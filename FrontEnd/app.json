@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MemoRaid",
-    "slug": "MemoRaid",
+    "name": "FrontEnd",
+    "slug": "FrontEnd",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
