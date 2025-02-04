@@ -12,7 +12,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onNext }) => {
       <Image
         style={styles.whatsappImage}
         resizeMode="cover"
-        source={require("../../assets/images/splash.png")} // Ensure this file exists
+        source={require("../../assets/images/splash.png")}
+
       />
       <View style={styles.homeIndicator} />
       <Pressable
