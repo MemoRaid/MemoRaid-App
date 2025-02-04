@@ -16,7 +16,7 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">MemoRaid We Are Here today...</ThemedText>
+        <ThemedText type="title">MemoRaid We Are Here today... Bye</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
