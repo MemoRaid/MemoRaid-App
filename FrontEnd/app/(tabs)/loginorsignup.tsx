@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import SplashScreen from "../../app/(tabs)/splashscreen";
 
 const LoginOrSignUp = () => {
     const navigation = useNavigation();
