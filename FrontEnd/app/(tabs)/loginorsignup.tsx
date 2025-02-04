@@ -8,16 +8,16 @@ const LoginOrSignUp = () => {
     return (
         <View style={styles.container}>
             <View style={styles.homeIndicator} />
-            <Image style={styles.logo} resizeMode="cover" source={require("./assets/logo.png")} />
+            <Image style={styles.logo} resizeMode="cover" source={require("../../assets/images/log.png")} />
             <Text style={styles.title}>Create your</Text>
             <Text style={styles.subtitle}>MemoRaid account</Text>
             <Text style={styles.description}>
                 We help you reconnect with cherished memories, restoring your story and honoring your unique journey.
             </Text>
-            <Pressable style={[styles.button, styles.signUpButton]} onPress={() => navigation.navigate("")}> 
+            <Pressable style={[styles.button, styles.signUpButton]} onPress={() => navigation.navigate("SplashScreen")}> 
                 <Text style={styles.buttonText}>Sign up</Text>
             </Pressable>
-            <Pressable style={[styles.button, styles.loginButton]} onPress={() => navigation.navigate("")}> 
+            <Pressable style={[styles.button, styles.loginButton]} onPress={() => navigation.navigate("SplashScreen")}> 
                 <Text style={styles.loginButtonText}>Log in</Text>
             </Pressable>
             <Pressable style={styles.termsContainer}>
