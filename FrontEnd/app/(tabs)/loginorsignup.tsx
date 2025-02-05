@@ -15,10 +15,10 @@ const LoginOrSignUp = () => {
             <Text style={styles.description}>
                 We help you reconnect with cherished memories, restoring your story and honoring your unique journey.
             </Text>
-            <Pressable style={[styles.button, styles.signUpButton]} onPress={() => navigation.navigate("SplashScreen")}> 
+            <Pressable style={[styles.button, styles.signUpButton]} onPress={() => navigation.navigate("")}> 
                 <Text style={styles.buttonText}>Sign up</Text>
             </Pressable>
-            <Pressable style={[styles.button, styles.loginButton]} onPress={() => navigation.navigate("SplashScreen")}> 
+            <Pressable style={[styles.button, styles.loginButton]} onPress={() => navigation.navigate("")}> 
                 <Text style={styles.loginButtonText}>Log in</Text>
             </Pressable>
             <Pressable style={styles.termsContainer}>
