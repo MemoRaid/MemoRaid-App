@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup.dart';
+import 'login.dart'; // Import your LoginScreen file
 
 class LoginSignupScreen extends StatelessWidget {
   const LoginSignupScreen({super.key});
@@ -127,7 +128,12 @@ class LoginSignupScreen extends StatelessWidget {
               top: height * 0.78,
               child: GestureDetector(
                 onTap: () {
-                  // TODO: Navigate to Log In Screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            LoginScreen()), // Navigate to LoginScreen
+                  );
                 },
                 child: Container(
                   width: width * 0.9,
