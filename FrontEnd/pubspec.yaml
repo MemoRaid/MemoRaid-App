@@ -22,4 +22,6 @@ flutter:
   uses-material-design: true
   assets:
     - lib/assets/images/splash.png
-    - lib/assets/images/loginsignup.png # Add your image asset here
+    - lib/assets/images/loginsignup.png
+    - lib/assets/images/login.png
+    # Add your image asset here
