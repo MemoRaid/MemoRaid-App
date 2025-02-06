@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/loginorsignup.dart';
 import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,6 +21,21 @@ class _LoginScreenState extends State<LoginScreen> {
     final height = size.height;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginSignupScreen(),
+              ),
+            );
+          },
+        ),
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -37,15 +53,13 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: height * 0.1),
+              SizedBox(height: height * 0.01),
 
               // Logo
-              Image.asset(
-                "lib/assets/images/loginsignup.png",
-                width: width * 0.6,
-              ),
+              Image.asset("lib/assets/images/login.png",
+                  width: width * 0.6, height: height * 0.25),
 
-              SizedBox(height: height * 0.05),
+              SizedBox(height: height * 0.002),
 
               // Welcome Text
               Text(
