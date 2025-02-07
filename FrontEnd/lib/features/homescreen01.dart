@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
@@ -54,7 +54,8 @@ class HomeScreen extends StatelessWidget {
                 width: width * 0.9,
                 padding: EdgeInsets.all(15),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color:
+                      const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
@@ -90,7 +91,7 @@ class HomeScreen extends StatelessWidget {
               buildActivityCard(
                 title: "General Memory Assessment",
                 buttonText: "Test your memory now",
-                image: "lib/assets/images/memory_test.png",
+                image: null, // No image provided for this card
                 onTap: () {},
               ),
 
@@ -106,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
 
-              SizedBox(height: height * 0.05),
+              SizedBox(height: height * 0.03),
 
               // Footer Message
               Padding(
@@ -154,7 +155,7 @@ class HomeScreen extends StatelessWidget {
   Widget buildActivityCard({
     required String title,
     required String buttonText,
-    required String image,
+    String? image, // Image is now optional
     required VoidCallback onTap,
   }) {
     return Container(
@@ -182,11 +183,13 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 10),
-          Image.asset(
-            image,
-            width: 150,
-          ),
+          if (image != null) ...[
+            SizedBox(height: 10),
+            Image.asset(
+              image,
+              width: 150,
+            ),
+          ],
           SizedBox(height: 10),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
