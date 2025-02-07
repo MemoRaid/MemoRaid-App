@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/features/loginorsignup.dart';
 import 'signup.dart';
+import 'homescreen01.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -155,7 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
               // Log In Button
               GestureDetector(
                 onTap: () {
-                  // TODO: Implement Login Function
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomeScreen()),
+                  );
                 },
                 child: Container(
                   width: width * 0.8,
