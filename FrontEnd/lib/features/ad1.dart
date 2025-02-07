@@ -136,5 +136,5 @@ class AdFeaturePage extends StatelessWidget {
 // Ensure you have added the image in your assets folder as 'assets/images/Trust.png'
 // Also, update your pubspec.yaml file with the following:
 // flutter:
-//   assets:
+
 //     - assets/images/Trust.png
