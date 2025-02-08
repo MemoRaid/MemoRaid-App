@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'ad3.dart'; // Import the AdScreen3
+import 'ad2.dart'; // Import Ad2 screen to navigate
 
-class AdScreen2 extends StatelessWidget {
-  const AdScreen2({super.key});
+class AdScreen extends StatelessWidget {
+  const AdScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,22 +40,22 @@ class AdScreen2 extends StatelessWidget {
           children: [
             // Ad Content
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.04),
               child: Column(
                 children: [
-                  SizedBox(height: height * 0.03),
+                  SizedBox(height: height * 0.01),
 
                   // Main Image
                   Image.asset(
-                    "lib/assets/images/sendmoney.png", // Update path to match the previous one
+                    "lib/assets/images/Trust.png",
                     width: width * 0.6,
                   ),
 
-                  SizedBox(height: height * 0.05),
+                  SizedBox(height: height * 0.01),
 
                   // Text Content
                   Text(
-                    "Track Your Progress and Watch Your Skills Grow Over Time.",
+                    "Rebuild Memory with Engaging, Science-Backed Exercises",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF0D3445),
@@ -64,7 +64,7 @@ class AdScreen2 extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: height * 0.05),
+                  SizedBox(height: height * 0.04),
 
                   // Centered Progress Bar
                   Center(
@@ -75,19 +75,6 @@ class AdScreen2 extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // First Progress Bar
-                          Container(
-                            width: (width * 0.35 - 2 * 2) / 3,
-                            height: 8,
-                            decoration: ShapeDecoration(
-                              color: Color(0xFFD0D0D0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(19),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 2), // Space between bars
-                          // Second Progress Bar
                           Container(
                             width: (width * 0.35 - 2 * 2) / 3,
                             height: 8,
@@ -99,7 +86,17 @@ class AdScreen2 extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 2), // Space between bars
-                          // Third Progress Bar
+                          Container(
+                            width: (width * 0.35 - 2 * 2) / 3,
+                            height: 8,
+                            decoration: ShapeDecoration(
+                              color: Color(0xFFD0D0D0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(19),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 2), // Space between bars
                           Container(
                             width: (width * 0.35 - 2 * 2) / 3,
                             height: 8,
@@ -123,10 +120,9 @@ class AdScreen2 extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
               child: GestureDetector(
                 onTap: () {
-                  // Navigate to AdScreen3
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AdScreen3()),
+                    MaterialPageRoute(builder: (context) => const AdScreen2()),
                   );
                 },
                 child: Container(
