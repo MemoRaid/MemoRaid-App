@@ -34,16 +34,15 @@ class AdScreen3 extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Adjusted spacing
           children: [
-            // Content for AdScreen3
             Padding(
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
               child: Column(
                 children: [
-                  // Image and Text for AdScreen3
+                  SizedBox(height: height * 0.03), // Add some space at the top
                   Image.asset("lib/assets/images/receivemoney.png",
-                      width: width * 0.8),
+                      width: width * 0.6),
                   SizedBox(height: height * 0.03),
                   Text(
                     "Capture Daily Reflections and Milestones for Steady Growth ",
@@ -55,8 +54,8 @@ class AdScreen3 extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: height * 0.05),
-                  // Progress Indicator (Same as previous screens)
-                  Container(
+                  // Progress Indicator
+                  SizedBox(
                     width: width * 0.6,
                     height: 8,
                     child: Row(
@@ -66,29 +65,29 @@ class AdScreen3 extends StatelessWidget {
                           width: (width * 0.35 - 2 * 2) / 3,
                           height: 8,
                           decoration: ShapeDecoration(
+                            color: Color(0xFFD0D0D0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(19),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 2),
+                        Container(
+                          width: (width * 0.35 - 2 * 2) / 3,
+                          height: 8,
+                          decoration: ShapeDecoration(
+                            color: Color(0xFFD0D0D0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(19),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 2),
+                        Container(
+                          width: (width * 0.35 - 2 * 2) / 3,
+                          height: 8,
+                          decoration: ShapeDecoration(
                             color: Color(0xFF0D3445),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(19),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 2),
-                        Container(
-                          width: (width * 0.35 - 2 * 2) / 3,
-                          height: 8,
-                          decoration: ShapeDecoration(
-                            color: Color(0xFFD0D0D0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(19),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 2),
-                        Container(
-                          width: (width * 0.35 - 2 * 2) / 3,
-                          height: 8,
-                          decoration: ShapeDecoration(
-                            color: Color(0xFFD0D0D0),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(19),
                             ),
@@ -100,12 +99,12 @@ class AdScreen3 extends StatelessWidget {
                 ],
               ),
             ),
-            // Next Button (Navigate to Feature3Page or AdScreen4)
+            // Finish Button
             Padding(
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
               child: GestureDetector(
                 onTap: () {
-                  // You can modify this to navigate to the next screen (Feature4 or elsewhere)
+                  // You can modify this to navigate to the next screen
                 },
                 child: Container(
                   width: width * 0.9,
@@ -121,7 +120,7 @@ class AdScreen3 extends StatelessWidget {
                       'Finish',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -129,7 +128,7 @@ class AdScreen3 extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: height * 0.03),
+            SizedBox(height: height * 0.03), // Add space at the bottom
           ],
         ),
       ),
