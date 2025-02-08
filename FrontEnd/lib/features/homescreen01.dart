@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'homescreen02.dart';
+import 'bottomnavbar.dart';
+import 'homescreen02.dart'; // Import the bottom navigation bar file
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -136,26 +137,10 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF0D3445),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white54,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: "Progress",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
+        // Use the custom navigation bar
         onTap: (index) {
-          // TODO: Implement navigation for each bottom tab
+          // Implement the navigation for each tab here
         },
       ),
     );
