@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bottomnavbar.dart'; // Import the custom bottom navbar
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -10,7 +11,7 @@ class HomeScreen2 extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
@@ -31,19 +32,13 @@ class HomeScreen2 extends StatelessWidget {
               ),
             ),
           ),
-          // Hexagonal Pattern Overlay
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/backgroundhex.png', // Add your hexagonal pattern image to the assets folder.
-              fit: BoxFit.cover,
-            ),
-          ),
           // Main Content
           Column(
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 15),
                   child: ListView(
                     physics: BouncingScrollPhysics(),
                     children: [
@@ -51,28 +46,28 @@ class HomeScreen2 extends StatelessWidget {
                         context,
                         title: "Games",
                         image:
-                            'assets/images/patient.png', // Replace with actual image path
+                            'lib/assets/images/patient.png', // Replace with actual image path
                       ),
-                      SizedBox(height: size.height * 0.02),
+                      SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
                         context,
                         title: "Story",
                         image:
-                            'assets/images/story.png', // Replace with actual image path
+                            'lib/assets/images/story.png', // Replace with actual image path
                       ),
-                      SizedBox(height: size.height * 0.02),
+                      SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
                         context,
                         title: "Reminder and Diary",
                         image:
-                            'assets/images/reminder.png', // Replace with actual image path
+                            'lib/assets/images/reminder.png', // Replace with actual image path
                       ),
-                      SizedBox(height: size.height * 0.02),
+                      SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
                         context,
                         title: "Calm Mind",
                         image:
-                            'assets/images/mind.png', // Replace with actual image path
+                            'lib/assets/images/mind.png', // Replace with actual image path
                       ),
                     ],
                   ),
@@ -82,28 +77,11 @@ class HomeScreen2 extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color.fromARGB(255, 8, 41, 55),
-        selectedItemColor: const Color.fromARGB(255, 18, 33, 18),
-        unselectedItemColor: Colors.grey[400],
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.library_books),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.rocket_launch),
-            label: '',
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
+        // Use the custom navigation bar
+        onTap: (index) {
+          // Implement the navigation for each tab here
+        },
       ),
     );
   }
@@ -111,9 +89,9 @@ class HomeScreen2 extends StatelessWidget {
   Widget _buildFeatureCard(BuildContext context,
       {required String title, required String image}) {
     return Container(
-      height: 80,
+      height: 120,
       decoration: BoxDecoration(
-        color: Color(0xFF4E6077),
+        color: Color(0xFF0D3445), // Same color scheme as HomeScreen1 cards
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -125,11 +103,11 @@ class HomeScreen2 extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SizedBox(width: 16),
+          SizedBox(width: 20),
           Image.asset(
             image,
-            width: 50,
-            height: 50,
+            width: 80,
+            height: 80,
             fit: BoxFit.contain,
           ),
           SizedBox(width: 16),
@@ -138,11 +116,13 @@ class HomeScreen2 extends StatelessWidget {
               title,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          SizedBox(width: 20),
         ],
       ),
     );
