@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'homescreen02.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -92,7 +93,12 @@ class HomeScreen extends StatelessWidget {
                 title: "General Memory Assessment",
                 buttonText: "Test your memory now",
                 image: null, // No image provided for this card
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomeScreen2()),
+                  );
+                },
               ),
 
               SizedBox(height: height * 0.02),
@@ -103,7 +109,10 @@ class HomeScreen extends StatelessWidget {
                 buttonText: "Start Training",
                 image: "lib/assets/images/brainperson.png",
                 onTap: () {
-                  // TODO: Implement training navigation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomeScreen2()),
+                  );
                 },
               ),
 
