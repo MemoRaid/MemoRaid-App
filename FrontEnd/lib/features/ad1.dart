@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ad2.dart';
 
 class AdScreen extends StatelessWidget {
   const AdScreen({super.key});
@@ -10,25 +11,6 @@ class AdScreen extends StatelessWidget {
     final height = size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          "Advertisement",
-          style: TextStyle(
-            color: Color(0xFF0D3445),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -43,80 +25,61 @@ class AdScreen extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ad Content
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.1),
               child: Column(
                 children: [
-                  SizedBox(height: height * 0.03),
-
-                  // Main Content
+                  Image.asset(
+                    'assets/images/amnesia.png',
+                    height: height * 0.35,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: height * 0.05),
                   Text(
-                    "Rebuild Memory with Engaging, Science-Backed Exercises",
+                    "Ever felt the frustration of forgetting important details?",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color(0xFF0D3445),
-                      fontSize: 18,
+                      color: Colors.black,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 15),
-                  Image.asset(
-                    "lib/assets/images/Trust.png",
-                    width: width * 0.8,
+                  SizedBox(height: height * 0.02),
+                  Text(
+                    "Struggling to recall names, dates, or daily tasks?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
                   ),
-
-                  SizedBox(height: height * 0.05),
-
-                  // Centered Progress Bar
-                  Center(
-                    child: Transform(
-                      transform: Matrix4.identity()
-                        ..translate(0.0, 0.0)
-                        ..rotateZ(3.14),
-                      child: Container(
-                        width: 102,
-                        height: 8,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 37,
-                              height: 8,
-                              decoration: ShapeDecoration(
-                                color: Color(0xFFD0D0D0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(19),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 2),
-                            Container(
-                              width: 37,
-                              height: 8,
-                              decoration: ShapeDecoration(
-                                color: Color(0xFFD0D0D0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(19),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 2),
-                            Container(
-                              width: 16,
-                              height: 8,
-                              decoration: ShapeDecoration(
-                                color: Color(0xFF0D3445),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(19),
-                                ),
-                              ),
-                            ),
-                          ],
+                  SizedBox(height: height * 0.1),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AdScreen2()),
+                      );
+                    },
+                    child: Container(
+                      width: width * 0.9,
+                      height: height * 0.06,
+                      decoration: ShapeDecoration(
+                        color: Color(0xFF0D3445),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Next',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
@@ -124,48 +87,6 @@ class AdScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Next and Previous Buttons
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF4E6077),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      // TODO: Implement "Previous" button action
-                    },
-                    child: Text(
-                      "Previous",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF4E6077),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      // TODO: Implement "Next" button action
-                    },
-                    child: Text(
-                      "Next",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: height * 0.03),
           ],
         ),
       ),

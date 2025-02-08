@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AdFeaturePage2 extends StatelessWidget {
-  const AdFeaturePage2({super.key});
+class AdScreen2 extends StatelessWidget {
+  const AdScreen2({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -9,104 +9,15 @@ class AdFeaturePage2 extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment(-0.20, 0.98),
             end: Alignment(0.2, -0.98),
             colors: [Colors.white],
           ),
-          borderRadius: BorderRadius.circular(50),
         ),
         child: Stack(
           children: [
-            Positioned(
-              left: 0,
-              top: 0,
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 44,
-                padding: const EdgeInsets.only(
-                  top: 14,
-                  left: 19.10,
-                  right: 14,
-                  bottom: 12,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 54,
-                      child: Text(
-                        '9:41',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF1F2024),
-                          fontSize: 15,
-                          fontFamily: 'SF Pro Text',
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.17,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 68,
-                      height: 14,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '􀛨',
-                            style: TextStyle(
-                              color: Color(0xFF1F2024),
-                              fontSize: 17,
-                              fontFamily: 'SF Pro Text',
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Text(
-                            '􀙇',
-                            style: TextStyle(
-                              color: Color(0xFF1F2024),
-                              fontSize: 14,
-                              fontFamily: 'SF Pro Text',
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Container(
-                            width: 17.10,
-                            height: 10.70,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(
-                                    "assets/images/sendmoney.png"), // Updated to AssetImage
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 118.50,
-              top: 5,
-              child: Container(
-                width: 122,
-                height: 36,
-                decoration: ShapeDecoration(
-                  color: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                ),
-                child: FlutterLogo(),
-              ),
-            ),
             Positioned(
               left: 0,
               top: 95,
@@ -114,74 +25,17 @@ class AdFeaturePage2 extends StatelessWidget {
                 width: MediaQuery.of(context).size.width,
                 height: 646,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
+                    Image.asset(
+                      'assets/images/sendmoney.png',
                       width: 221.16,
                       height: 260,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            left: 0,
-                            top: 0,
-                            child: Image.asset(
-                              'assets/images/sendmoney.png', // Updated to Image.asset
-                              width: 221.16,
-                              height: 260,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ],
-                      ),
+                      fit: BoxFit.cover,
                     ),
-                    SizedBox(height: 89),
-                    Transform(
-                      transform: Matrix4.identity()
-                        ..translate(0.0, 0.0)
-                        ..rotateZ(3.14),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 37,
-                            height: 8,
-                            decoration: ShapeDecoration(
-                              color: Color(0xFFD0D0D0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(19),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Container(
-                            width: 16,
-                            height: 8,
-                            decoration: ShapeDecoration(
-                              color: Color(0xFF0D3445),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(19),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Container(
-                            width: 37,
-                            height: 8,
-                            decoration: ShapeDecoration(
-                              color: Color(0xFFD0D0D0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(19),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 22),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 17.50),
+                    const SizedBox(height: 40),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 17.5),
                       child: Text(
                         'Track Your Progress and Watch Your Skills Grow Over Time.',
                         textAlign: TextAlign.center,
@@ -190,23 +44,23 @@ class AdFeaturePage2 extends StatelessWidget {
                           fontSize: 24,
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          height: 1.71,
+                          height: 1.5,
                         ),
                       ),
                     ),
-                    SizedBox(height: 72),
+                    const SizedBox(height: 40),
                     GestureDetector(
                       onTap: () {
-                        // Action when "Next" is tapped
+                        Navigator.pushNamed(context, '/adscreen3');
                       },
                       child: Container(
                         width: 330,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
-                          color: Color(0xFF0D3445),
+                          color: const Color(0xFF0D3445),
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             'Next',
                             style: TextStyle(
@@ -214,7 +68,6 @@ class AdFeaturePage2 extends StatelessWidget {
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              height: 1.50,
                             ),
                           ),
                         ),
@@ -225,27 +78,39 @@ class AdFeaturePage2 extends StatelessWidget {
               ),
             ),
             Positioned(
+              bottom: 20,
               left: 0,
-              bottom: 0,
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 34,
-                padding: const EdgeInsets.only(
-                  top: 21,
-                  left: 121,
-                  right: 120,
-                  bottom: 8,
-                ),
-                child: Center(
-                  child: Container(
-                    width: 134,
-                    height: 5,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 37,
+                    height: 8,
                     decoration: BoxDecoration(
-                      color: Color(0xFF1F2024),
-                      borderRadius: BorderRadius.circular(100),
+                      color: const Color(0xFFD0D0D0),
+                      borderRadius: BorderRadius.circular(19),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 16,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D3445),
+                      borderRadius: BorderRadius.circular(19),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 37,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD0D0D0),
+                      borderRadius: BorderRadius.circular(19),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
