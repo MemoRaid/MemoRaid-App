@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'features/splash.dart'; // Import your splash screen
+import 'package:my_flutter_app/features/homescreen02.dart';
+import 'features/splash.dart';
+import 'features/homescreen01.dart';
+import 'features/chatbot.dart';
+import 'features/login.dart';
+import 'features/signup.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,16 +20,21 @@ class MyApp extends StatelessWidget {
       title: 'MemoRaid',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        // Global BottomNavigationBar theme customization
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor:
-              Color(0xFF0D3445), // Global background color for BottomNavBar
-          selectedItemColor:
-              Color.fromARGB(255, 3, 3, 3), // Selected item color
-          unselectedItemColor: Color(0xFF0D3445), // Unselected item color
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF0D3445), // Global background color
+          selectedItemColor: Colors.white, // Selected item color
+          unselectedItemColor: Colors.grey, // Unselected item color
         ),
       ),
-      home: SplashScreen(), // Set SplashScreen as the initial screen
+      initialRoute: '/', // Set initial route to splash screen
+      routes: {
+        '/': (context) => const SplashScreen(), // Initial splash screen
+        '/home': (context) => const HomeScreen(), // Home screen
+        '/progress': (context) => const LoginScreen(), // Progress graph
+        '/chatbot': (context) => const ChatScreen(), // AI Chatbot
+        '/rocket': (context) => const SignUpScreen(), // Rocket feature
+        '/achievements': (context) => const HomeScreen2(), // Achievements
+      },
     );
   }
 }
