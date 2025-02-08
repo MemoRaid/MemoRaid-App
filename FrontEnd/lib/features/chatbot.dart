@@ -35,7 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 178, 29, 29),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -48,6 +48,22 @@ class _ChatScreenState extends State<ChatScreen> {
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(
+                right: 16), // Adjust the right padding to shift left
+            child: GestureDetector(
+              onTap: () {
+                // Navigate to Profile Page
+              },
+              child: CircleAvatar(
+                radius: 20,
+                backgroundImage: AssetImage(
+                    "lib/assets/images/kushen.png"), // Replace with your image path
+              ),
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -70,58 +86,63 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
                     final message = messages[index];
                     bool isUser = message["sender"] == "user";
-                    return Row(
-                      mainAxisAlignment: isUser
-                          ? MainAxisAlignment.end
-                          : MainAxisAlignment.start,
-                      children: [
-                        if (!isUser) ...[
-                          // AI Profile Pic
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage:
-                                AssetImage("lib/assets/images/memoraid.png"),
-                          ),
-                          SizedBox(width: 8),
-                        ],
-                        Flexible(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 8),
-                            padding: EdgeInsets.all(14),
-                            constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width * 0.7),
-                            decoration: BoxDecoration(
-                              color:
-                                  isUser ? Color(0xFF0D3445) : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
+                    return AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: Duration(milliseconds: 300),
+                      child: Row(
+                        mainAxisAlignment: isUser
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        children: [
+                          if (!isUser) ...[
+                            // AI Profile Pic
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage:
+                                  AssetImage("lib/assets/images/memoraid.png"),
                             ),
-                            child: Text(
-                              message["text"]!,
-                              style: TextStyle(
-                                color: isUser ? Colors.white : Colors.black87,
-                                fontSize: 16,
+                            SizedBox(width: 8),
+                          ],
+                          Flexible(
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 8),
+                              padding: EdgeInsets.all(14),
+                              constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.7),
+                              decoration: BoxDecoration(
+                                color: isUser
+                                    ? Color(0xFF0D3445)
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                message["text"]!,
+                                style: TextStyle(
+                                  color: isUser ? Colors.white : Colors.black87,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        if (isUser) ...[
-                          SizedBox(width: 8),
-                          // User Profile Pic
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage:
-                                AssetImage("lib/assets/images/user.png"),
-                          ),
+                          if (isUser) ...[
+                            SizedBox(width: 8),
+                            // User Profile Pic
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage:
+                                  AssetImage("lib/assets/images/kushen.png"),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     );
                   },
                 ),
