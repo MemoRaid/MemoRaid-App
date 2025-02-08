@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -78,58 +77,48 @@ class _ChatScreenState extends State<ChatScreen> {
                       children: [
                         if (!isUser) ...[
                           // AI Profile Pic
-                          FadeInLeft(
-                            duration: Duration(milliseconds: 500),
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundImage:
-                                  AssetImage("lib/assets/images/memoraid.png"),
-                            ),
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundImage:
+                                AssetImage("lib/assets/images/memoraid.png"),
                           ),
                           SizedBox(width: 8),
                         ],
                         Flexible(
-                          child: FadeInUp(
-                            duration: Duration(milliseconds: 300),
-                            child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              padding: EdgeInsets.all(14),
-                              constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.7),
-                              decoration: BoxDecoration(
-                                color: isUser
-                                    ? Color(0xFF0D3445)
-                                    : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                message["text"]!,
-                                style: TextStyle(
-                                  color: isUser ? Colors.white : Colors.black87,
-                                  fontSize: 16,
+                          child: Container(
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            padding: EdgeInsets.all(14),
+                            constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.7),
+                            decoration: BoxDecoration(
+                              color:
+                                  isUser ? Color(0xFF0D3445) : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
                                 ),
+                              ],
+                            ),
+                            child: Text(
+                              message["text"]!,
+                              style: TextStyle(
+                                color: isUser ? Colors.white : Colors.black87,
+                                fontSize: 16,
                               ),
                             ),
                           ),
                         ),
                         if (isUser) ...[
                           SizedBox(width: 8),
-                          // User Profile Pic (Default Avatar)
-                          FadeInRight(
-                            duration: Duration(milliseconds: 500),
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundImage:
-                                  AssetImage("lib/assets/images/user.png"),
-                            ),
+                          // User Profile Pic
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundImage:
+                                AssetImage("lib/assets/images/user.png"),
                           ),
                         ],
                       ],
