@@ -92,12 +92,12 @@ class HomeScreen2 extends StatelessWidget {
       height: 120,
       decoration: BoxDecoration(
         color: Color(0xFF0D3445), // Same color scheme as HomeScreen1 cards
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: Offset(0, 4),
+            blurRadius: 40,
+            offset: Offset(0, 10),
           ),
         ],
       ),
@@ -106,7 +106,7 @@ class HomeScreen2 extends StatelessWidget {
           SizedBox(width: 20),
           Image.asset(
             image,
-            width: 80,
+            width: 90,
             height: 80,
             fit: BoxFit.contain,
           ),
@@ -116,7 +116,7 @@ class HomeScreen2 extends StatelessWidget {
               title,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 17,
                 fontWeight: FontWeight.w800,
               ),
               overflow: TextOverflow.ellipsis,
