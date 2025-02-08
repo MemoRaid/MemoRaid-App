@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'homescreen01.dart';
 
 class AdScreen3 extends StatelessWidget {
   const AdScreen3({super.key});
@@ -104,6 +105,11 @@ class AdScreen3 extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
               child: GestureDetector(
                 onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  );
+
                   // You can modify this to navigate to the next screen
                 },
                 child: Container(
