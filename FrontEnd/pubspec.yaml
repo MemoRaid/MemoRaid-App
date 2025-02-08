@@ -29,4 +29,8 @@ flutter:
     - lib/assets/images/apple.png
     - lib/assets/images/graph.png
     - lib/assets/images/brainperson.png
+    - lib/assets/images/Trust.png
+    - lib/assets/images/sendmoney.png
+    - lib/assets/images/receivemoney.png
+    
     # Add your image asset here
