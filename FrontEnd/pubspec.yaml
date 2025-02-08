@@ -39,5 +39,6 @@ flutter:
     - lib/assets/images/reminder.png
     - lib/assets/images/story.png
     - lib/assets/images/memoraid.png
+    - lib/assets/images/kushen.png
 
     # Add your image asset here
