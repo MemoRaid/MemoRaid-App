@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'loginorsignup.dart';
+import 'ad1.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -26,6 +26,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final height = size.height;
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous screen
+          },
+        ),
+        backgroundColor: Colors.white, // Make the app bar transparent
+        elevation: 0, // Remove the shadow of the app bar
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -49,7 +59,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: height * 0.1),
+                SizedBox(height: height * 0.03),
 
                 // Title
                 Text(
@@ -73,7 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
 
-                SizedBox(height: height * 0.05),
+                SizedBox(height: height * 0.07),
 
                 // Form
                 Form(
@@ -127,7 +137,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginSignupScreen()),
+                                  builder: (context) => AdScreen()),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
