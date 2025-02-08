@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  animate_do: ^3.0.2
 
 dev_dependencies:
   flutter_test:
@@ -37,5 +38,6 @@ flutter:
     - lib/assets/images/patient.png
     - lib/assets/images/reminder.png
     - lib/assets/images/story.png
+    - lib/assets/images/memoraid.png
 
     # Add your image asset here
