@@ -19,11 +19,6 @@ class AdScreen3 extends StatelessWidget {
             Navigator.pop(context); // Navigate back to AdScreen2
           },
         ),
-        centerTitle: true,
-        title: Text(
-          "Ad Screen 3",
-          style: TextStyle(color: Color(0xFF0D3445)),
-        ),
       ),
       body: Container(
         width: double.infinity,
@@ -47,11 +42,11 @@ class AdScreen3 extends StatelessWidget {
               child: Column(
                 children: [
                   // Image and Text for AdScreen3
-                  Image.asset("assets/images/receivemoney.png",
+                  Image.asset("lib/assets/images/receivemoney.png",
                       width: width * 0.8),
                   SizedBox(height: height * 0.03),
                   Text(
-                    "Steady Growth: Capture Your Journey.",
+                    "Capture Daily Reflections and Milestones for Steady Growth ",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF0D3445),
