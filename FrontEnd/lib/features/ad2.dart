@@ -1,118 +1,163 @@
 import 'package:flutter/material.dart';
+import 'ad3.dart'; // Import the Feature3Page (AdScreen3)
 
 class AdScreen2 extends StatelessWidget {
   const AdScreen2({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        centerTitle: true,
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment(-0.20, 0.98),
-            end: Alignment(0.2, -0.98),
-            colors: [Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white,
+              Color(0xFF0D3445),
+            ],
           ),
         ),
-        child: Stack(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Positioned(
-              left: 0,
-              top: 95,
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 646,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/sendmoney.png',
-                      width: 221.16,
-                      height: 260,
-                      fit: BoxFit.cover,
+            // Ad Content
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+              child: Column(
+                children: [
+                  SizedBox(height: height * 0.03),
+
+                  // Main Image
+                  Image.asset(
+                    "assets/images/sendmoney.png", // Update path to match the previous one
+                    width: width * 0.8,
+                  ),
+
+                  SizedBox(height: height * 0.03),
+
+                  // Text Content
+                  Text(
+                    "Track Your Progress and Watch Your Skills Grow Over Time.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF0D3445),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 40),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 17.5),
-                      child: Text(
-                        'Track Your Progress and Watch Your Skills Grow Over Time.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF2A2A2A),
-                          fontSize: 24,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/adscreen3');
-                      },
-                      child: Container(
-                        width: 330,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0D3445),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Next',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
+                  ),
+
+                  SizedBox(height: height * 0.05),
+
+                  // Centered Progress Bar
+                  Center(
+                    child: Container(
+                      width: width *
+                          0.6, // Control the total width of progress bars
+                      height: 8,
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center the bars
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // First Progress Bar
+                          Container(
+                            width: (width * 0.35 - 2 * 2) /
+                                3, // Further minimized width
+                            height: 8,
+                            decoration: ShapeDecoration(
+                              color: Color(0xFF0D3445),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(19),
+                              ),
                             ),
                           ),
-                        ),
+                          SizedBox(width: 2), // Space between bars
+                          // Second Progress Bar
+                          Container(
+                            width: (width * 0.35 - 2 * 2) /
+                                3, // Further minimized width
+                            height: 8,
+                            decoration: ShapeDecoration(
+                              color: Color(0xFFD0D0D0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(19),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 2), // Space between bars
+                          // Third Progress Bar
+                          Container(
+                            width: (width * 0.35 - 2 * 2) /
+                                3, // Further minimized width
+                            height: 8,
+                            decoration: ShapeDecoration(
+                              color: Color(0xFFD0D0D0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(19),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 20,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 37,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD0D0D0),
-                      borderRadius: BorderRadius.circular(19),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 16,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D3445),
-                      borderRadius: BorderRadius.circular(19),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 37,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD0D0D0),
-                      borderRadius: BorderRadius.circular(19),
                     ),
                   ),
                 ],
               ),
             ),
+
+            // Next Button Centered
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+              child: GestureDetector(
+                onTap: () {
+                  // Navigate to AdScreen3 (Feature3Page)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdScreen3()),
+                  );
+                },
+                child: Container(
+                  width: width * 0.9,
+                  height: height * 0.06,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF0D3445),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Next',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: height * 0.03),
           ],
         ),
       ),
