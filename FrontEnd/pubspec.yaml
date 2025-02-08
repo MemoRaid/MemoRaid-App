@@ -29,4 +29,13 @@ flutter:
     - lib/assets/images/apple.png
     - lib/assets/images/graph.png
     - lib/assets/images/brainperson.png
+    - lib/assets/images/Trust.png
+    - lib/assets/images/sendmoney.png
+    - lib/assets/images/receivemoney.png
+    - lib/assets/images/backgroundhex.png
+    - lib/assets/images/mind.png
+    - lib/assets/images/patient.png
+    - lib/assets/images/reminder.png
+    - lib/assets/images/story.png
+
     # Add your image asset here
