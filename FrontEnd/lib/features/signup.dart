@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'loginorsignup.dart';
+import 'ad1.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -137,7 +137,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginSignupScreen()),
+                                  builder: (context) => AdScreen()),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
