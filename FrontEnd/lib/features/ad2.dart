@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ad3.dart'; // Import the Feature3Page (AdScreen3)
+import 'ad3.dart'; // Import the AdScreen3
 
 class AdScreen2 extends StatelessWidget {
   const AdScreen2({super.key});
@@ -47,7 +47,7 @@ class AdScreen2 extends StatelessWidget {
 
                   // Main Image
                   Image.asset(
-                    "assets/images/sendmoney.png", // Update path to match the previous one
+                    "lib/assets/images/sendmoney.png", // Update path to match the previous one
                     width: width * 0.8,
                   ),
 
