@@ -140,7 +140,23 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: CustomBottomNavigationBar(
         // Use the custom navigation bar
         onTap: (index) {
-          // Implement the navigation for each tab here
+          switch (index) {
+            case 0:
+              Navigator.pushReplacementNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushReplacementNamed(context, '/progress');
+              break;
+            case 2:
+              Navigator.pushReplacementNamed(context, '/chatbot');
+              break;
+            case 3:
+              Navigator.pushReplacementNamed(context, '/rocket');
+              break;
+            case 4:
+              Navigator.pushReplacementNamed(context, '/achievements');
+              break;
+          }
         },
       ),
     );
