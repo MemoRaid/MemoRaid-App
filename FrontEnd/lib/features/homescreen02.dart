@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/breath.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
 import 'gamescreen.dart'; // Import the Game Screen
 
@@ -73,6 +74,15 @@ class HomeScreen2 extends StatelessWidget {
                         context,
                         title: "Calm Mind",
                         image: 'lib/assets/images/mind.png',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BreathExerciseScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
