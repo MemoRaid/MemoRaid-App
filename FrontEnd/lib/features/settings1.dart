@@ -21,7 +21,7 @@ class SettingsScreen extends StatelessWidget {
               // Header without Dynamic Island
               Container(
                 width: double.infinity,
-                height: 150,
+                height: 140,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -94,7 +94,7 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Container(
                   width: 134,
-                  height: 5,
+                  height: 15,
                   decoration: BoxDecoration(
                     color: Color(0xFFD9D8D8),
                     borderRadius: BorderRadius.circular(100),
@@ -113,7 +113,7 @@ class SettingsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Container(
         width: double.infinity,
-        height: 52,
+        height: 62,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
