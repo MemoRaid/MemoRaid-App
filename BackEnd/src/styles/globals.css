@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Additional styles for date picker */
+.react-datepicker-wrapper {
+  width: 100%;
+}
