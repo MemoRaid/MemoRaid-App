@@ -6,99 +6,154 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment(-0.19, 0.98),
-              end: Alignment(0.2, -0.2),
-              colors: [Color(0x7F0D3445), Colors.white, Colors.white],
-            ),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Settings",
+          style: TextStyle(
+            color: Color(0xFF0D3445),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
+        ),
+        centerTitle: true,
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white,
+              Color(0xFF0D3445),
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
           child: Column(
             children: [
-              // Header without Dynamic Island
-              Container(
-                width: double.infinity,
-                height: 140,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-              ),
+              SizedBox(height: 24),
 
-              // User Profile Section
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+              // Profile Section
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 24),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Color(0xFFEAF2FF),
-                      child: CircleAvatar(
-                        radius: 32,
-                        backgroundColor: Color(0xFF264857),
-                      ),
+                    Stack(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.white,
+                            backgroundImage:
+                                AssetImage("lib/assets/images/kushen.png"),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF4E6077),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child:
+                                Icon(Icons.edit, color: Colors.white, size: 16),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
+                    SizedBox(height: 16),
+                    Text(
                       'Lucas Scott',
                       style: TextStyle(
-                        color: Color(0xFF1F2024),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.08,
-                        fontFamily: 'Inter',
+                        color: Color(0xFF0D3445),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       '@lucasscott3',
                       style: TextStyle(
-                        color: Color(0xFF71727A),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.12,
-                        fontFamily: 'Inter',
+                        color: Color(0xFF0D3445).withOpacity(0.7),
+                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Settings Options
-              buildSettingsOption('Profile', context),
-              buildSettingsOption('Appearance', context),
-              buildSettingsOption('Password', context),
-              buildSettingsOption('Personal Data', context),
-              buildSettingsOption('Help Center', context),
-              buildSettingsOption('Chat with Us', context),
-              buildSettingsOption('Privacy & Security', context),
-              buildSettingsOption('Terms of Service', context),
-              buildSettingsOption('Log Out', context),
-
-              // Bottom Indicator Bar
+              // Settings Sections
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Container(
-                  width: 134,
-                  height: 15,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFD9D8D8),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildSection('Account', [
+                      SettingItem(
+                        icon: Icons.person_outline,
+                        title: 'Profile',
+                        subtitle: 'Edit your profile information',
+                      ),
+                      SettingItem(
+                        icon: Icons.lock_outline,
+                        title: 'Password & Security',
+                        subtitle: 'Manage your security settings',
+                      ),
+                      SettingItem(
+                        icon: Icons.notifications_outlined,
+                        title: 'Notifications',
+                        subtitle: 'Customize your notifications',
+                      ),
+                    ]),
+                    SizedBox(height: 16),
+                    _buildSection('Preferences', [
+                      SettingItem(
+                        icon: Icons.palette_outlined,
+                        title: 'Appearance',
+                        subtitle: 'Dark mode and theme settings',
+                      ),
+                      SettingItem(
+                        icon: Icons.language_outlined,
+                        title: 'Language',
+                        subtitle: 'Change app language',
+                      ),
+                    ]),
+                    SizedBox(height: 16),
+                    _buildSection('Support', [
+                      SettingItem(
+                        icon: Icons.help_outline,
+                        title: 'Help Center',
+                        subtitle: 'Get help and support',
+                      ),
+                      SettingItem(
+                        icon: Icons.privacy_tip_outlined,
+                        title: 'Privacy Policy',
+                        subtitle: 'Read our privacy policy',
+                      ),
+                      SettingItem(
+                        icon: Icons.description_outlined,
+                        title: 'Terms of Service',
+                        subtitle: 'Read our terms of service',
+                      ),
+                    ]),
+                    SizedBox(height: 24),
+                    _buildLogoutButton(),
+                    SizedBox(height: 32),
+                  ],
                 ),
               ),
             ],
@@ -108,34 +163,138 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget buildSettingsOption(String title, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Container(
-        width: double.infinity,
-        height: 62,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment(1.00, 0.00),
-            end: Alignment(-1, 0),
-            colors: [Color(0xFFD9D9D9), Color(0xFF508298)],
+  Widget _buildSection(String title, List<Widget> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 16, bottom: 12),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          borderRadius: BorderRadius.circular(7),
         ),
+        Container(
+          decoration: BoxDecoration(
+            color: Color(0xFF0D3445),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 5,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return Column(
+                children: [
+                  item,
+                  if (index != items.length - 1)
+                    Divider(
+                      height: 1,
+                      color: Colors.white.withOpacity(0.1),
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFF4E6077),
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Text(
+          'Log Out',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SettingItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const SettingItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: EdgeInsets.all(16),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: Color(0xFF0D3445),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Inter',
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color(0xFF4E6077),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF021219)),
+            Icon(
+              Icons.chevron_right,
+              color: Colors.white.withOpacity(0.7),
+              size: 24,
+            ),
           ],
         ),
       ),
