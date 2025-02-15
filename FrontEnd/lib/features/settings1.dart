@@ -55,7 +55,7 @@ class SettingsScreen extends StatelessWidget {
                             color: Colors.white.withOpacity(0.9),
                           ),
                           child: CircleAvatar(
-                            radius: 50,
+                            radius: 70,
                             backgroundColor: Colors.white,
                             backgroundImage:
                                 AssetImage("lib/assets/images/kushen.png"),
@@ -172,9 +172,9 @@ class SettingsScreen extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              color: Color(0xFF0D3445),
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
