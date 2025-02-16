@@ -23,66 +23,72 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D3445),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "Progress & Leaderboard",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
+      // Updated background to use LinearGradient
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromARGB(255, 255, 255, 255),
+              Color(0xFF0D3445), // Slightly darker shade for depth
+            ],
           ),
         ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          // User Stats Summary
-          _buildUserStats(),
-
-          const SizedBox(height: 20),
-          // Progress Chart
-          _buildProgressChart(),
-
-          const SizedBox(height: 20),
-          // Leaderboard Toggle
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C5D7A),
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: Colors.white,
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: const Text(
+                "Progress & Leaderboard",
+                style: TextStyle(
+                  color: Color(0xFF0D3445),
+                  fontSize: 24,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              labelColor: const Color(0xFF0D3445),
-              unselectedLabelColor: Colors.white,
-              tabs: const [
-                Tab(text: "Global"),
-                Tab(text: "Local"),
-              ],
+              centerTitle: true,
             ),
-          ),
-
-          const SizedBox(height: 20),
-          // Leaderboard List
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildLeaderboardList(isGlobal: true),
-                _buildLeaderboardList(isGlobal: false),
-              ],
+            const SizedBox(height: 20),
+            // Rest of your existing widgets...
+            _buildUserStats(),
+            const SizedBox(height: 20),
+            _buildProgressChart(),
+            const SizedBox(height: 20),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D3445),
+                borderRadius: BorderRadius.circular(35),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(35),
+                  color: Colors.white,
+                ),
+                labelColor: const Color(0xFF0D3445),
+                unselectedLabelColor: Colors.white,
+                tabs: const [
+                  Tab(text: "Global"),
+                  Tab(text: "Local"),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildLeaderboardList(isGlobal: true),
+                  _buildLeaderboardList(isGlobal: false),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         onTap: (index) {
@@ -92,15 +98,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
+  // Rest of your existing methods remain the same...
   Widget _buildUserStats() {
+    // Existing implementation...
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF4DB6AC),
-            const Color(0xFF4DB6AC).withOpacity(0.7),
+            const Color.fromARGB(255, 0, 0, 0),
+            const Color.fromARGB(255, 255, 255, 255).withOpacity(0.7),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -120,7 +128,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundImage: AssetImage("assets/avatar.png"),
+                backgroundImage: AssetImage("lib/assets/images/kushen.png"),
               ),
               SizedBox(width: 15),
               Column(
