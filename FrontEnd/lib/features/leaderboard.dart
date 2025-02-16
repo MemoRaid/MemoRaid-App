@@ -18,12 +18,20 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Updated background to use LinearGradient
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -31,7 +39,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             end: Alignment.bottomRight,
             colors: [
               Color.fromARGB(255, 255, 255, 255),
-              Color(0xFF0D3445), // Slightly darker shade for depth
+              Color(0xFF0D3445),
             ],
           ),
         ),
@@ -52,28 +60,78 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               centerTitle: true,
             ),
             const SizedBox(height: 20),
-            // Rest of your existing widgets...
             _buildUserStats(),
             const SizedBox(height: 20),
             _buildProgressChart(),
             const SizedBox(height: 20),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D3445),
-                borderRadius: BorderRadius.circular(35),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(35),
-                  color: Colors.white,
-                ),
-                labelColor: const Color(0xFF0D3445),
-                unselectedLabelColor: Colors.white,
-                tabs: const [
-                  Tab(text: "Global"),
-                  Tab(text: "Local"),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        _tabController.animateTo(0);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                          color: _tabController.index == 0
+                              ? Colors.white
+                              : const Color(0xFF0D3445),
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(35),
+                          ),
+                          border: Border.all(
+                            color: const Color(0xFF0D3445),
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          "Global",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _tabController.index == 0
+                                ? const Color(0xFF0D3445)
+                                : Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        _tabController.animateTo(1);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                          color: _tabController.index == 1
+                              ? Colors.white
+                              : const Color(0xFF0D3445),
+                          borderRadius: const BorderRadius.horizontal(
+                            right: Radius.circular(35),
+                          ),
+                          border: Border.all(
+                            color: const Color(0xFF0D3445),
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          "Local",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _tabController.index == 1
+                                ? const Color(0xFF0D3445)
+                                : Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -98,15 +156,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  // Rest of your existing methods remain the same...
   Widget _buildUserStats() {
-    // Existing implementation...
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [const Color(0XFF0D3445), const Color(0xFF0D3445)],
+          colors: [const Color(0xFF0D3445), const Color(0xFF0D3445)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -132,7 +188,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "John Doe",
+                    "John Peter",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -140,7 +196,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     ),
                   ),
                   Text(
-                    "Level 8 Memory Master",
+                    "Memory Master",
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -191,7 +247,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C5D7A),
+        color: const Color(0xFF0D3445),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -215,33 +271,142 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           const SizedBox(height: 20),
           SizedBox(
             height: 200,
-            child: LineChart(
-              LineChartData(
-                gridData: const FlGridData(show: false),
-                titlesData: const FlTitlesData(show: false),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: [
-                      const FlSpot(0, 3),
-                      const FlSpot(2.6, 2),
-                      const FlSpot(4.9, 5),
-                      const FlSpot(6.8, 3.1),
-                      const FlSpot(8, 4),
-                      const FlSpot(9.5, 3),
-                      const FlSpot(11, 4),
-                    ],
-                    isCurved: true,
-                    color: Colors.white,
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: Colors.white.withOpacity(0.2),
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: 6,
+                barTouchData: BarTouchData(enabled: false),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        const style = TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        );
+                        String text;
+                        switch (value.toInt()) {
+                          case 0:
+                            text = 'Mon';
+                            break;
+                          case 1:
+                            text = 'Tue';
+                            break;
+                          case 2:
+                            text = 'Wed';
+                            break;
+                          case 3:
+                            text = 'Thu';
+                            break;
+                          case 4:
+                            text = 'Fri';
+                            break;
+                          case 5:
+                            text = 'Sat';
+                            break;
+                          case 6:
+                            text = 'Sun';
+                            break;
+                          default:
+                            text = '';
+                        }
+                        return Text(text, style: style);
+                      },
                     ),
                   ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  BarChartGroupData(
+                    x: 0,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 3,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 2,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 2,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 5,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 3,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 3.1,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 4,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 4,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 5,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 3,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 6,
+                    barRods: [
+                      BarChartRodData(
+                        toY: 4,
+                        color: Colors.white,
+                        width: 15,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
                 ],
+                gridData: FlGridData(show: false),
               ),
             ),
           ),
@@ -276,7 +441,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color:
-            isCurrentUser ? const Color(0xFF4DB6AC) : const Color(0xFF1C5D7A),
+            isCurrentUser ? const Color(0xFF4DB6AC) : const Color(0xFF0D3445),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
