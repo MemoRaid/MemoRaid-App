@@ -106,10 +106,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color.fromARGB(255, 0, 0, 0),
-            const Color.fromARGB(255, 255, 255, 255).withOpacity(0.7),
-          ],
+          colors: [const Color(0XFF0D3445), const Color(0xFF0D3445)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
