@@ -39,11 +39,11 @@ class SettingsScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 24),
+              SizedBox(height: 15),
 
               // Profile Section
               Container(
-                padding: EdgeInsets.symmetric(vertical: 24),
+                padding: EdgeInsets.symmetric(vertical: 10),
                 child: Column(
                   children: [
                     Stack(
@@ -79,7 +79,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Lucas Scott',
+                      'Mr.John',
                       style: TextStyle(
                         color: Color(0xFF0D3445),
                         fontSize: 20,
@@ -87,7 +87,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '@lucasscott3',
+                      '@johnfern3',
                       style: TextStyle(
                         color: Color(0xFF0D3445).withOpacity(0.7),
                         fontSize: 14,
@@ -152,7 +152,7 @@ class SettingsScreen extends StatelessWidget {
                     ]),
                     SizedBox(height: 24),
                     _buildLogoutButton(),
-                    SizedBox(height: 32),
+                    SizedBox(height: 22),
                   ],
                 ),
               ),
@@ -172,7 +172,7 @@ class SettingsScreen extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              color: Color(0xFF0D3445),
+              color: Color(0x00000),
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
