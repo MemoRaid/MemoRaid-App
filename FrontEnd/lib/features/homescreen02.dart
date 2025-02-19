@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_flutter_app/features/breath.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
 import 'gamescreen.dart'; // Import the Game Screen
+import 'note.dart';
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -68,6 +69,14 @@ class HomeScreen2 extends StatelessWidget {
                         context,
                         title: "Reminder and Diary",
                         image: 'lib/assets/images/reminder.png',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotebookScreen(),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
