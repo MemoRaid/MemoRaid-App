@@ -1,5 +1,48 @@
 // notebook_screen.dart
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+// note_model.dart
+class Note {
+  final String id;
+  final String title;
+  final String content;
+  final String category;
+  final DateTime createdAt;
+  final DateTime? reminderTime;
+  final String? audioPath;
+  final NoteType type;
+
+  Note({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.category,
+    required this.createdAt,
+    this.reminderTime,
+    this.audioPath,
+    required this.type,
+  });
+}
+
+enum NoteType { text, voice, reminder }
+
+// note_service.dart
+class NoteService {
+  static final List<Note> _notes = [];
+
+  static List<Note> getNotesByCategory(String category) {
+    return _notes.where((note) => note.category == category).toList();
+  }
+
+  static void addNote(Note note) {
+    _notes.add(note);
+  }
+
+  static void deleteNote(String id) {
+    _notes.removeWhere((note) => note.id == id);
+  }
+}
 
 class NotebookScreen extends StatelessWidget {
   const NotebookScreen({super.key});
@@ -21,52 +64,37 @@ class NotebookScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddNoteScreen(),
-            ),
-          );
-        },
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           _buildCategoryCard(
             context,
-            'Daily Tasks',
-            Icons.calendar_today,
-            const Color(0xFF1E88E5),
-          ),
-          _buildCategoryCard(
-            context,
-            'Important Contacts',
-            Icons.people,
-            const Color(0xFF43A047),
-          ),
-          _buildCategoryCard(
-            context,
-            'Medications',
-            Icons.medical_services,
-            const Color(0xFFE53935),
-          ),
-          _buildCategoryCard(
-            context,
-            'Personal Notes',
+            'Text Notes',
             Icons.note,
-            const Color(0xFF8E24AA),
+            const Color(0xFF1E88E5),
+            NoteType.text,
+          ),
+          _buildCategoryCard(
+            context,
+            'Voice Notes',
+            Icons.mic,
+            const Color(0xFF43A047),
+            NoteType.voice,
+          ),
+          _buildCategoryCard(
+            context,
+            'Reminders',
+            Icons.alarm,
+            const Color(0xFFE53935),
+            NoteType.reminder,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryCard(
-      BuildContext context, String title, IconData icon, Color color) {
+  Widget _buildCategoryCard(BuildContext context, String title, IconData icon,
+      Color color, NoteType type) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 4,
@@ -75,7 +103,8 @@ class NotebookScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => NotesListScreen(category: title),
+              builder: (context) =>
+                  NotesListScreen(category: title, noteType: type),
             ),
           );
         },
@@ -126,11 +155,15 @@ class NotebookScreen extends StatelessWidget {
 // notes_list_screen.dart
 class NotesListScreen extends StatelessWidget {
   final String category;
+  final NoteType noteType;
 
-  const NotesListScreen({super.key, required this.category});
+  const NotesListScreen(
+      {super.key, required this.category, required this.noteType});
 
   @override
   Widget build(BuildContext context) {
+    final notes = NoteService.getNotesByCategory(category);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D3445),
       appBar: AppBar(
@@ -139,27 +172,37 @@ class NotesListScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+        child: Icon(noteType == NoteType.voice ? Icons.mic : Icons.add),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddNoteScreen(category: category),
+              builder: (context) => AddNoteScreen(
+                category: category,
+                noteType: noteType,
+              ),
             ),
           );
         },
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: 5, // Replace with actual notes count
-        itemBuilder: (context, index) {
-          return _buildNoteCard(context);
-        },
-      ),
+      body: notes.isEmpty
+          ? Center(
+              child: Text(
+                'No ${category.toLowerCase()} yet',
+                style: const TextStyle(color: Colors.white),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: notes.length,
+              itemBuilder: (context, index) {
+                return _buildNoteCard(context, notes[index]);
+              },
+            ),
     );
   }
 
-  Widget _buildNoteCard(BuildContext context) {
+  Widget _buildNoteCard(BuildContext context, Note note) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       child: Padding(
@@ -170,9 +213,9 @@ class NotesListScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Note Title',
-                  style: TextStyle(
+                Text(
+                  note.title,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -189,30 +232,57 @@ class NotesListScreen extends StatelessWidget {
                     ),
                   ],
                   onSelected: (value) {
-                    // Handle menu item selection
+                    if (value == 'delete') {
+                      NoteService.deleteNote(note.id);
+                      // Rebuild screen
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotesListScreen(
+                            category: category,
+                            noteType: noteType,
+                          ),
+                        ),
+                      );
+                    }
                   },
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              'Note content preview...',
-              style: TextStyle(
-                color: Colors.grey[600],
+            if (note.type == NoteType.voice)
+              _buildAudioPlayer(note.audioPath!)
+            else
+              Text(
+                note.content,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
               ),
-            ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  'Today, 3:30 PM',
+                  note.createdAt.toString(),
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
                   ),
                 ),
+                if (note.reminderTime != null) ...[
+                  const SizedBox(width: 8),
+                  Icon(Icons.alarm, size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    note.reminderTime.toString(),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
@@ -220,13 +290,37 @@ class NotesListScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildAudioPlayer(String audioPath) {
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.play_arrow),
+          onPressed: () {
+            // Implement audio playback
+          },
+        ),
+        Expanded(
+          child: Slider(
+            value: 0,
+            onChanged: (value) {},
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 // add_note_screen.dart
 class AddNoteScreen extends StatefulWidget {
-  final String? category;
+  final String category;
+  final NoteType noteType;
 
-  const AddNoteScreen({super.key, this.category});
+  const AddNoteScreen({
+    super.key,
+    required this.category,
+    required this.noteType,
+  });
 
   @override
   State<AddNoteScreen> createState() => _AddNoteScreenState();
@@ -236,6 +330,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   DateTime? _reminderTime;
+  String? _audioPath;
+  bool _isRecording = false;
 
   @override
   Widget build(BuildContext context) {
@@ -243,14 +339,11 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
       backgroundColor: const Color(0xFF0D3445),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D3445),
-        title:
-            const Text('Add New Note', style: TextStyle(color: Colors.white)),
+        title: Text('Add New ${widget.category}',
+            style: const TextStyle(color: Colors.white)),
         actions: [
           TextButton(
-            onPressed: () {
-              // Save note logic
-              Navigator.pop(context);
-            },
+            onPressed: _saveNote,
             child: const Text('Save', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -279,51 +372,101 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: _contentController,
-                      decoration: const InputDecoration(
-                        hintText: 'Write your note here...',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
+                    if (widget.noteType == NoteType.voice)
+                      _buildVoiceRecorder()
+                    else
+                      TextField(
+                        controller: _contentController,
+                        decoration: const InputDecoration(
+                          hintText: 'Write your note here...',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
                       ),
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.notification_add),
-                title: const Text('Set Reminder'),
-                subtitle: Text(_reminderTime != null
-                    ? 'Reminder set for ${_reminderTime.toString()}'
-                    : 'No reminder set'),
-                onTap: () async {
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                  );
-                  if (time != null) {
-                    setState(() {
-                      _reminderTime = DateTime(
-                        DateTime.now().year,
-                        DateTime.now().month,
-                        DateTime.now().day,
-                        time.hour,
-                        time.minute,
-                      );
-                    });
-                  }
-                },
+            if (widget.noteType == NoteType.reminder ||
+                widget.noteType == NoteType.text)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.notification_add),
+                  title: const Text('Set Reminder'),
+                  subtitle: Text(_reminderTime != null
+                      ? _reminderTime.toString()
+                      : 'No reminder set'),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (time != null) {
+                      setState(() {
+                        _reminderTime = DateTime(
+                          DateTime.now().year,
+                          DateTime.now().month,
+                          DateTime.now().day,
+                          time.hour,
+                          time.minute,
+                        );
+                      });
+                    }
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildVoiceRecorder() {
+    return Column(
+      children: [
+        Text(_audioPath ?? 'No recording yet'),
+        const SizedBox(height: 16),
+        IconButton(
+          icon: Icon(_isRecording ? Icons.stop : Icons.mic),
+          onPressed: () {
+            setState(() {
+              _isRecording = !_isRecording;
+              if (!_isRecording) {
+                // Simulate saving audio file
+                _audioPath =
+                    'recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+              }
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  void _saveNote() {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a title')),
+      );
+      return;
+    }
+
+    final note = Note(
+      id: const Uuid().v4(),
+      title: _titleController.text,
+      content: _contentController.text,
+      category: widget.category,
+      createdAt: DateTime.now(),
+      reminderTime: _reminderTime,
+      audioPath: _audioPath,
+      type: widget.noteType,
+    );
+
+    NoteService.addNote(note);
+    Navigator.pop(context);
   }
 
   @override

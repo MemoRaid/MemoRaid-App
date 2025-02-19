@@ -15,6 +15,9 @@ dependencies:
   animate_do: ^3.0.2
   vibration: ^1.7.5
   fl_chart: ^0.64.0
+  uuid: ^3.0.7
+  record: ^4.4.4
+  just_audio: ^0.9.34
 
 dev_dependencies:
   flutter_test:
