@@ -16,8 +16,12 @@ dependencies:
   vibration: ^1.7.5
   fl_chart: ^0.64.0
   uuid: ^3.0.7
-  record: ^4.4.4
+  record: ^5.0.1
   just_audio: ^0.9.34
+  audioplayers: ^5.2.1
+  flutter_sound: ^8.4.2
+  path_provider: ^2.1.1
+  permission_handler: ^10.2.0
 
 dev_dependencies:
   flutter_test:
