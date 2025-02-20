@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'signup.dart';
-import 'login.dart'; // Import your LoginScreen file
+import 'login.dart';
+import 'settings1.dart';
+// Import your LoginScreen file
 
 class LoginSignupScreen extends StatelessWidget {
   const LoginSignupScreen({super.key});
@@ -96,7 +98,7 @@ class LoginSignupScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignUpScreen()),
+                    MaterialPageRoute(builder: (context) => SettingsScreen()),
                   );
                 },
                 child: Container(

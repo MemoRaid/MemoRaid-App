@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/breath.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
+import 'gamescreen.dart'; // Import the Game Screen
+import 'note.dart';
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -45,29 +48,50 @@ class HomeScreen2 extends StatelessWidget {
                       _buildFeatureCard(
                         context,
                         title: "Games",
-                        image:
-                            'lib/assets/images/patient.png', // Replace with actual image path
+                        image: 'lib/assets/images/patient.png',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const GameScreen(),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
                         context,
                         title: "Story",
-                        image:
-                            'lib/assets/images/story.png', // Replace with actual image path
+                        image: 'lib/assets/images/story.png',
                       ),
                       SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
                         context,
                         title: "Reminder and Diary",
-                        image:
-                            'lib/assets/images/reminder.png', // Replace with actual image path
+                        image: 'lib/assets/images/reminder.png',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotebookScreen(),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: size.height * 0.03),
                       _buildFeatureCard(
                         context,
                         title: "Calm Mind",
-                        image:
-                            'lib/assets/images/mind.png', // Replace with actual image path
+                        image: 'lib/assets/images/mind.png',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BreathExerciseScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -103,43 +127,46 @@ class HomeScreen2 extends StatelessWidget {
   }
 
   Widget _buildFeatureCard(BuildContext context,
-      {required String title, required String image}) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: Color(0xFF0D3445), // Same color scheme as HomeScreen1 cards
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 40,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          SizedBox(width: 20),
-          Image.asset(
-            image,
-            width: 90,
-            height: 80,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-              ),
-              overflow: TextOverflow.ellipsis,
+      {required String title, required String image, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap, // Handle navigation when tapped
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Color(0xFF0D3445), // Same color scheme as HomeScreen1 cards
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 40,
+              offset: Offset(0, 10),
             ),
-          ),
-          SizedBox(width: 20),
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: 20),
+            Image.asset(
+              image,
+              width: 90,
+              height: 80,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(width: 20),
+          ],
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'features/homescreen01.dart';
 import 'features/chatbot.dart';
 import 'features/login.dart';
 import 'features/signup.dart';
+import 'features/leaderboard.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         '/progress': (context) => const LoginScreen(), // Progress graph
         '/chatbot': (context) => const ChatScreen(), // AI Chatbot
         '/rocket': (context) => const SignUpScreen(), // Rocket feature
-        '/achievements': (context) => const HomeScreen2(), // Achievements
+        '/achievements': (context) => const LeaderboardScreen(), // Achievements
       },
     );
   }
