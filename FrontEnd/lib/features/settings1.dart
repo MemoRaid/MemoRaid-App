@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'profile_screen.dart';
+import 'password_security_screen.dart';
+import 'notifications_screen.dart';
+import 'appearance_screen.dart';
+import 'language_screen.dart';
+import 'help_center_screen.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_of_service_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -107,16 +115,31 @@ class SettingsScreen extends StatelessWidget {
                         icon: Icons.person_outline,
                         title: 'Profile',
                         subtitle: 'Edit your profile information',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProfileScreen()),
+                        ),
                       ),
                       SettingItem(
                         icon: Icons.lock_outline,
                         title: 'Password & Security',
                         subtitle: 'Manage your security settings',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PasswordSecurityScreen()),
+                        ),
                       ),
                       SettingItem(
                         icon: Icons.notifications_outlined,
                         title: 'Notifications',
                         subtitle: 'Customize your notifications',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NotificationsScreen()),
+                        ),
                       ),
                     ]),
                     SizedBox(height: 16),
@@ -125,11 +148,21 @@ class SettingsScreen extends StatelessWidget {
                         icon: Icons.palette_outlined,
                         title: 'Appearance',
                         subtitle: 'Dark mode and theme settings',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AppearanceScreen()),
+                        ),
                       ),
                       SettingItem(
                         icon: Icons.language_outlined,
                         title: 'Language',
                         subtitle: 'Change app language',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LanguageScreen()),
+                        ),
                       ),
                     ]),
                     SizedBox(height: 16),
@@ -138,16 +171,31 @@ class SettingsScreen extends StatelessWidget {
                         icon: Icons.help_outline,
                         title: 'Help Center',
                         subtitle: 'Get help and support',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HelpCenterScreen()),
+                        ),
                       ),
                       SettingItem(
                         icon: Icons.privacy_tip_outlined,
                         title: 'Privacy Policy',
                         subtitle: 'Read our privacy policy',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PrivacyPolicyScreen()),
+                        ),
                       ),
                       SettingItem(
                         icon: Icons.description_outlined,
                         title: 'Terms of Service',
                         subtitle: 'Read our terms of service',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TermsOfServiceScreen()),
+                        ),
                       ),
                     ]),
                     SizedBox(height: 24),
@@ -243,17 +291,19 @@ class SettingItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback onTap;
 
   const SettingItem({
     required this.icon,
     required this.title,
     required this.subtitle,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Row(
