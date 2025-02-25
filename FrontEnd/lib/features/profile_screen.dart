@@ -126,6 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 30),
                 _buildProfileImageSection(),
                 _buildFormSection(),
                 SizedBox(height: 30),
@@ -140,89 +141,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileImageSection() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 30),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: Offset(0, 3),
-            blurRadius: 8,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(60),
-                  child: _profileImage == null
-                      ? Image.asset(
-                          "lib/assets/images/kushen.png",
-                          fit: BoxFit.cover,
-                        )
-                      : Image.file(
-                          File(_profileImage!.path),
-                          fit: BoxFit.cover,
-                        ),
-                ),
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: InkWell(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF4E6077),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(60),
+                child: _profileImage == null
+                    ? Image.asset(
+                        "lib/assets/images/kushen.png",
+                        fit: BoxFit.cover,
+                      )
+                    : Image.file(
+                        File(_profileImage!.path),
+                        fit: BoxFit.cover,
+                      ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: InkWell(
+                onTap: _pickImage,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF4E6077),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 15),
-          Text(
+            ),
+          ],
+        ),
+        SizedBox(height: 15),
+        Center(
+          child: Text(
             "Tap to change profile picture",
             style: TextStyle(
-              color: Colors.grey[600],
+              color: Color(0xFF0D3445),
               fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -360,6 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
+      color: Color(0xFF0D3445), // Updated background color
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -368,7 +359,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(
               title,
               style: TextStyle(
-                color: Color(0xFF0D3445),
+                color: Colors.white, // Updated text color for better contrast
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -396,12 +387,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return TextFormField(
       initialValue: initialValue,
       maxLines: maxLines,
+      style: TextStyle(color: Colors.white), // Updated text color
       decoration: InputDecoration(
         labelText: labelText,
+        labelStyle: TextStyle(color: Colors.white), // Updated label text color
         hintText: hintText,
-        prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: Color(0xFF4E6077))
-            : null,
+        hintStyle: TextStyle(color: Colors.white70), // Updated hint text color
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: Colors.white) : null,
         contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -413,14 +406,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Color(0xFF4E6077), width: 2),
+          borderSide: BorderSide(color: Colors.white, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.red.shade300),
         ),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.grey.shade50.withOpacity(0.1),
       ),
       onSaved: onSaved,
       validator: validator,
@@ -439,12 +432,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: AbsorbPointer(
         child: TextFormField(
           initialValue: initialValue,
+          style: TextStyle(color: Colors.white), // Updated text color
           decoration: InputDecoration(
             labelText: labelText,
+            labelStyle:
+                TextStyle(color: Colors.white), // Updated label text color
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: Color(0xFF4E6077))
+                ? Icon(prefixIcon, color: Colors.white)
                 : null,
-            suffixIcon: Icon(Icons.calendar_today, color: Color(0xFF4E6077)),
+            suffixIcon: Icon(Icons.calendar_today, color: Colors.white),
             contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -456,10 +452,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFF4E6077), width: 2),
+              borderSide: BorderSide(color: Colors.white, width: 2),
             ),
             filled: true,
-            fillColor: Colors.grey.shade50,
+            fillColor: Colors.grey.shade50.withOpacity(0.1),
           ),
           onSaved: onSaved,
         ),
@@ -477,18 +473,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     return DropdownButtonFormField<String>(
       value: value,
-      items: items
-          .map((item) => DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              ))
-          .toList(),
-      onChanged: onChanged,
+      style: TextStyle(color: Colors.white), // Updated text color
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: Color(0xFF4E6077))
-            : null,
+        labelStyle: TextStyle(color: Colors.white), // Updated label text color
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: Colors.white) : null,
         contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -500,11 +490,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Color(0xFF4E6077), width: 2),
+          borderSide: BorderSide(color: Colors.white, width: 2),
         ),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.grey.shade50.withOpacity(0.1),
       ),
+      items: items
+          .map((item) => DropdownMenuItem(
+                value: item,
+                child: Text(item, style: TextStyle(color: Colors.black)),
+              ))
+          .toList(),
+      onChanged: onChanged,
       onSaved: onSaved,
     );
   }
