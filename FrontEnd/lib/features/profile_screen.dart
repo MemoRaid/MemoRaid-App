@@ -86,7 +86,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: Color(0xFFF5F7FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -98,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           "Edit Profile",
           style: TextStyle(
             color: Color(0xFF0D3445),
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -107,272 +110,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xFF0D3445),
-            ],
-          ),
-        ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        backgroundImage: _profileImage == null
-                            ? AssetImage("lib/assets/images/kushen.png")
-                            : FileImage(File(_profileImage!.path))
-                                as ImageProvider,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: Color(0xFF4E6077),
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.white, width: 1.5),
-                            ),
-                            child: Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                _buildSectionTitle("Basic Information"),
-                TextFormField(
-                  initialValue: _profileName,
-                  decoration: InputDecoration(
-                    labelText: 'Profile Name',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _profileName = value ?? '';
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your profile name';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 15),
-                TextFormField(
-                  initialValue: _username,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _username = value ?? '';
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 15),
-                GestureDetector(
-                  onTap: () => _selectDate(context),
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      initialValue: _dateOfBirth,
-                      decoration: InputDecoration(
-                        labelText: 'Date of Birth',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        suffixIcon: Icon(Icons.calendar_today),
-                      ),
-                      onSaved: (value) {
-                        _dateOfBirth = value;
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(height: 15),
-                DropdownButtonFormField<String>(
-                  value: _country,
-                  items: _countries
-                      .map((country) => DropdownMenuItem(
-                            value: country,
-                            child: Text(country),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _country = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Country',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _country = value;
-                  },
-                ),
-                SizedBox(height: 15),
-                DropdownButtonFormField<String>(
-                  value: _gender,
-                  items: _genders
-                      .map((gender) => DropdownMenuItem(
-                            value: gender,
-                            child: Text(gender),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _gender = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Gender',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _gender = value;
-                  },
-                ),
-                SizedBox(height: 20),
-                _buildSectionTitle("Contact Information"),
-                TextFormField(
-                  initialValue: _email,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _email = value;
-                  },
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty) {
-                      final emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                      if (!emailRegExp.hasMatch(value)) {
-                        return 'Please enter a valid email';
-                      }
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 15),
-                TextFormField(
-                  initialValue: _phoneNumber,
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _phoneNumber = value;
-                  },
-                ),
-                SizedBox(height: 20),
-                _buildSectionTitle("About Me"),
-                TextFormField(
-                  initialValue: _bio,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: 'Bio',
-                    hintText: 'Tell us about yourself',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    _bio = value;
-                  },
-                ),
+                _buildProfileImageSection(),
+                _buildFormSection(),
                 SizedBox(height: 30),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _formKey.currentState?.save();
-                        Provider.of<UserProvider>(context, listen: false)
-                            .updateUser(
-                          username: _username,
-                          profileName: _profileName,
-                          profileImage: _profileImage?.path,
-                          dateOfBirth: _dateOfBirth,
-                          country: _country,
-                          bio: _bio,
-                          gender: _gender,
-                          email: _email,
-                          phoneNumber: _phoneNumber,
-                        );
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF4E6077),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      'Save',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildSaveButton(context),
+                SizedBox(height: 30),
               ],
             ),
           ),
@@ -381,15 +129,414 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildProfileImageSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 30),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: Offset(0, 3),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(60),
+                  child: _profileImage == null
+                      ? Image.asset(
+                          "lib/assets/images/kushen.png",
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          File(_profileImage!.path),
+                          fit: BoxFit.cover,
+                        ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: InkWell(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Color(0xFF4E6077),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 15),
+          Text(
+            "Tap to change profile picture",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormSection() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCard(
+            "Basic Information",
+            [
+              _buildTextField(
+                initialValue: _profileName,
+                labelText: 'Profile Name',
+                prefixIcon: Icons.person,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your profile name';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _profileName = value ?? '';
+                },
+              ),
+              _buildTextField(
+                initialValue: _username,
+                labelText: 'Username',
+                prefixIcon: Icons.alternate_email,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your username';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _username = value ?? '';
+                },
+              ),
+              _buildDateField(
+                initialValue: _dateOfBirth,
+                labelText: 'Date of Birth',
+                prefixIcon: Icons.cake,
+                onTap: () => _selectDate(context),
+                onSaved: (value) {
+                  _dateOfBirth = value;
+                },
+              ),
+              _buildDropdownField(
+                value: _country,
+                items: _countries,
+                labelText: 'Country',
+                prefixIcon: Icons.public,
+                onChanged: (value) {
+                  setState(() {
+                    _country = value;
+                  });
+                },
+                onSaved: (value) {
+                  _country = value;
+                },
+              ),
+              _buildDropdownField(
+                value: _gender,
+                items: _genders,
+                labelText: 'Gender',
+                prefixIcon: Icons.people,
+                onChanged: (value) {
+                  setState(() {
+                    _gender = value;
+                  });
+                },
+                onSaved: (value) {
+                  _gender = value;
+                },
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          _buildSectionCard(
+            "Contact Information",
+            [
+              _buildTextField(
+                initialValue: _email,
+                labelText: 'Email',
+                prefixIcon: Icons.email,
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    final emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                    if (!emailRegExp.hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _email = value;
+                },
+              ),
+              _buildTextField(
+                initialValue: _phoneNumber,
+                labelText: 'Phone Number',
+                prefixIcon: Icons.phone,
+                onSaved: (value) {
+                  _phoneNumber = value;
+                },
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          _buildSectionCard(
+            "About Me",
+            [
+              _buildTextField(
+                initialValue: _bio,
+                labelText: 'Bio',
+                hintText: 'Tell us about yourself',
+                maxLines: 3,
+                prefixIcon: Icons.info_outline,
+                onSaved: (value) {
+                  _bio = value;
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(String title, List<Widget> children) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Color(0xFF0D3445),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16),
+            ...children
+                .expand((widget) => [widget, SizedBox(height: 16)])
+                .toList()
+              ..removeLast(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    String? initialValue,
+    required String labelText,
+    String? hintText,
+    IconData? prefixIcon,
+    int maxLines = 1,
+    Function(String?)? onSaved,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      initialValue: initialValue,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: Color(0xFF4E6077))
+            : null,
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFF4E6077), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.red.shade300),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      onSaved: onSaved,
+      validator: validator,
+    );
+  }
+
+  Widget _buildDateField({
+    String? initialValue,
+    required String labelText,
+    IconData? prefixIcon,
+    required Function() onTap,
+    Function(String?)? onSaved,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AbsorbPointer(
+        child: TextFormField(
+          initialValue: initialValue,
+          decoration: InputDecoration(
+            labelText: labelText,
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, color: Color(0xFF4E6077))
+                : null,
+            suffixIcon: Icon(Icons.calendar_today, color: Color(0xFF4E6077)),
+            contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFF4E6077), width: 2),
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+          ),
+          onSaved: onSaved,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField({
+    String? value,
+    required List<String> items,
+    required String labelText,
+    IconData? prefixIcon,
+    required Function(String?) onChanged,
+    Function(String?)? onSaved,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      items: items
+          .map((item) => DropdownMenuItem(
+                value: item,
+                child: Text(item),
+              ))
+          .toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        labelText: labelText,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: Color(0xFF4E6077))
+            : null,
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFF4E6077), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      onSaved: onSaved,
+    );
+  }
+
+  Widget _buildSaveButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState?.validate() ?? false) {
+            _formKey.currentState?.save();
+            Provider.of<UserProvider>(context, listen: false).updateUser(
+              username: _username,
+              profileName: _profileName,
+              profileImage: _profileImage?.path,
+              dateOfBirth: _dateOfBirth,
+              country: _country,
+              bio: _bio,
+              gender: _gender,
+              email: _email,
+              phoneNumber: _phoneNumber,
+            );
+            Navigator.pop(context);
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFF4E6077),
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 3,
+          shadowColor: Color(0xFF4E6077).withOpacity(0.5),
+          minimumSize: Size(double.infinity, 55),
+        ),
+        child: Text(
+          'Save Changes',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
