@@ -16,6 +16,9 @@ dependencies:
   vibration: ^1.7.5
   fl_chart: ^0.64.0
   uuid: ^4.2.1
+  image_picker: ^0.8.4+4
+  provider: ^6.0.0
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:

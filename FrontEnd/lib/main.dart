@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:my_flutter_app/features/homescreen02.dart';
 import 'features/splash.dart';
 import 'features/homescreen01.dart';
@@ -6,9 +7,18 @@ import 'features/chatbot.dart';
 import 'features/login.dart';
 import 'features/signup.dart';
 import 'features/leaderboard.dart';
+import 'features/settings1.dart';
+import 'features/user_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -35,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/chatbot': (context) => const ChatScreen(), // AI Chatbot
         '/rocket': (context) => const SignUpScreen(), // Rocket feature
         '/achievements': (context) => const LeaderboardScreen(), // Achievements
+        '/settings': (context) => const SettingsScreen(), // Settings screen
       },
     );
   }
