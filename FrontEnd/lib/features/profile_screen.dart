@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Color(0xFFF5F7FA),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -110,6 +110,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white,
+              Color(0xFF0D3445),
+            ],
+          ),
+        ),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
