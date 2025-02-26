@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'profile_screen.dart';
 import 'password_security_screen.dart';
 import 'notifications_screen.dart';
 import 'help_center_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
+import 'theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,7 +16,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkMode = false;
   String _selectedLanguage = 'English';
   final List<String> _languages = [
     'English',
@@ -27,212 +28,193 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Settings",
-          style: TextStyle(
-            color: Color(0xFF0D3445),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    // Use Consumer to rebuild when theme changes
+    return Consumer<ThemeProvider>(builder: (context, themeProvider, _) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor:
+              themeProvider.isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back,
+                color: themeProvider.isDarkMode
+                    ? Colors.white
+                    : Color(0xFF0D3445)),
+            onPressed: () => Navigator.pop(context),
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xFF0D3445),
-            ],
+          title: Text(
+            "Settings",
+            style: TextStyle(
+              color:
+                  themeProvider.isDarkMode ? Colors.white : Color(0xFF0D3445),
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          centerTitle: true,
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 5),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: themeProvider.isDarkMode
+                  ? [Color(0xFF1E1E1E), Color(0xFF0D3445)]
+                  : [Colors.white, Color(0xFF0D3445)],
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 5),
 
-              // Profile Section
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 5),
-                child: Column(
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
-                          child: CircleAvatar(
-                            radius: 70,
-                            backgroundColor: Colors.white,
-                            backgroundImage:
-                                AssetImage("lib/assets/images/kushen.png"),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.all(8),
+                // Profile Section
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 5),
+                  child: Column(
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(3),
                             decoration: BoxDecoration(
-                              color: Color(0xFF4E6077),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
+                              color: Colors.white.withOpacity(0.9),
                             ),
-                            child:
-                                Icon(Icons.edit, color: Colors.white, size: 16),
+                            child: CircleAvatar(
+                              radius: 70,
+                              backgroundColor: Colors.white,
+                              backgroundImage:
+                                  AssetImage("lib/assets/images/kushen.png"),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF4E6077),
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
+                              ),
+                              child: Icon(Icons.edit,
+                                  color: Colors.white, size: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Mr.John',
+                        style: TextStyle(
+                          color: Color(0xFF0D3445),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '@johnfern3',
+                        style: TextStyle(
+                          color: Color(0xFF0D3445).withOpacity(0.7),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Settings Sections
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildSection('Account', [
+                        SettingItemNavigation(
+                          icon: Icons.person_outline,
+                          title: 'Profile',
+                          subtitle: 'Edit your profile information',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileScreen()),
                           ),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Mr.John',
-                      style: TextStyle(
-                        color: Color(0xFF0D3445),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '@johnfern3',
-                      style: TextStyle(
-                        color: Color(0xFF0D3445).withOpacity(0.7),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                        SettingItemNavigation(
+                          icon: Icons.lock_outline,
+                          title: 'Password & Security',
+                          subtitle: 'Manage your security settings',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PasswordSecurityScreen()),
+                          ),
+                        ),
+                        SettingItemNavigation(
+                          icon: Icons.notifications_outlined,
+                          title: 'Notifications',
+                          subtitle: 'Customize your notifications',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NotificationsScreen()),
+                          ),
+                        ),
+                      ]),
+                      SizedBox(height: 16),
+                      _buildPreferencesSection(),
+                      SizedBox(height: 16),
+                      _buildSection('Support', [
+                        SettingItemNavigation(
+                          icon: Icons.help_outline,
+                          title: 'Help Center',
+                          subtitle: 'Get help and support',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HelpCenterScreen()),
+                          ),
+                        ),
+                        SettingItemNavigation(
+                          icon: Icons.privacy_tip_outlined,
+                          title: 'Privacy Policy',
+                          subtitle: 'Read our privacy policy',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PrivacyPolicyScreen()),
+                          ),
+                        ),
+                        SettingItemNavigation(
+                          icon: Icons.description_outlined,
+                          title: 'Terms of Service',
+                          subtitle: 'Read our terms of service',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TermsOfServiceScreen()),
+                          ),
+                        ),
+                      ]),
+                      SizedBox(height: 24),
+                      _buildLogoutButton(),
+                      SizedBox(height: 22),
+                    ],
+                  ),
                 ),
-              ),
-
-              // Settings Sections
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _buildSection('Account', [
-                      SettingItemNavigation(
-                        icon: Icons.person_outline,
-                        title: 'Profile',
-                        subtitle: 'Edit your profile information',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ProfileScreen()),
-                        ),
-                      ),
-                      SettingItemNavigation(
-                        icon: Icons.lock_outline,
-                        title: 'Password & Security',
-                        subtitle: 'Manage your security settings',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PasswordSecurityScreen()),
-                        ),
-                      ),
-                      SettingItemNavigation(
-                        icon: Icons.notifications_outlined,
-                        title: 'Notifications',
-                        subtitle: 'Customize your notifications',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => NotificationsScreen()),
-                        ),
-                      ),
-                    ]),
-                    SizedBox(height: 16),
-                    _buildSection('Preferences', [
-                      SettingItemSwitch(
-                        icon: Icons.palette_outlined,
-                        title: 'Dark Mode',
-                        subtitle: 'Toggle dark mode on/off',
-                        value: _isDarkMode,
-                        onChanged: (value) {
-                          setState(() {
-                            _isDarkMode = value;
-                          });
-                          // Apply dark mode changes here
-                        },
-                      ),
-                      SettingItemDropdown(
-                        icon: Icons.language_outlined,
-                        title: 'Language',
-                        subtitle: 'Select your preferred language',
-                        value: _selectedLanguage,
-                        items: _languages,
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedLanguage = value;
-                            });
-                            // Apply language changes here
-                          }
-                        },
-                      ),
-                    ]),
-                    SizedBox(height: 16),
-                    _buildSection('Support', [
-                      SettingItemNavigation(
-                        icon: Icons.help_outline,
-                        title: 'Help Center',
-                        subtitle: 'Get help and support',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HelpCenterScreen()),
-                        ),
-                      ),
-                      SettingItemNavigation(
-                        icon: Icons.privacy_tip_outlined,
-                        title: 'Privacy Policy',
-                        subtitle: 'Read our privacy policy',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PrivacyPolicyScreen()),
-                        ),
-                      ),
-                      SettingItemNavigation(
-                        icon: Icons.description_outlined,
-                        title: 'Terms of Service',
-                        subtitle: 'Read our terms of service',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TermsOfServiceScreen()),
-                        ),
-                      ),
-                    ]),
-                    SizedBox(height: 24),
-                    _buildLogoutButton(),
-                    SizedBox(height: 22),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildSection(String title, List<Widget> items) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -279,6 +261,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPreferencesSection() {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return _buildSection('Preferences', [
+          SettingItemSwitch(
+            icon: Icons.palette_outlined,
+            title: 'Dark Mode',
+            subtitle: 'Toggle dark mode on/off',
+            value: themeProvider.isDarkMode,
+            onChanged: (_) => themeProvider.toggleTheme(),
+          ),
+          SettingItemDropdown(
+            icon: Icons.language_outlined,
+            title: 'Language',
+            subtitle: 'Select your preferred language',
+            value: _selectedLanguage,
+            items: _languages,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _selectedLanguage = value;
+                });
+              }
+            },
+          ),
+        ]);
+      },
     );
   }
 

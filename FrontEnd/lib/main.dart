@@ -9,11 +9,13 @@ import 'features/signup.dart';
 import 'features/leaderboard.dart';
 import 'features/settings1.dart';
 import 'features/user_provider.dart';
+import 'features/theme_provider.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MyApp(),
@@ -26,26 +28,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'MemoRaid',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF0D3445), // Global background color
-          selectedItemColor: Colors.white, // Selected item color
-          unselectedItemColor: Colors.grey, // Unselected item color
-        ),
-      ),
-      initialRoute: '/', // Set initial route to splash screen
-      routes: {
-        '/': (context) => const SplashScreen(), // Initial splash screen
-        '/home': (context) => const HomeScreen(), // Home screen
-        '/progress': (context) => const LoginScreen(), // Progress graph
-        '/chatbot': (context) => const ChatScreen(), // AI Chatbot
-        '/rocket': (context) => const SignUpScreen(), // Rocket feature
-        '/achievements': (context) => const LeaderboardScreen(), // Achievements
-        '/settings': (context) => const SettingsScreen(), // Settings screen
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'MemoRaid',
+          theme: themeProvider.getTheme(),
+          initialRoute: '/', // Set initial route to splash screen
+          routes: {
+            '/': (context) => const SplashScreen(), // Initial splash screen
+            '/home': (context) => const HomeScreen(), // Home screen
+            '/progress': (context) => const LoginScreen(), // Progress graph
+            '/chatbot': (context) => const ChatScreen(), // AI Chatbot
+            '/rocket': (context) => const SignUpScreen(), // Rocket feature
+            '/achievements': (context) =>
+                const LeaderboardScreen(), // Achievements
+            '/settings': (context) => const SettingsScreen(), // Settings screen
+          },
+        );
       },
     );
   }
