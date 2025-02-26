@@ -60,6 +60,10 @@ class HomeScreen extends StatelessWidget {
                   color:
                       const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
                   borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: Color(0xFF0D3445),
+                    width: 3,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
