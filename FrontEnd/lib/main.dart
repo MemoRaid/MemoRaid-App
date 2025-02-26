@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:my_flutter_app/features/homescreen02.dart';
 import 'features/splash.dart';
 import 'features/homescreen01.dart';
 import 'features/chatbot.dart';
-import 'features/login.dart';
-import 'features/signup.dart';
 import 'features/leaderboard.dart';
 import 'features/settings1.dart';
 import 'features/user_provider.dart';
 import 'features/theme_provider.dart';
-import 'features/help_center_screen.dart'; // Add this import
+import 'features/help_center_screen.dart';
+import 'features/profile_screen.dart';
+import 'features/password_security_screen.dart';
+import 'features/notifications_screen.dart';
+import 'features/privacy_policy_screen.dart';
+import 'features/terms_of_service_screen.dart';
 
 void main() {
   runApp(
@@ -35,18 +37,21 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'MemoRaid',
           theme: themeProvider.getTheme(),
-          initialRoute: '/', // Set initial route to splash screen
+          initialRoute: '/',
           routes: {
-            '/': (context) => const SplashScreen(), // Initial splash screen
-            '/home': (context) => const HomeScreen(), // Home screen
-            '/progress': (context) => const LoginScreen(), // Progress graph
-            '/chatbot': (context) => const ChatScreen(), // AI Chatbot
-            '/rocket': (context) => const SignUpScreen(), // Rocket feature
-            '/achievements': (context) =>
-                const LeaderboardScreen(), // Achievements
-            '/settings': (context) => const SettingsScreen(), // Settings screen
-            '/help_center': (context) =>
-                const HelpCenterScreen(), // Add this route
+            '/': (context) => const SplashScreen(),
+            '/home': (context) => const HomeScreen(),
+            '/chatbot': (context) => const ChatScreen(),
+            '/achievements': (context) => const LeaderboardScreen(),
+            '/settings': (context) => const SettingsScreen(),
+
+            // Settings sub-screens
+            '/help_center': (context) => const HelpCenterScreen(),
+            '/profile': (context) => const ProfileScreen(),
+            '/password_security': (context) => const PasswordSecurityScreen(),
+            '/notifications': (context) => const NotificationsScreen(),
+            '/privacy_policy': (context) => const PrivacyPolicyScreen(),
+            '/terms': (context) => const TermsOfServiceScreen(),
           },
         );
       },

@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'profile_screen.dart';
-import 'password_security_screen.dart';
-import 'notifications_screen.dart';
-import 'help_center_screen.dart';
-import 'privacy_policy_screen.dart';
-import 'terms_of_service_screen.dart';
+
 import 'theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -137,31 +132,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           icon: Icons.person_outline,
                           title: 'Profile',
                           subtitle: 'Edit your profile information',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ProfileScreen()),
-                          ),
+                          onTap: () => Navigator.pushNamed(context, '/profile'),
                         ),
                         SettingItemNavigation(
                           icon: Icons.lock_outline,
                           title: 'Password & Security',
                           subtitle: 'Manage your security settings',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PasswordSecurityScreen()),
-                          ),
+                          onTap: () => Navigator.pushNamed(
+                              context, '/password_security'),
                         ),
                         SettingItemNavigation(
                           icon: Icons.notifications_outlined,
                           title: 'Notifications',
                           subtitle: 'Customize your notifications',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NotificationsScreen()),
-                          ),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/notifications'),
                         ),
                       ]),
                       SizedBox(height: 16),
@@ -179,21 +164,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           icon: Icons.privacy_tip_outlined,
                           title: 'Privacy Policy',
                           subtitle: 'Read our privacy policy',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PrivacyPolicyScreen()),
-                          ),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/privacy_policy'),
                         ),
                         SettingItemNavigation(
                           icon: Icons.description_outlined,
                           title: 'Terms of Service',
                           subtitle: 'Read our terms of service',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TermsOfServiceScreen()),
-                          ),
+                          onTap: () => Navigator.pushNamed(context, '/terms'),
                         ),
                       ]),
                       SizedBox(height: 24),
