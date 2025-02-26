@@ -10,6 +10,7 @@ import 'features/leaderboard.dart';
 import 'features/settings1.dart';
 import 'features/user_provider.dart';
 import 'features/theme_provider.dart';
+import 'features/help_center_screen.dart'; // Add this import
 
 void main() {
   runApp(
@@ -44,6 +45,8 @@ class MyApp extends StatelessWidget {
             '/achievements': (context) =>
                 const LeaderboardScreen(), // Achievements
             '/settings': (context) => const SettingsScreen(), // Settings screen
+            '/help_center': (context) =>
+                const HelpCenterScreen(), // Add this route
           },
         );
       },

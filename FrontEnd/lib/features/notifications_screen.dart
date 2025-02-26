@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'theme_provider.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -15,21 +17,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: themeProvider.primaryBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: themeProvider.primaryBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          icon: Icon(Icons.arrow_back, color: themeProvider.primaryTextColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Notifications",
           style: TextStyle(
-            color: Color(0xFF0D3445),
+            color: themeProvider.primaryTextColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -43,10 +45,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xFF0D3445),
-            ],
+            colors: themeProvider.getGradientColors(),
           ),
         ),
         child: SingleChildScrollView(

@@ -39,6 +39,22 @@ class ThemeProvider with ChangeNotifier {
     return _isDarkMode ? _darkTheme : _lightTheme;
   }
 
+  // Get colors for gradients and custom UI elements based on theme
+  Color get primaryBackgroundColor =>
+      _isDarkMode ? Color(0xFF121212) : Colors.white;
+  Color get secondaryBackgroundColor => Color(0xFF0D3445);
+  Color get cardColor => _isDarkMode ? Color(0xFF1E1E1E) : Color(0xFF0D3445);
+  Color get primaryTextColor => _isDarkMode ? Colors.white : Color(0xFF0D3445);
+  Color get secondaryTextColor => Colors.white;
+  Color get accentColor => Color(0xFF4E6077);
+
+  // Function to get gradient colors based on theme
+  List<Color> getGradientColors() {
+    return _isDarkMode
+        ? [Color(0xFF1E1E1E), Color(0xFF0D3445)]
+        : [Colors.white, Color(0xFF0D3445)];
+  }
+
   // Light theme
   final ThemeData _lightTheme = ThemeData(
     brightness: Brightness.light,
