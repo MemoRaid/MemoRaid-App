@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/features/breath.dart';
-import 'bottomnavbar.dart'; // Import the custom bottom navbar
-import 'gamescreen.dart'; // Import the Game Screen
+import 'bottomnavbar.dart';
+import 'gamescreen.dart';
 import 'note.dart';
 
 class HomeScreen2 extends StatelessWidget {
@@ -18,91 +18,121 @@ class HomeScreen2 extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
-      ),
-      body: Stack(
-        children: [
-          // Background Gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.white, Color(0xFF0D3445)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+        title: Text(
+          "Memory Training",
+          style: TextStyle(
+            color: Color(0xFF0D3445),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
-          // Main Content
-          Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 15),
-                  child: ListView(
-                    physics: BouncingScrollPhysics(),
-                    children: [
-                      _buildFeatureCard(
-                        context,
-                        title: "Games",
-                        image: 'lib/assets/images/patient.png',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const GameScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(height: size.height * 0.03),
-                      _buildFeatureCard(
-                        context,
-                        title: "Story",
-                        image: 'lib/assets/images/story.png',
-                      ),
-                      SizedBox(height: size.height * 0.03),
-                      _buildFeatureCard(
-                        context,
-                        title: "Reminder and Diary",
-                        image: 'lib/assets/images/reminder.png',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const NotebookScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(height: size.height * 0.03),
-                      _buildFeatureCard(
-                        context,
-                        title: "Calm Mind",
-                        image: 'lib/assets/images/mind.png',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const BreathExerciseScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+        ),
+        centerTitle: true,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xFF0D3445)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20),
+                Text(
+                  "Featured Activities",
+                  style: TextStyle(
+                    color: Color(0xFF0D3445),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 15),
+                _buildFeaturedCard(
+                  context,
+                  title: "Memory Games",
+                  subtitle:
+                      "Enhance your cognitive abilities through interactive games",
+                  image: 'lib/assets/images/patient.png',
+                  icon: Icons.sports_esports,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const GameScreen()),
+                  ),
+                ),
+                SizedBox(height: 25),
+                Text(
+                  "Daily Training",
+                  style: TextStyle(
+                    color: Color(0xFF0D3445),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 15),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSmallCard(
+                        context,
+                        title: "Story\nRecall Activity",
+                        icon: Icons.auto_stories,
+                        image: 'lib/assets/images/story.png',
+                        onTap: () {/* Navigate to Story screen */},
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: _buildSmallCard(
+                        context,
+                        title: "Personal\nDiary",
+                        icon: Icons.book,
+                        image: 'lib/assets/images/reminder.png',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const NotebookScreen()),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 25),
+                Text(
+                  "Mindfulness",
+                  style: TextStyle(
+                    color: Color(0xFF0D3445),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 15),
+                _buildMindfulnessCard(
+                  context,
+                  title: "Calm Mind Exercises",
+                  subtitle: "Improve focus and mental clarity",
+                  image: 'lib/assets/images/mind.png',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const BreathExerciseScreen()),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
-        // Use the custom navigation bar
+        currentIndex: 0,
         onTap: (index) {
           switch (index) {
             case 0:
@@ -115,7 +145,7 @@ class HomeScreen2 extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/chatbot');
               break;
             case 3:
-              Navigator.pushReplacementNamed(context, '/rocket');
+              Navigator.pushReplacementNamed(context, '/settings');
               break;
             case 4:
               Navigator.pushReplacementNamed(context, '/achievements');
@@ -126,45 +156,255 @@ class HomeScreen2 extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCard(BuildContext context,
-      {required String title, required String image, VoidCallback? onTap}) {
+  Widget _buildFeaturedCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required String image,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: onTap, // Handle navigation when tapped
+      onTap: onTap,
       child: Container(
-        height: 120,
+        height: 190,
         decoration: BoxDecoration(
-          color: Color(0xFF0D3445), // Same color scheme as HomeScreen1 cards
-          borderRadius: BorderRadius.circular(40),
+          color: Color(0xFF0D3445),
+          borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 40,
-              offset: Offset(0, 10),
+              blurRadius: 10,
+              offset: Offset(0, 5),
             ),
           ],
         ),
-        child: Row(
+        child: Stack(
           children: [
-            SizedBox(width: 20),
-            Image.asset(
-              image,
-              width: 90,
-              height: 80,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
+            Positioned(
+              right: -20,
+              bottom: -20,
+              child: Opacity(
+                opacity: 0.1,
+                child: Icon(
+                  icon,
+                  size: 180,
                   color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: 20),
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF4E6077),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Start Training',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Image.asset(
+                    image,
+                    width: 100,
+                    height: 80,
+                    fit: BoxFit.contain,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmallCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required String image,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: Color(0xFF0D3445),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              bottom: -20,
+              child: Opacity(
+                opacity: 0.1,
+                child: Icon(
+                  icon,
+                  size: 100,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    image,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.contain,
+                  ),
+                  Spacer(),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF4E6077),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMindfulnessCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required String image,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 140,
+        decoration: BoxDecoration(
+          color: Color(0xFF0D3445),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              bottom: -20,
+              child: Opacity(
+                opacity: 0.1,
+                child: Icon(
+                  Icons.spa,
+                  size: 120,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Image.asset(
+                    image,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
