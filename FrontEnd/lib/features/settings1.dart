@@ -2,14 +2,28 @@ import 'package:flutter/material.dart';
 import 'profile_screen.dart';
 import 'password_security_screen.dart';
 import 'notifications_screen.dart';
-import 'appearance_screen.dart';
-import 'language_screen.dart';
 import 'help_center_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  _SettingsScreenState createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isDarkMode = false;
+  String _selectedLanguage = 'English';
+  final List<String> _languages = [
+    'English',
+    'Spanish',
+    'French',
+    'German',
+    'Chinese',
+    'Japanese'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +61,11 @@ class SettingsScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 15),
+              SizedBox(height: 5),
 
               // Profile Section
               Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(vertical: 5),
                 child: Column(
                   children: [
                     Stack(
@@ -111,7 +125,7 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildSection('Account', [
-                      SettingItem(
+                      SettingItemNavigation(
                         icon: Icons.person_outline,
                         title: 'Profile',
                         subtitle: 'Edit your profile information',
@@ -121,7 +135,7 @@ class SettingsScreen extends StatelessWidget {
                               builder: (context) => ProfileScreen()),
                         ),
                       ),
-                      SettingItem(
+                      SettingItemNavigation(
                         icon: Icons.lock_outline,
                         title: 'Password & Security',
                         subtitle: 'Manage your security settings',
@@ -131,7 +145,7 @@ class SettingsScreen extends StatelessWidget {
                               builder: (context) => PasswordSecurityScreen()),
                         ),
                       ),
-                      SettingItem(
+                      SettingItemNavigation(
                         icon: Icons.notifications_outlined,
                         title: 'Notifications',
                         subtitle: 'Customize your notifications',
@@ -144,30 +158,37 @@ class SettingsScreen extends StatelessWidget {
                     ]),
                     SizedBox(height: 16),
                     _buildSection('Preferences', [
-                      SettingItem(
+                      SettingItemSwitch(
                         icon: Icons.palette_outlined,
-                        title: 'Appearance',
-                        subtitle: 'Dark mode and theme settings',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AppearanceScreen()),
-                        ),
+                        title: 'Dark Mode',
+                        subtitle: 'Toggle dark mode on/off',
+                        value: _isDarkMode,
+                        onChanged: (value) {
+                          setState(() {
+                            _isDarkMode = value;
+                          });
+                          // Apply dark mode changes here
+                        },
                       ),
-                      SettingItem(
+                      SettingItemDropdown(
                         icon: Icons.language_outlined,
                         title: 'Language',
-                        subtitle: 'Change app language',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => LanguageScreen()),
-                        ),
+                        subtitle: 'Select your preferred language',
+                        value: _selectedLanguage,
+                        items: _languages,
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedLanguage = value;
+                            });
+                            // Apply language changes here
+                          }
+                        },
                       ),
                     ]),
                     SizedBox(height: 16),
                     _buildSection('Support', [
-                      SettingItem(
+                      SettingItemNavigation(
                         icon: Icons.help_outline,
                         title: 'Help Center',
                         subtitle: 'Get help and support',
@@ -177,7 +198,7 @@ class SettingsScreen extends StatelessWidget {
                               builder: (context) => HelpCenterScreen()),
                         ),
                       ),
-                      SettingItem(
+                      SettingItemNavigation(
                         icon: Icons.privacy_tip_outlined,
                         title: 'Privacy Policy',
                         subtitle: 'Read our privacy policy',
@@ -187,7 +208,7 @@ class SettingsScreen extends StatelessWidget {
                               builder: (context) => PrivacyPolicyScreen()),
                         ),
                       ),
-                      SettingItem(
+                      SettingItemNavigation(
                         icon: Icons.description_outlined,
                         title: 'Terms of Service',
                         subtitle: 'Read our terms of service',
@@ -220,7 +241,7 @@ class SettingsScreen extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              color: Color(0x00000),
+              color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -287,13 +308,13 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class SettingItem extends StatelessWidget {
+class SettingItemNavigation extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
 
-  const SettingItem({
+  const SettingItemNavigation({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -347,6 +368,166 @@ class SettingItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SettingItemSwitch extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final Function(bool) onChanged;
+
+  const SettingItemSwitch({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color(0xFF4E6077),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Color(0xFF4E6077),
+            activeTrackColor: Colors.white.withOpacity(0.5),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SettingItemDropdown extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String value;
+  final List<String> items;
+  final Function(String?) onChanged;
+
+  const SettingItemDropdown({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Color(0xFF4E6077),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFF4E6077),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: value,
+                items: items.map((String item) {
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(
+                      item,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                }).toList(),
+                onChanged: onChanged,
+                style: TextStyle(color: Colors.white),
+                dropdownColor: Color(0xFF4E6077),
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                isExpanded: true,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
