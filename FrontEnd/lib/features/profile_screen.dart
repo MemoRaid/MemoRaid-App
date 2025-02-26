@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import 'user_provider.dart';
+import 'theme_provider.dart';
 import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -86,21 +87,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: themeProvider.primaryBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: themeProvider.primaryBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          icon: Icon(Icons.arrow_back, color: themeProvider.primaryTextColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Edit Profile",
           style: TextStyle(
-            color: Color(0xFF0D3445),
+            color: themeProvider.primaryTextColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -114,10 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xFF0D3445),
-            ],
+            colors: themeProvider.getGradientColors(),
           ),
         ),
         child: SingleChildScrollView(
@@ -141,6 +139,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileImageSection() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Column(
       children: [
         Stack(
@@ -206,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Text(
             "Tap to change profile picture",
             style: TextStyle(
-              color: Color(0xFF0D3445),
+              color: themeProvider.primaryTextColor,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),

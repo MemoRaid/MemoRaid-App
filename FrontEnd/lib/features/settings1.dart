@@ -172,11 +172,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           icon: Icons.help_outline,
                           title: 'Help Center',
                           subtitle: 'Get help and support',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HelpCenterScreen()),
-                          ),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/help_center'),
                         ),
                         SettingItemNavigation(
                           icon: Icons.privacy_tip_outlined,
