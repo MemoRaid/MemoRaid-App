@@ -1,0 +1,26 @@
+name: memoraid_app
+description: A memory aid application for amnesia patients
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # For unique IDs
+  uuid: ^3.0.7
+
+  # For date and time formatting
+  intl: ^0.18.1
+
+  # For audio recording and playback
+  audio_recorder: ^2.0.0
+  audioplayers: ^5.1.0
+
+  # For file path management
+  path_provider: ^2.1.1
+
+  # For shared preferences
+  shared_preferences: ^2.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
