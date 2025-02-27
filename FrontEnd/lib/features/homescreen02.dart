@@ -98,7 +98,7 @@ class HomeScreen2 extends StatelessWidget {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const NotebookScreen()),
+                              builder: (context) => TaskSchedulerScreen()),
                         ),
                       ),
                     ),
