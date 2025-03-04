@@ -158,3 +158,9 @@ class _GameScreenState extends State<GameScreen> {
       }
     });
   }
+
+  void _toggleHint() {
+    setState(() {
+      showHint = !showHint;
+    });
+  }
