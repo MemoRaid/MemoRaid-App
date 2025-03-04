@@ -453,3 +453,57 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     return prefs.getInt('highScore_level_$level') ?? 0;
   }
 }
+
+class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
+  // Game constants
+  static const int maxLives = 3;
+  static const Duration sequenceDisplayDuration = Duration(milliseconds: 800);
+
+  // Game state variables
+  late int level;
+  late int score;
+  late int lives;
+  late int dotCount;
+  late int sequenceLength;
+  late List<Dot> dots;
+  late List<int> sequence;
+  late int currentIndex;
+  late bool showingSequence;
+  late bool awaitingInput;
+  late bool gameOver;
+  late Random random;
+  late int startTime;
+  bool _isFirstBuild = true;
+  int? countdownNumber;
+  late bool dotsMove;
+  Duration dotMovementDuration = const Duration(milliseconds: 1500);
+
+  // Controllers for animations
+  late List<AnimationController> moveControllers;
+  late List<Animation<Offset>> moveAnimations;
+
+  @override
+  void initState() {
+    super.initState();
+    random = Random();
+    moveControllers = [];
+    moveAnimations = [];
+    _initializeGame();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only generate levels after the first build to ensure context is available
+    if (!_isFirstBuild) {
+      _generateLevel();
+    } else {
+      _isFirstBuild = false;
+      // Schedule level generation after the first frame is drawn
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _generateLevel();
+        }
+      });
+    }
+  }
