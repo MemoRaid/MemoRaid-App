@@ -86,3 +86,34 @@ class StartScreen extends StatelessWidget {
     return prefs.getInt('highScore') ?? 0;
   }
 }
+
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'game_level.dart';
+import 'game_screen.dart';
+
+class LevelSelectionScreen extends StatefulWidget {
+  const LevelSelectionScreen({super.key});
+
+  @override
+  State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
+}
+
+class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
+  int unlockedLevel = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnlockedLevel();
+  }
+
+  Future<void> _loadUnlockedLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      unlockedLevel = prefs.getInt('unlockedLevel') ?? 1;
+    });
+  }
+
+ 
+}
