@@ -767,3 +767,46 @@ void _startCountdown() {
       }
     });
   }
+
+  void _handleDotTap(int dotId) {
+    // Ignore taps if not awaiting input
+    if (!awaitingInput || gameOver) return;
+
+    final expectedDotId = sequence[currentIndex];
+
+    if (dotId == expectedDotId) {
+      // Correct tap
+      setState(() {
+        dots[dotId] = dots[dotId].copyWith(isHighlighted: true);
+        score += 10;
+        currentIndex++;
+      });
+
+      // Visual feedback for correct tap
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          setState(() {
+            dots[dotId] = dots[dotId].copyWith(isHighlighted: false);
+          });
+        }
+      });
+
+      // Check if the sequence is complete
+      if (currentIndex >= sequence.length) {
+        _handleLevelComplete();
+      }
+    } else {
+      // Incorrect tap
+      setState(() {
+        lives--;
+        score = max(0, score - 5);
+      });
+
+      // Visual feedback for wrong tap
+      _showErrorAnimation();
+
+      if (lives <= 0) {
+        _handleGameOver();
+      }
+    }
+  }
