@@ -73,3 +73,8 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     ];
+
+      currentScenarioIndex = 0;
+    score = 0;
+    _resetScenario();
+  }
