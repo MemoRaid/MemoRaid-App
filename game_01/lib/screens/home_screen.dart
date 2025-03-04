@@ -13,8 +13,9 @@ class HomeScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color.fromARGB(255, 18, 103, 207),
-              const Color.fromARGB(255, 82, 158, 230)
+              const Color(0xFF0D3445), // Dark blue-green (#0D3445)
+              const Color(
+                  0xFF1A5066) // Slightly lighter variant for gradient effect
             ],
           ),
         ),
