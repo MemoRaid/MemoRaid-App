@@ -248,22 +248,27 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _nextScenario() {
-    setState(() {
-      if (currentScenarioIndex + 1 < scenarios.length) {
-        currentScenarioIndex++;
-        _resetScenario();
-      } else {
-        // All scenarios completed, navigate to ResultsScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ResultsScreen(
-              score: score,
-              totalScenarios: scenarios.length,
+    // Animate out current scenario
+    _scenarioTransitionController.reverse().then((_) {
+      setState(() {
+        if (currentScenarioIndex + 1 < scenarios.length) {
+          currentScenarioIndex++;
+          _resetScenario();
+          // Animate in new scenario
+          _scenarioTransitionController.forward();
+        } else {
+          // All scenarios completed, navigate to ResultsScreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResultsScreen(
+                score: score,
+                totalScenarios: scenarios.length,
+              ),
             ),
-          ),
-        );
-      }
+          );
+        }
+      });
     });
   }
 
