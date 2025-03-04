@@ -3,6 +3,7 @@ import '../models/scenario.dart';
 import '../models/task_step.dart';
 import '../utils/shuffler.dart';
 import 'results_screen.dart';
+import 'dart:math' as math;
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -22,9 +23,88 @@ class _GameScreenState extends State<GameScreen> {
   late int attempts;
   late int score;
 
+  // Animation controllers
+  late AnimationController _fadeInController;
+  late AnimationController _buttonController;
+  late AnimationController _checkAnswerController;
+  late AnimationController _scenarioTransitionController;
+  late AnimationController _shakeController;
+
+  // Animations
+  late Animation<double> _fadeInAnimation;
+  late Animation<double> _buttonScaleAnimation;
+  late Animation<double> _checkAnswerRotationAnimation;
+  late Animation<Offset> _scenarioSlideAnimation;
+  late Animation<double> _shakeAnimation;
+
   @override
   void initState() {
     super.initState();
+
+    // Initialize animation controllers
+    _fadeInController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _buttonController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+
+    _checkAnswerController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+
+    _scenarioTransitionController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    // Setup animations
+    _fadeInAnimation = CurvedAnimation(
+      parent: _fadeInController,
+      curve: Curves.easeIn,
+    );
+
+    _buttonScaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.9,
+    ).animate(CurvedAnimation(
+      parent: _buttonController,
+      curve: Curves.easeInOut,
+    ));
+
+    _checkAnswerRotationAnimation = Tween<double>(
+      begin: 0,
+      end: 2 * math.pi,
+    ).animate(CurvedAnimation(
+      parent: _checkAnswerController,
+      curve: Curves.elasticOut,
+    ));
+
+    _scenarioSlideAnimation = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _scenarioTransitionController,
+      curve: Curves.easeInOut,
+    ));
+
+    _shakeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(
+      parent: _shakeController,
+      curve: Curves.elasticIn,
+    ));
+
     _initializeGame();
   }
 
