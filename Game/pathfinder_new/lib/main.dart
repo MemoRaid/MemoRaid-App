@@ -189,5 +189,8 @@ class HighScore {
     return prefs.getInt('highScore') ?? 0;
   }
 
-  
+  static Future<void> setHighScore(int score) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('highScore', score);
+  }
 }
