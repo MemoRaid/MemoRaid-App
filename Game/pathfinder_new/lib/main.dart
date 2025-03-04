@@ -225,3 +225,29 @@ class StartScreen extends StatelessWidget {
     return prefs.getInt('highScore') ?? 0;
   }
 }
+
+class LevelSelectionScreen extends StatefulWidget {
+  const LevelSelectionScreen({super.key});
+
+  @override
+  State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
+}
+
+class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
+  int unlockedLevel = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnlockedLevel();
+  }
+
+  Future<void> _loadUnlockedLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUnlockedLevel = prefs.getInt('unlockedLevel') ?? 1;
+
+    setState(() {
+      unlockedLevel = savedUnlockedLevel;
+    });
+  }
+
