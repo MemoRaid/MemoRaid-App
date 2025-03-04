@@ -20,3 +20,11 @@ class PathFinderApp extends StatelessWidget {
     );
   }
 }
+
+class GameLevel {
+  final int levelNumber;
+  final int dotCount;
+  final int sequenceLength;
+  final bool dotsMove;
+  final double movementSpeed;
+}
