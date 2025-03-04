@@ -44,3 +44,18 @@ final List<GameLevel> gameLevels = [
   const GameLevel(levelNumber: 2, dotCount: 4, sequenceLength: 4),
   const GameLevel(levelNumber: 3, dotCount: 5, sequenceLength: 4, dotsMove: true, movementSpeed: 0.5),
 ];
+
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'level_selection_screen.dart';
+
+class StartScreen extends StatelessWidget {
+  const StartScreen({super.key});
+
+  
+
+  Future<int> _getHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('highScore') ?? 0;
+  }
+}
