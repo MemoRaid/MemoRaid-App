@@ -115,5 +115,27 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     });
   }
 
- 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Select Level')),
+      body: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        itemCount: gameLevels.length,
+        itemBuilder: (context, index) {
+          final level = gameLevels[index];
+          return GestureDetector(
+            onTap: level.levelNumber <= unlockedLevel
+                ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => GameScreen(level: level)))
+                : null,
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: level.levelNumber <= unlockedLevel ? Colors.white : Colors.grey),
+              child: Center(child: Text('${level.levelNumber}')),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
