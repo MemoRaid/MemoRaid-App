@@ -250,6 +250,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       unlockedLevel = savedUnlockedLevel;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -380,7 +381,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     );
   }
 
- void _showResetConfirmation() {
+  void _showResetConfirmation() {
     showDialog(
       context: context,
       builder:
@@ -417,3 +418,38 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     );
   }
 
+  Future<void> _resetAllProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Reset unlocked levels back to 1
+    await prefs.setInt('unlockedLevel', 1);
+
+    // Reset overall high score
+    await prefs.setInt('highScore', 0);
+
+    // Reset all level high scores
+    for (final level in gameLevels) {
+      await prefs.remove('highScore_level_${level.levelNumber}');
+    }
+
+    // Update UI
+    setState(() {
+      unlockedLevel = 1;
+    });
+
+    // Show confirmation to user
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('All progress has been reset'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<int> _getLevelHighScore(int level) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('highScore_level_$level') ?? 0;
+  }
+}
