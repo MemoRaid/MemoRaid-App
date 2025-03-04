@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
+import 'memory_match_game.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -52,7 +53,11 @@ class GameScreen extends StatelessWidget {
                         title: "Memory Match",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
-                          // Navigate to Memory Match Game
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MemoryMatchGame()),
+                          );
                         },
                       ),
                       const SizedBox(height: 24),
