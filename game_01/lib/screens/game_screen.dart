@@ -44,3 +44,17 @@ class _GameScreenState extends State<GameScreen> {
           "Leave the house"
         ],
       ),
+      Scenario(
+        id: 2,
+        title: "Making Pasta",
+        description: "Put these steps in order to make pasta",
+        steps: [
+          "Fill pot with water",
+          "Bring water to a boil",
+          "Add salt to water",
+          "Add pasta to boiling water",
+          "Cook pasta until al dente",
+          "Drain pasta",
+          "Add sauce and serve"
+        ],
+      ),
