@@ -736,3 +736,34 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       }
     });
   }
+
+void _startCountdown() {
+    setState(() {
+      countdownNumber = 3;
+    });
+
+    // Countdown 3, 2, 1
+    Future.forEach([2, 1, 0], (number) async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        setState(() {
+          countdownNumber = number;
+        });
+      }
+    }).then((_) {
+      if (mounted) {
+        setState(() {
+          countdownNumber = null;
+          showingSequence = false;
+          awaitingInput = true;
+
+          // Start dot movement for level 3+
+          if (dotsMove) {
+            for (var controller in moveControllers) {
+              controller.forward();
+            }
+          }
+        });
+      }
+    });
+  }
