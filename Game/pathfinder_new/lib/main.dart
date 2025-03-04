@@ -139,3 +139,32 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     );
   }
 }
+
+import 'dart:ui';
+
+class Dot {
+  final int id;
+  final Offset position;
+  final double size;
+  final bool isActive;
+  final bool isHighlighted;
+
+  Dot({
+    required this.id,
+    required this.position,
+    required this.size,
+    required this.isActive,
+    required this.isHighlighted,
+  });
+
+  Dot copyWith({Offset? position, bool? isActive, bool? isHighlighted}) {
+    return Dot(
+      id: id,
+      position: position ?? this.position,
+      size: size,
+      isActive: isActive ?? this.isActive,
+      isHighlighted: isHighlighted ?? this.isHighlighted,
+    );
+  }
+}
+
