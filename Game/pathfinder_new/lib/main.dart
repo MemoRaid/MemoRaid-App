@@ -454,6 +454,15 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   }
 }
 
+class GameScreen extends StatefulWidget {
+  final GameLevel level;
+
+  const GameScreen({super.key, required this.level});
+
+  @override
+  GameScreenState createState() => GameScreenState();
+}
+
 class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Game constants
   static const int maxLives = 3;
