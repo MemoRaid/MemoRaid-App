@@ -240,6 +240,9 @@ class _GameScreenState extends State<GameScreen> {
         _checkAnswerController.forward();
       } else {
         feedback = "Not quite right. Try again or use a hint!";
+        // Error animation
+        _shakeController.reset();
+        _shakeController.forward();
       }
     });
   }
