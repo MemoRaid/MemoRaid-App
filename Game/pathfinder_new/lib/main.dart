@@ -52,7 +52,34 @@ import 'level_selection_screen.dart';
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
 
-  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('PATH FINDER', style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const LevelSelectionScreen()));
+              },
+              child: const Text('Start Game'),
+            ),
+            FutureBuilder<int>(
+              future: _getHighScore(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text('High Score: ${snapshot.data}');
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<int> _getHighScore() async {
     final prefs = await SharedPreferences.getInstance();
