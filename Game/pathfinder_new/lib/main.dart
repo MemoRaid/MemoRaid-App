@@ -250,4 +250,133 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       unlockedLevel = savedUnlockedLevel;
     });
   }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Select Level')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showResetConfirmation,
+        backgroundColor: Colors.red,
+        tooltip: 'Reset All Progress',
+        child: const Icon(Icons.refresh),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade400, Colors.blue.shade100],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select a Level:',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: gameLevels.length,
+                  itemBuilder: (context, index) {
+                    final level = gameLevels[index];
+                    final isUnlocked = level.levelNumber <= unlockedLevel;
+
+                    return FutureBuilder<int>(
+                      future: _getLevelHighScore(level.levelNumber),
+                      builder: (context, snapshot) {
+                        final highScore = snapshot.data ?? 0;
+
+                        return GestureDetector(
+                          onTap:
+                              isUnlocked
+                                  ? () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) =>
+                                                GameScreen(level: level),
+                                      ),
+                                    ).then((_) {
+                                      // Refresh unlocked levels when returning from game
+                                      _loadUnlockedLevel();
+                                    });
+                                  }
+                                  : null,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color:
+                                  isUnlocked
+                                      ? Colors.white
+                                      : Colors.grey.shade400,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 5,
+                                  offset: const Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${level.levelNumber}',
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            isUnlocked
+                                                ? Colors.blue
+                                                : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                    if (isUnlocked && highScore > 0)
+                                      Text(
+                                        'Best: $highScore',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (!isUnlocked)
+                                  const Icon(
+                                    Icons.lock,
+                                    color: Colors.black38,
+                                    size: 30,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
