@@ -27,4 +27,12 @@ class GameLevel {
   final int sequenceLength;
   final bool dotsMove;
   final double movementSpeed;
+
+  const GameLevel({
+    required this.levelNumber,
+    required this.dotCount,
+    required this.sequenceLength,
+    this.dotsMove = false,
+    this.movementSpeed = 1.0,
+  });
 }
