@@ -507,3 +507,232 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       });
     }
   }
+  void _initializeGame() {
+    // Initialize based on the passed level
+    level = widget.level.levelNumber;
+    score = 0;
+    lives = maxLives;
+    dotCount = widget.level.dotCount;
+    sequenceLength = widget.level.sequenceLength;
+    dotsMove = widget.level.dotsMove;
+
+    // Adjust movement speed based on level
+    dotMovementDuration = Duration(
+      milliseconds: (1500 / widget.level.movementSpeed).round(),
+    );
+
+    dots = [];
+    sequence = [];
+    currentIndex = 0;
+    showingSequence = false;
+    awaitingInput = false;
+    gameOver = false;
+    startTime = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  void _generateLevel() {
+    if (!mounted) return;
+
+    // Clear previous level data
+    dots.clear();
+    sequence.clear();
+    currentIndex = 0;
+
+    // Generate dots and their positions
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height * 0.7;
+    final safeAreaInsets = MediaQuery.of(context).padding;
+
+    // Calculate safe boundaries to keep dots fully on screen
+    final dotSize = 60.0;
+    final safeWidth = screenWidth - dotSize;
+    final safeTop = 100.0 + safeAreaInsets.top; // Top padding + status bar
+    final safeBottom = screenHeight - dotSize;
+
+    // Generate dots with random positions within safe bounds
+    for (int i = 0; i < dotCount; i++) {
+      final xPos = random.nextDouble() * safeWidth;
+      final yPos = safeTop + random.nextDouble() * (safeBottom - safeTop);
+
+      dots.add(
+        Dot(
+          id: i,
+          position: Offset(xPos, yPos),
+          size: dotSize,
+          isActive: false,
+          isHighlighted: false,
+        ),
+      );
+    }
+
+    // Generate random sequence only if we have dots
+    if (dots.isNotEmpty) {
+      // Use only the number of dots we need for the sequence
+      List<int> indices = List.generate(dotCount, (index) => index);
+      indices.shuffle(random);
+      // Take only the required number of dots for the sequence
+      sequence = indices.take(sequenceLength).toList();
+
+      // Setup animation controllers for dot movement
+      if (dotsMove) {
+        _setupMovementAnimations();
+      }
+
+      // Start showing the sequence after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _showSequence();
+        }
+      });
+    }
+  }
+
+  void _setupMovementAnimations() {
+    // Don't proceed if no dots
+    if (dots.isEmpty) return;
+
+    // Dispose old controllers if any
+    for (var controller in moveControllers) {
+      controller.dispose();
+    }
+
+    moveControllers = [];
+    moveAnimations = [];
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height * 0.7;
+    final safeAreaInsets = MediaQuery.of(context).padding;
+
+    for (int i = 0; i < dots.length; i++) {
+      // Create animation controller
+      final controller = AnimationController(
+        duration: dotMovementDuration,
+        vsync: this,
+      );
+
+      // Calculate safe boundaries for this dot
+      final dotSize = dots[i].size;
+      final safeWidth = screenWidth - dotSize;
+      final safeTop = 100.0 + safeAreaInsets.top; // Top padding + status bar
+      final safeBottom = screenHeight - dotSize;
+
+      // Calculate a new random position within safe bounds
+      final newX = random.nextDouble() * safeWidth;
+      final newY = safeTop + random.nextDouble() * (safeBottom - safeTop);
+
+      // Create tween animation
+      final animation = Tween<Offset>(
+        begin: dots[i].position,
+        end: Offset(newX, newY),
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+      // Add listener to update dot position
+      animation.addListener(() {
+        if (mounted && i < dots.length) {
+          // Check if index is valid
+          setState(() {
+            dots[i] = dots[i].copyWith(position: animation.value);
+          });
+        }
+      });
+
+      moveControllers.add(controller);
+      moveAnimations.add(animation);
+
+      // When animation completes, start a new one in a different direction
+      controller.addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted && i < dots.length) {
+          // Calculate new safe position within screen bounds
+          final newX = random.nextDouble() * safeWidth;
+          final newY = safeTop + random.nextDouble() * (safeBottom - safeTop);
+
+          // Create a new tween animation with new positions
+          final newAnimation = Tween<Offset>(
+            begin: dots[i].position,
+            end: Offset(newX, newY),
+          ).animate(
+            CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+          );
+
+          // Add listener to update dot position
+          newAnimation.addListener(() {
+            if (mounted && i < dots.length) {
+              setState(() {
+                dots[i] = dots[i].copyWith(position: newAnimation.value);
+              });
+            }
+          });
+
+          if (i < moveAnimations.length) {
+            moveAnimations[i] = newAnimation;
+          }
+
+          controller.reset();
+          controller.forward();
+        }
+      });
+    }
+  }
+
+  void _showSequence() {
+    if (sequence.isEmpty) return; // Don't proceed with empty sequence
+
+    setState(() {
+      showingSequence = true;
+      awaitingInput = false;
+    });
+
+    // Show sequence one by one
+    Future.forEach(List.generate(sequence.length, (index) => index), (
+      index,
+    ) async {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          // Reset all dots
+          for (int i = 0; i < dots.length; i++) {
+            dots[i] = dots[i].copyWith(isHighlighted: false, isActive: false);
+          }
+
+          // Highlight current dot in sequence
+          final dotIndex = sequence[index];
+          dots[dotIndex] = dots[dotIndex].copyWith(
+            isHighlighted: true,
+            isActive: true,
+          );
+        });
+      }
+
+      // Blink effect
+      for (int i = 0; i < 2; i++) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        if (mounted) {
+          setState(() {
+            final dotIndex = sequence[index];
+            dots[dotIndex] = dots[dotIndex].copyWith(
+              isHighlighted: !dots[dotIndex].isHighlighted,
+            );
+          });
+        }
+      }
+
+      // Wait for display duration
+      await Future.delayed(sequenceDisplayDuration);
+
+      // Turn off highlight
+      if (mounted) {
+        setState(() {
+          final dotIndex = sequence[index];
+          dots[dotIndex] = dots[dotIndex].copyWith(
+            isHighlighted: false,
+            isActive: false,
+          );
+        });
+      }
+    }).then((_) {
+      if (mounted) {
+        // Start countdown
+        _startCountdown();
+      }
+    });
+  }
