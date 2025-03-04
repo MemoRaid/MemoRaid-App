@@ -235,6 +235,9 @@ class _GameScreenState extends State<GameScreen> {
       if (correct) {
         score += 10 - (attempts > 5 ? 5 : attempts);
         feedback = "Great job! You've arranged the steps correctly!";
+        // Success animation
+        _checkAnswerController.reset();
+        _checkAnswerController.forward();
       } else {
         feedback = "Not quite right. Try again or use a hint!";
       }
