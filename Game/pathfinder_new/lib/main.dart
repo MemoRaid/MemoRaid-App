@@ -810,3 +810,134 @@ void _startCountdown() {
       }
     }
   }
+void _handleLevelComplete() {
+    // Stop dot movements
+    if (dotsMove) {
+      for (var controller in moveControllers) {
+        controller.stop();
+      }
+    }
+
+    // Calculate time bonus
+    final endTime = DateTime.now().millisecondsSinceEpoch;
+    final timeElapsed = (endTime - startTime) / 1000; // Convert to seconds
+    int timeBonus = max(
+      0,
+      100 - (timeElapsed.toInt() * 2),
+    ); // 2 points per second
+
+    // Calculate perfect bonus
+    final perfectBonus = lives >= maxLives ? 50 : 0;
+
+    setState(() {
+      score += timeBonus;
+      score += perfectBonus;
+      awaitingInput = false;
+    });
+
+    // Check if this is a new high score and/or unlocks a new level
+    _checkLevelAchievement().then((achievement) {
+      if (!mounted) return;
+
+      // Show level complete dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                achievement.isSpecialAchievement
+                    ? 'Congratulations!'
+                    : 'Level Complete',
+                style: TextStyle(
+                  fontSize: 24,
+                  color:
+                      achievement.isSpecialAchievement
+                          ? Colors.green
+                          : Colors.blue,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Level $level Completed!',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text('Final Score: $score'),
+                  Text('Time Bonus: +$timeBonus'),
+                  if (perfectBonus > 0) const Text('Perfect Level Bonus: +50'),
+                  const SizedBox(height: 15),
+                  if (achievement.isNewHighScore)
+                    Text(
+                      'New High Score! Previous best: ${achievement.previousHighScore}',
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  if (achievement.isNewLevelUnlocked)
+                    const Text(
+                      'You\'ve unlocked the next level!',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pop(); // Return to level selection
+                  },
+                  child: const Text(
+                    'Return to Menu',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+      );
+    });
+  }
+
+  Future<LevelAchievement> _checkLevelAchievement() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Check if this is a new high score
+    final currentLevelHigh = prefs.getInt('highScore_level_$level') ?? 0;
+    final isNewHighScore = score > currentLevelHigh;
+
+    // Save level high score if better than previous
+    if (isNewHighScore) {
+      await prefs.setInt('highScore_level_$level', score);
+    }
+
+    // Save overall high score if better than previous
+    final currentHigh = prefs.getInt('highScore') ?? 0;
+    if (score > currentHigh) {
+      await prefs.setInt('highScore', score);
+    }
+
+    // Check if completing this level unlocks a new level
+    final currentUnlockedLevel = prefs.getInt('unlockedLevel') ?? 1;
+    bool isNewLevelUnlocked = false;
+
+    if (level >= currentUnlockedLevel && level < gameLevels.length) {
+      isNewLevelUnlocked = true;
+      await prefs.setInt('unlockedLevel', level + 1);
+    }
+
+    return LevelAchievement(
+      isNewHighScore: isNewHighScore,
+      isNewLevelUnlocked: isNewLevelUnlocked,
+      previousHighScore: currentLevelHigh,
+    );
+  }
