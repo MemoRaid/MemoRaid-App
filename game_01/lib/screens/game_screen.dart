@@ -106,6 +106,20 @@ class _GameScreenState extends State<GameScreen> {
     ));
 
     _initializeGame();
+
+    // Start initial animations
+    _fadeInController.forward();
+    _scenarioTransitionController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeInController.dispose();
+    _buttonController.dispose();
+    _checkAnswerController.dispose();
+    _scenarioTransitionController.dispose();
+    _shakeController.dispose();
+    super.dispose();
   }
 
   void _initializeGame() {
@@ -184,6 +198,10 @@ class _GameScreenState extends State<GameScreen> {
       jumbledSteps.removeWhere((s) => s.id == step.id);
       orderedSteps.add(step);
     });
+
+    // Add button press animation effect
+    _buttonController.reset();
+    _buttonController.forward().then((_) => _buttonController.reverse());
   }
 
   void _removeStep(TaskStep step) {
@@ -193,6 +211,10 @@ class _GameScreenState extends State<GameScreen> {
       orderedSteps.removeWhere((s) => s.id == step.id);
       jumbledSteps.add(step);
     });
+
+    // Add button press animation effect
+    _buttonController.reset();
+    _buttonController.forward().then((_) => _buttonController.reverse());
   }
 
   void _checkAnswer() {
