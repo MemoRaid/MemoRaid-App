@@ -1199,3 +1199,18 @@ class Dot {
     );
   }
 }
+
+class LevelAchievement {
+  final bool isNewHighScore;
+  final bool isNewLevelUnlocked;
+  final int previousHighScore;
+
+  LevelAchievement({
+    required this.isNewHighScore,
+    required this.isNewLevelUnlocked,
+    required this.previousHighScore,
+  });
+
+  // A special achievement is either a new high score or unlocking a new level
+  bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
+}
