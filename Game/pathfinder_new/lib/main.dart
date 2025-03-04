@@ -181,3 +181,13 @@ class Animations {
   }
 }
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+class HighScore {
+  static Future<int> getHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('highScore') ?? 0;
+  }
+
+  
+}
