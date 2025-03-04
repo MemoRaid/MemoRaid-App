@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/gamescreen.dart';
 //import 'signup.dart';
 import 'login.dart';
 import 'signup.dart';
@@ -98,7 +99,7 @@ class LoginSignupScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignUpScreen()),
+                    MaterialPageRoute(builder: (context) => GameScreen()),
                   );
                 },
                 child: Container(
