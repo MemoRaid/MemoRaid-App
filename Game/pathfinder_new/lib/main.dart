@@ -507,6 +507,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       });
     }
   }
+
   void _initializeGame() {
     // Initialize based on the passed level
     level = widget.level.levelNumber;
@@ -737,7 +738,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
-void _startCountdown() {
+  void _startCountdown() {
     setState(() {
       countdownNumber = 3;
     });
@@ -810,7 +811,8 @@ void _startCountdown() {
       }
     }
   }
-void _handleLevelComplete() {
+
+  void _handleLevelComplete() {
     // Stop dot movements
     if (dotsMove) {
       for (var controller in moveControllers) {
@@ -941,6 +943,7 @@ void _handleLevelComplete() {
       previousHighScore: currentLevelHigh,
     );
   }
+
   void _handleGameOver() {
     setState(() {
       gameOver = true;
@@ -1016,3 +1019,183 @@ void _handleLevelComplete() {
     });
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Level $level'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text(
+                'Score: $score',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Lives display
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                maxLives,
+                (index) => Icon(
+                  Icons.favorite,
+                  color: index < lives ? Colors.red : Colors.grey,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+
+          // Game status indicator
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            color:
+                showingSequence
+                    ? Colors.yellow
+                    : (awaitingInput ? Colors.green : Colors.grey),
+            width: double.infinity,
+            child: Text(
+              showingSequence
+                  ? 'Watch carefully...'
+                  : (awaitingInput ? 'Your turn!' : 'Get ready...'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+
+          // Game area
+          Expanded(
+            child: Stack(
+              children: [
+                // Dots display code remains the same...
+                for (final dot in dots)
+                  Positioned(
+                    left: dot.position.dx,
+                    top: dot.position.dy,
+                    child: GestureDetector(
+                      onTap: () => _handleDotTap(dot.id),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        width: dot.isHighlighted ? dot.size * 1.3 : dot.size,
+                        height: dot.isHighlighted ? dot.size * 1.3 : dot.size,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              dot.isHighlighted
+                                  ? Colors
+                                      .orange // More attention-grabbing color
+                                  : Colors.blue.withOpacity(0.6),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  dot.isHighlighted
+                                      ? Colors.orange.withOpacity(0.8)
+                                      : Colors.black26,
+                              blurRadius: dot.isHighlighted ? 20 : 5,
+                              spreadRadius: dot.isHighlighted ? 5 : 1,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${dot.id + 1}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize:
+                                  dot.isHighlighted
+                                      ? 24
+                                      : 16, // Larger text when highlighted
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Countdown overlay
+                if (countdownNumber != null)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.5),
+                      child: Center(
+                        child: AnimatedScale(
+                          scale: countdownNumber == 0 ? 1.5 : 1.0,
+                          duration: const Duration(milliseconds: 300),
+                          child: Text(
+                            countdownNumber == 0
+                                ? "GO!"
+                                : countdownNumber.toString(),
+                            style: TextStyle(
+                              fontSize: 80,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  countdownNumber == 0
+                                      ? Colors.green
+                                      : Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in moveControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+}
+
+// Dot data class
+class Dot {
+  final int id;
+  final Offset position;
+  final double size;
+  final bool isActive;
+  final bool isHighlighted;
+
+  Dot({
+    required this.id,
+    required this.position,
+    required this.size,
+    required this.isActive,
+    required this.isHighlighted,
+  });
+
+  Dot copyWith({
+    int? id,
+    Offset? position,
+    double? size,
+    bool? isActive,
+    bool? isHighlighted,
+  }) {
+    return Dot(
+      id: id ?? this.id,
+      position: position ?? this.position,
+      size: size ?? this.size,
+      isActive: isActive ?? this.isActive,
+      isHighlighted: isHighlighted ?? this.isHighlighted,
+    );
+  }
+}
