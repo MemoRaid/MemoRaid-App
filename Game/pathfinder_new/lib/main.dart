@@ -941,3 +941,78 @@ void _handleLevelComplete() {
       previousHighScore: currentLevelHigh,
     );
   }
+  void _handleGameOver() {
+    setState(() {
+      gameOver = true;
+      awaitingInput = false;
+    });
+
+    // Save high score
+    _saveLevelHighScore(score);
+
+    // Show game over dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Game Over'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Final Score: $score'),
+                const SizedBox(height: 10),
+                const Text('Try again to complete this level!'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Return to level selection
+                },
+                child: const Text('Level Selection'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _initializeGame(); // Restart the current level
+                    _generateLevel();
+                  });
+                },
+                child: const Text('Try Again'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _saveLevelHighScore(int score) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentLevelHigh = prefs.getInt('highScore_level_$level') ?? 0;
+
+    if (score > currentLevelHigh) {
+      await prefs.setInt('highScore_level_$level', score);
+    }
+  }
+
+  void _showErrorAnimation() {
+    // Flash the screen red
+    OverlayEntry entry = OverlayEntry(
+      builder:
+          (context) => Positioned.fill(
+            child: Container(
+              color: Colors.red.withAlpha(76), // 0.3 opacity = 76/255
+            ),
+          ),
+    );
+
+    Overlay.of(context).insert(entry);
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      entry.remove();
+    });
+  }
+
