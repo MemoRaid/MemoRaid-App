@@ -36,3 +36,11 @@ class GameLevel {
     this.movementSpeed = 1.0,
   });
 }
+
+import 'game_level.dart';
+
+final List<GameLevel> gameLevels = [
+  const GameLevel(levelNumber: 1, dotCount: 3, sequenceLength: 3),
+  const GameLevel(levelNumber: 2, dotCount: 4, sequenceLength: 4),
+  const GameLevel(levelNumber: 3, dotCount: 5, sequenceLength: 4, dotsMove: true, movementSpeed: 0.5),
+];
