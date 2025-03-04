@@ -380,3 +380,40 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     );
   }
 
+ void _showResetConfirmation() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Reset All Progress?'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.warning, color: Colors.orange, size: 50),
+                SizedBox(height: 10),
+                Text(
+                  'This will reset all level unlocks and high scores. This action cannot be undone.',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _resetAllProgress();
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Reset'),
+              ),
+            ],
+          ),
+    );
+  }
+
