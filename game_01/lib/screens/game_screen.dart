@@ -58,3 +58,18 @@ class _GameScreenState extends State<GameScreen> {
           "Add sauce and serve"
         ],
       ),
+      Scenario(
+        id: 3,
+        title: "Grocery Shopping",
+        description: "Arrange the steps for a successful grocery trip",
+        steps: [
+          "Make a shopping list",
+          "Grab reusable bags",
+          "Drive to the store",
+          "Select items and put in cart",
+          "Wait in checkout line",
+          "Pay for groceries",
+          "Load groceries in car and drive home"
+        ],
+      ),
+    ];
