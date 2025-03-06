@@ -54,6 +54,7 @@ class GameLevel {
   final int sequenceLength;
   final bool dotsMove;
   final double movementSpeed;
+  final bool shuffleAndStop; // New property for shuffle-then-stop behavior
 
   const GameLevel({
     required this.levelNumber,
@@ -61,26 +62,25 @@ class GameLevel {
     required this.sequenceLength,
     this.dotsMove = false,
     this.movementSpeed = 1.0,
+    this.shuffleAndStop = false,
   });
 }
 
 // Define all game levels
 final List<GameLevel> gameLevels = [
+  // Levels 1-3: Static dots (no movement)
   const GameLevel(levelNumber: 1, dotCount: 3, sequenceLength: 3),
   const GameLevel(levelNumber: 2, dotCount: 4, sequenceLength: 4),
-  const GameLevel(
-    levelNumber: 3,
-    dotCount: 5,
-    sequenceLength: 4,
-    dotsMove: true,
-    movementSpeed: 0.5,
-  ),
+  const GameLevel(levelNumber: 3, dotCount: 5, sequenceLength: 4),
+
+  // Levels 4-9: Shuffle and stop behavior
   const GameLevel(
     levelNumber: 4,
     dotCount: 5,
     sequenceLength: 5,
     dotsMove: true,
     movementSpeed: 0.7,
+    shuffleAndStop: true,
   ),
   const GameLevel(
     levelNumber: 5,
@@ -88,6 +88,7 @@ final List<GameLevel> gameLevels = [
     sequenceLength: 5,
     dotsMove: true,
     movementSpeed: 0.8,
+    shuffleAndStop: true,
   ),
   const GameLevel(
     levelNumber: 6,
@@ -95,6 +96,7 @@ final List<GameLevel> gameLevels = [
     sequenceLength: 6,
     dotsMove: true,
     movementSpeed: 0.9,
+    shuffleAndStop: true,
   ),
   const GameLevel(
     levelNumber: 7,
@@ -102,6 +104,7 @@ final List<GameLevel> gameLevels = [
     sequenceLength: 6,
     dotsMove: true,
     movementSpeed: 1.0,
+    shuffleAndStop: true,
   ),
   const GameLevel(
     levelNumber: 8,
@@ -109,6 +112,7 @@ final List<GameLevel> gameLevels = [
     sequenceLength: 7,
     dotsMove: true,
     movementSpeed: 1.1,
+    shuffleAndStop: true,
   ),
   const GameLevel(
     levelNumber: 9,
@@ -116,7 +120,10 @@ final List<GameLevel> gameLevels = [
     sequenceLength: 7,
     dotsMove: true,
     movementSpeed: 1.2,
+    shuffleAndStop: true,
   ),
+
+  // Levels 10-15: Continuous movement (as before)
   const GameLevel(
     levelNumber: 10,
     dotCount: 8,
@@ -2110,6 +2117,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Game constants
   static const int maxLives = 3;
   static const Duration sequenceDisplayDuration = Duration(milliseconds: 800);
+  static const Duration shuffleDuration = Duration(
+    seconds: 3,
+  ); // Duration for shuffling before stopping
 
   // Game state variables
   late int level;
@@ -2128,7 +2138,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   bool _isFirstBuild = true;
   int? countdownNumber;
   late bool dotsMove;
+  late bool shuffleAndStop;
   Duration dotMovementDuration = const Duration(milliseconds: 1500);
+  String gameStatusText = 'Get ready...'; // Status text to show to the player
 
   // Controllers for animations
   late List<AnimationController> moveControllers;
@@ -2200,6 +2212,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     dotCount = widget.level.dotCount;
     sequenceLength = widget.level.sequenceLength;
     dotsMove = widget.level.dotsMove;
+    shuffleAndStop = widget.level.shuffleAndStop;
 
     // Adjust movement speed based on level
     dotMovementDuration = Duration(
@@ -2451,6 +2464,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     setState(() {
       showingSequence = true;
       awaitingInput = false;
+      gameStatusText = 'Watch carefully...';
     });
 
     // Show sequence one by one
@@ -2502,7 +2516,37 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       }
     }).then((_) {
       if (mounted) {
-        // Start countdown
+        // For shuffle and stop levels, start shuffling first
+        if (shuffleAndStop && dotsMove) {
+          _startShufflePhase();
+        } else {
+          // Standard behavior - start countdown directly
+          _startCountdown();
+        }
+      }
+    });
+  }
+
+  // New method to handle the shuffle phase
+  void _startShufflePhase() {
+    setState(() {
+      gameStatusText = 'Dots are shuffling...';
+    });
+
+    // Start dot movement
+    for (var controller in moveControllers) {
+      controller.forward();
+    }
+
+    // Set a timer to stop movement after shuffle duration
+    Future.delayed(shuffleDuration, () {
+      if (mounted) {
+        // Stop all dot movements
+        for (var controller in moveControllers) {
+          controller.stop();
+        }
+
+        // Now start the countdown for player input
         _startCountdown();
       }
     });
@@ -2511,6 +2555,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void _startCountdown() {
     setState(() {
       countdownNumber = 3;
+      gameStatusText = 'Get ready...';
     });
 
     // Countdown 3, 2, 1
@@ -2527,9 +2572,10 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           countdownNumber = null;
           showingSequence = false;
           awaitingInput = true;
+          gameStatusText = 'Your turn!';
 
-          // Start dot movement for level 3+
-          if (dotsMove) {
+          // Start dot movement for continuous movement levels
+          if (dotsMove && !shuffleAndStop) {
             for (var controller in moveControllers) {
               controller.forward();
             }
@@ -2939,9 +2985,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
                 width: double.infinity,
                 child: Text(
-                  showingSequence
-                      ? 'Watch carefully...'
-                      : (awaitingInput ? 'Your turn!' : 'Get ready...'),
+                  gameStatusText,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
