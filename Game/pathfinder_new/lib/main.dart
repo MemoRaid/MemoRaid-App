@@ -66,105 +66,116 @@ class GameLevel {
   });
 }
 
-// Define all game levels
+// Define all game levels with adjusted difficulty for memory-impaired players
 final List<GameLevel> gameLevels = [
-  // Levels 1-3: Static dots (no movement)
-  const GameLevel(levelNumber: 1, dotCount: 3, sequenceLength: 3),
-  const GameLevel(levelNumber: 2, dotCount: 4, sequenceLength: 4),
-  const GameLevel(levelNumber: 3, dotCount: 5, sequenceLength: 4),
-
-  // Levels 4-9: Shuffle and stop behavior
+  // STATIC LEVELS - Very gentle introduction
+  const GameLevel(
+    levelNumber: 1,
+    dotCount: 3,
+    sequenceLength: 3,
+  ), // Easiest possible start
+  const GameLevel(
+    levelNumber: 2,
+    dotCount: 4,
+    sequenceLength: 3,
+  ), // More dots but same sequence
+  const GameLevel(
+    levelNumber: 3,
+    dotCount: 5,
+    sequenceLength: 4,
+  ), // Same dots, longer sequence
+  // SHUFFLE-STOP LEVELS - Incremental movement introduction
   const GameLevel(
     levelNumber: 4,
-    dotCount: 5,
-    sequenceLength: 5,
+    dotCount: 3, // Keep dot count same as level 3
+    sequenceLength: 3, // Keep sequence same as level 3
     dotsMove: true,
-    movementSpeed: 0.7,
     shuffleAndStop: true,
+    movementSpeed: 0.4, // Very slow movement for introduction
   ),
   const GameLevel(
     levelNumber: 5,
-    dotCount: 6,
-    sequenceLength: 5,
+    dotCount: 4, // Now increase dot count
+    sequenceLength: 4, // Keep sequence length the same
     dotsMove: true,
-    movementSpeed: 0.8,
     shuffleAndStop: true,
+    movementSpeed: 0.5,
   ),
   const GameLevel(
     levelNumber: 6,
-    dotCount: 6,
-    sequenceLength: 6,
+    dotCount: 5,
+    sequenceLength: 4, // Now increase sequence length
     dotsMove: true,
-    movementSpeed: 0.9,
     shuffleAndStop: true,
+    movementSpeed: 0.6,
   ),
   const GameLevel(
     levelNumber: 7,
-    dotCount: 7,
-    sequenceLength: 6,
+    dotCount: 5,
+    sequenceLength: 4,
     dotsMove: true,
-    movementSpeed: 1.0,
     shuffleAndStop: true,
+    movementSpeed: 0.7,
   ),
   const GameLevel(
     levelNumber: 8,
-    dotCount: 7,
-    sequenceLength: 7,
+    dotCount: 5,
+    sequenceLength: 5,
     dotsMove: true,
-    movementSpeed: 1.1,
     shuffleAndStop: true,
+    movementSpeed: 0.8,
   ),
   const GameLevel(
     levelNumber: 9,
-    dotCount: 8,
-    sequenceLength: 7,
+    dotCount: 6,
+    sequenceLength: 5,
     dotsMove: true,
-    movementSpeed: 1.2,
     shuffleAndStop: true,
+    movementSpeed: 0.9,
   ),
 
-  // Levels 10-15: Continuous movement (as before)
+  // CONTINUOUS MOVEMENT LEVELS - Most challenging
   const GameLevel(
     levelNumber: 10,
-    dotCount: 8,
-    sequenceLength: 8,
+    dotCount: 5, // Fewer dots to compensate for continuous movement
+    sequenceLength: 4, // Shorter sequence to compensate for difficulty
     dotsMove: true,
-    movementSpeed: 1.3,
+    movementSpeed: 0.6, // Slower speed for introduction
   ),
   const GameLevel(
     levelNumber: 11,
-    dotCount: 9,
-    sequenceLength: 8,
+    dotCount: 5,
+    sequenceLength: 5,
     dotsMove: true,
-    movementSpeed: 1.4,
+    movementSpeed: 0.6,
   ),
   const GameLevel(
     levelNumber: 12,
-    dotCount: 9,
-    sequenceLength: 9,
+    dotCount: 6,
+    sequenceLength: 5,
     dotsMove: true,
-    movementSpeed: 1.5,
+    movementSpeed: 0.7,
   ),
   const GameLevel(
     levelNumber: 13,
-    dotCount: 10,
-    sequenceLength: 9,
+    dotCount: 6,
+    sequenceLength: 6,
     dotsMove: true,
-    movementSpeed: 1.6,
+    movementSpeed: 0.8,
   ),
   const GameLevel(
     levelNumber: 14,
-    dotCount: 10,
-    sequenceLength: 10,
+    dotCount: 7,
+    sequenceLength: 6,
     dotsMove: true,
-    movementSpeed: 1.7,
+    movementSpeed: 0.9,
   ),
   const GameLevel(
     levelNumber: 15,
-    dotCount: 12,
-    sequenceLength: 10,
+    dotCount: 7,
+    sequenceLength: 7,
     dotsMove: true,
-    movementSpeed: 1.8,
+    movementSpeed: 1.0,
   ),
 ];
 
@@ -2116,10 +2127,12 @@ class GameScreen extends StatefulWidget {
 class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Game constants
   static const int maxLives = 3;
-  static const Duration sequenceDisplayDuration = Duration(milliseconds: 800);
+  static const Duration sequenceDisplayDuration = Duration(
+    milliseconds: 1000,
+  ); // Longer display time
   static const Duration shuffleDuration = Duration(
-    seconds: 3,
-  ); // Duration for shuffling before stopping
+    seconds: 5,
+  ); // Longer shuffle time for better perception
 
   // Game state variables
   late int level;
@@ -2490,7 +2503,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
       // Blink effect
       for (int i = 0; i < 2; i++) {
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 300));
         if (mounted) {
           setState(() {
             final dotIndex = sequence[index];
