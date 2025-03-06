@@ -2164,6 +2164,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   Timer? _backgroundAnimationTimer;
   late List<ParticleDot> _backgroundParticles;
 
+  // Add a list to track target positions of dots
+  List<Offset> targetPositions = [];
+
   @override
   void initState() {
     super.initState();
@@ -2339,6 +2342,8 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     moveControllers = [];
     moveAnimations = [];
+    targetPositions = List.filled(
+        dots.length, Offset.zero); // Initialize target positions list
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height * 0.7;
@@ -2365,6 +2370,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         safeBottom,
         dotSize,
       );
+
+      // Store the target position
+      targetPositions[i] = newPosition;
 
       // Create tween animation
       final animation = Tween<Offset>(
@@ -2396,6 +2404,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             dotSize,
           );
 
+          // Update the target position
+          targetPositions[i] = newPosition;
+
           // Create a new tween animation with new positions
           final newAnimation = Tween<Offset>(
             begin: dots[i].position,
@@ -2424,7 +2435,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
-  // New helper method to find a position that doesn't overlap with other dots
+  // Improved helper method to find a position that doesn't overlap with other dots
   Offset _findNonOverlappingPosition(
     int dotIndex,
     double safeWidth,
@@ -2432,7 +2443,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     double safeBottom,
     double dotSize,
   ) {
-    const maxAttempts = 30;
+    const maxAttempts = 50; // Increased attempts for better results
     int attempts = 0;
 
     while (attempts < maxAttempts) {
@@ -2443,16 +2454,38 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
       bool overlaps = false;
 
-      // Check against all other dots
+      // Check against all other dots (both current positions and target positions)
       for (int i = 0; i < dots.length; i++) {
         if (i == dotIndex) continue; // Skip checking against self
 
-        final distance = (testPosition - dots[i].position).distance;
-        final minDistance = dotSize * 1.2; // Avoid overlap with some buffer
+        // Check for overlap with current position
+        final currentDistance = (testPosition - dots[i].position).distance;
+        final minDistance =
+            dotSize * 1.5; // Increased buffer for safer movement
 
-        if (distance < minDistance) {
+        // Also check for overlap with target position if available
+        final targetDistance =
+            targetPositions.isNotEmpty && i < targetPositions.length
+                ? (testPosition - targetPositions[i]).distance
+                : double.infinity;
+
+        if (currentDistance < minDistance || targetDistance < minDistance) {
           overlaps = true;
           break;
+        }
+      }
+
+      // Also check path intersections to prevent dots from crossing paths
+      if (!overlaps) {
+        for (int i = 0; i < dots.length; i++) {
+          if (i == dotIndex || i >= targetPositions.length) continue;
+
+          // Simple line intersection check - if dots would cross paths
+          if (_pathsIntersect(dots[dotIndex].position, testPosition,
+              dots[i].position, targetPositions[i])) {
+            overlaps = true;
+            break;
+          }
         }
       }
 
@@ -2464,11 +2497,69 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
 
     // If we couldn't find a non-overlapping position after max attempts,
-    // just return a random position and hope for the best
-    return Offset(
+    // try to find the farthest position from all other dots
+    double maxMinDistance = 0;
+    Offset bestPosition = Offset(
       random.nextDouble() * safeWidth,
       safeTop + random.nextDouble() * (safeBottom - safeTop),
     );
+
+    for (int attempt = 0; attempt < 20; attempt++) {
+      final testX = random.nextDouble() * safeWidth;
+      final testY = safeTop + random.nextDouble() * (safeBottom - safeTop);
+      final testPos = Offset(testX, testY);
+
+      double minDistanceToOtherDot = double.infinity;
+      for (int i = 0; i < dots.length; i++) {
+        if (i == dotIndex) continue;
+        final dist = (testPos - dots[i].position).distance;
+        minDistanceToOtherDot = min(minDistanceToOtherDot, dist);
+      }
+
+      if (minDistanceToOtherDot > maxMinDistance) {
+        maxMinDistance = minDistanceToOtherDot;
+        bestPosition = testPos;
+      }
+    }
+
+    return bestPosition;
+  }
+
+  // Helper method to check if two line segments intersect (for path crossing detection)
+  bool _pathsIntersect(Offset a, Offset b, Offset c, Offset d) {
+    // Simple bounding box check first for efficiency
+    if (max(a.dx, b.dx) < min(c.dx, d.dx) ||
+        max(c.dx, d.dx) < min(a.dx, b.dx) ||
+        max(a.dy, b.dy) < min(c.dy, d.dy) ||
+        max(c.dy, d.dy) < min(a.dy, b.dy)) {
+      return false;
+    }
+
+    // Only do more detailed check if bounding boxes overlap
+    // This is a simple cross-product check for line segment intersection
+    final abX = b.dx - a.dx;
+    final abY = b.dy - a.dy;
+    final acX = c.dx - a.dx;
+    final acY = c.dy - a.dy;
+    final adX = d.dx - a.dx;
+    final adY = d.dy - a.dy;
+
+    final cross1 = abX * acY - abY * acX;
+    final cross2 = abX * adY - abY * adX;
+
+    if (cross1 * cross2 > 0) return false;
+
+    final cdX = d.dx - c.dx;
+    final cdY = d.dy - c.dy;
+    final caX = a.dx - c.dx;
+    final caY = a.dy - c.dy;
+    final cbX = b.dx - c.dx;
+    final cbY = b.dy - c.dy;
+
+    final cross3 = cdX * caY - cdY * caX;
+    final cross4 = cdX * cbY - cdY * cbX;
+
+    return cross3 * cross4 <= 0;
   }
 
   void _showSequence() {
@@ -2670,67 +2761,21 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _checkLevelAchievement().then((achievement) {
       if (!mounted) return;
 
-      // Show level complete dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: Text(
-            achievement.isSpecialAchievement
-                ? 'Congratulations!'
-                : 'Level Complete',
-            style: TextStyle(
-              fontSize: 24,
-              color:
-                  achievement.isSpecialAchievement ? Colors.green : Colors.blue,
-            ),
+      // Navigate to results screen instead of showing a dialog
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          opaque: false,
+          pageBuilder: (_, __, ___) => GameResultsScreen(
+            level: level,
+            score: score,
+            timeBonus: timeBonus,
+            perfectBonus: perfectBonus,
+            achievement: achievement,
+            onContinue: () {
+              Navigator.of(context).pop(); // Close results screen
+              Navigator.of(context).pop(); // Return to level selection
+            },
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Level $level Completed!',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text('Final Score: $score'),
-              Text('Time Bonus: +$timeBonus'),
-              if (perfectBonus > 0) const Text('Perfect Level Bonus: +50'),
-              const SizedBox(height: 15),
-              if (achievement.isNewHighScore)
-                Text(
-                  'New High Score! Previous best: ${achievement.previousHighScore}',
-                  style: const TextStyle(
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              if (achievement.isNewLevelUnlocked)
-                const Text(
-                  'You\'ve unlocked the next level!',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Return to level selection
-              },
-              child: const Text(
-                'Return to Menu',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
         ),
       );
     });
@@ -2779,40 +2824,24 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Save high score
     _saveLevelHighScore(score);
 
-    // Show game over dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Game Over'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Final Score: $score'),
-            const SizedBox(height: 10),
-            const Text('Try again to complete this level!'),
-          ],
+    // Replace dialog with custom overlay
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => GameOverScreen(
+          score: score,
+          onRetry: () {
+            Navigator.of(context).pop(); // Close game over screen
+            setState(() {
+              _initializeGame(); // Restart the current level
+              _generateLevel();
+            });
+          },
+          onExit: () {
+            Navigator.of(context).pop(); // Close game over screen
+            Navigator.of(context).pop(); // Return to level selection
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop(); // Return to level selection
-            },
-            child: const Text('Level Selection'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-                _initializeGame(); // Restart the current level
-                _generateLevel();
-              });
-            },
-            child: const Text('Try Again'),
-          ),
-        ],
       ),
     );
   }
@@ -3159,5 +3188,386 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       controller.dispose();
     }
     super.dispose();
+  }
+}
+
+// New Game Results Screen
+class GameResultsScreen extends StatelessWidget {
+  final int level;
+  final int score;
+  final int timeBonus;
+  final int perfectBonus;
+  final LevelAchievement achievement;
+  final VoidCallback onContinue;
+
+  const GameResultsScreen({
+    Key? key,
+    required this.level,
+    required this.score,
+    required this.timeBonus,
+    required this.perfectBonus,
+    required this.achievement,
+    required this.onContinue,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black54,
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D3445),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                blurRadius: 15,
+                spreadRadius: 5,
+              ),
+            ],
+            border: Border.all(
+              color: const Color(0xFF4ECDC4).withOpacity(0.5),
+              width: 2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.3),
+                  border: Border.all(
+                    color: const Color(0xFF4ECDC4),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  achievement.isSpecialAchievement
+                      ? Icons.emoji_events
+                      : Icons.check_circle,
+                  size: 40,
+                  color: achievement.isSpecialAchievement
+                      ? const Color(0xFFFFD700)
+                      : const Color(0xFF4ECDC4),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              Text(
+                achievement.isSpecialAchievement
+                    ? 'Congratulations!'
+                    : 'Level Complete',
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Level description
+              Text(
+                'Level $level Completed',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Color(0xFF4ECDC4),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Scores
+              _buildScoreRow('Base Score', score - timeBonus - perfectBonus),
+              _buildScoreRow('Time Bonus', timeBonus),
+              if (perfectBonus > 0)
+                _buildScoreRow('Perfect Clear Bonus', perfectBonus),
+
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                height: 2,
+                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+              ),
+
+              _buildScoreRow('Final Score', score, isTotal: true),
+              const SizedBox(height: 24),
+
+              // Achievements
+              if (achievement.isNewHighScore)
+                _buildAchievementRow(
+                  'New High Score!',
+                  'Previous: ${achievement.previousHighScore}',
+                  Icons.star,
+                  const Color(0xFFFFD700),
+                ),
+
+              if (achievement.isNewLevelUnlocked)
+                _buildAchievementRow(
+                  'New Level Unlocked!',
+                  'Keep going for more challenges',
+                  Icons.lock_open,
+                  const Color(0xFF4ECDC4),
+                ),
+
+              const SizedBox(height: 32),
+
+              // Continue button
+              ElevatedButton(
+                onPressed: onContinue,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4ECDC4),
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 6,
+                ),
+                child: const Text(
+                  'Continue',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScoreRow(String label, int value, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isTotal ? 20 : 18,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
+          Text(
+            '+$value',
+            style: TextStyle(
+              fontSize: isTotal ? 24 : 18,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: isTotal ? const Color(0xFF4ECDC4) : Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAchievementRow(
+      String title, String subtitle, IconData icon, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(0.2),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// New Game Over screen
+class GameOverScreen extends StatelessWidget {
+  final int score;
+  final VoidCallback onRetry;
+  final VoidCallback onExit;
+
+  const GameOverScreen({
+    Key? key,
+    required this.score,
+    required this.onRetry,
+    required this.onExit,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black54,
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D3445),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withOpacity(0.2),
+                blurRadius: 15,
+                spreadRadius: 5,
+              ),
+            ],
+            border: Border.all(
+              color: Colors.red.withOpacity(0.3),
+              width: 2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.3),
+                  border: Border.all(
+                    color: Colors.red,
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  size: 40,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              const Text(
+                'Game Over',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Score
+              const Text(
+                'Final Score',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$score',
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Message
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  'Keep trying! You\'ll get better with practice.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: onExit,
+                      icon: const Icon(Icons.menu),
+                      label: const Text('Menu'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueGrey,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.replay),
+                      label: const Text('Try Again'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4ECDC4),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
