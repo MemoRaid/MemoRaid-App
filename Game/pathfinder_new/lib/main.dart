@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//------------------------------------------------------------------------------
+// APP ENTRY POINT AND CONFIGURATION
+//------------------------------------------------------------------------------
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -38,6 +42,10 @@ class PathFinderApp extends StatelessWidget {
     );
   }
 }
+
+//------------------------------------------------------------------------------
+// DATA MODELS
+//------------------------------------------------------------------------------
 
 // Level data class to define each level's properties
 class GameLevel {
@@ -153,6 +161,1061 @@ final List<GameLevel> gameLevels = [
   ),
 ];
 
+// Dot data class
+class Dot {
+  final int id;
+  final Offset position;
+  final double size;
+  final bool isActive;
+  final bool isHighlighted;
+
+  Dot({
+    required this.id,
+    required this.position,
+    required this.size,
+    required this.isActive,
+    required this.isHighlighted,
+  });
+
+  Dot copyWith({
+    int? id,
+    Offset? position,
+    double? size,
+    bool? isActive,
+    bool? isHighlighted,
+  }) {
+    return Dot(
+      id: id ?? this.id,
+      position: position ?? this.position,
+      size: size ?? this.size,
+      isActive: isActive ?? this.isActive,
+      isHighlighted: isHighlighted ?? this.isHighlighted,
+    );
+  }
+}
+
+class LevelAchievement {
+  final bool isNewHighScore;
+  final bool isNewLevelUnlocked;
+  final int previousHighScore;
+
+  LevelAchievement({
+    required this.isNewHighScore,
+    required this.isNewLevelUnlocked,
+    required this.previousHighScore,
+  });
+
+  // A special achievement is either a new high score or unlocking a new level
+  bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
+}
+
+// Wave layer model for background waves
+class WaveLayer {
+  final Color color;
+  final double speed;
+  final double amplitude;
+  final double frequency;
+  final double phase;
+  final double heightFactor;
+
+  WaveLayer({
+    required this.color,
+    required this.speed,
+    required this.amplitude,
+    required this.frequency,
+    required this.phase,
+    required this.heightFactor,
+  });
+}
+
+// Background particle models
+class ParticleNode {
+  Offset position;
+  final double size;
+  final double speed;
+  double angle; // Direction angle
+  final double opacity;
+
+  ParticleNode({
+    required this.position,
+    required this.size,
+    required this.speed,
+    required this.angle,
+    required this.opacity,
+  });
+
+  void update(double time, Size screenSize) {
+    // Move node slowly in its direction
+    position = Offset(
+      position.dx + cos(angle) * speed,
+      position.dy + sin(angle) * speed,
+    );
+
+    // Wrap around when going off screen
+    if (position.dx < -50)
+      position = Offset(screenSize.width + 50, position.dy);
+    if (position.dx > screenSize.width + 50)
+      position = Offset(-50, position.dy);
+    if (position.dy < -50)
+      position = Offset(position.dx, screenSize.height + 50);
+    if (position.dy > screenSize.height + 50)
+      position = Offset(position.dx, -50);
+
+    // Slightly adjust angle for smooth movement
+    angle += (sin(time * 0.5) * 0.03);
+  }
+}
+
+class Connection {
+  final int startNodeIndex;
+  final int endNodeIndex;
+  final double maxDistance;
+  final double thickness;
+
+  Connection({
+    required this.startNodeIndex,
+    required this.endNodeIndex,
+    required this.maxDistance,
+    required this.thickness,
+  });
+}
+
+class ParticleDot {
+  Offset position;
+  final double size;
+  final double opacity;
+  final double speed;
+  double angle;
+
+  ParticleDot({
+    required this.position,
+    required this.size,
+    required this.opacity,
+    required this.speed,
+    required this.angle,
+  });
+
+  void update(double time, Size screenSize) {
+    // Apply slow movement in the dot's direction
+    position = Offset(
+      position.dx + cos(angle) * speed,
+      position.dy + sin(angle) * speed,
+    );
+
+    // Wrap around screen edges
+    if (position.dx < -50)
+      position = Offset(screenSize.width + 50, position.dy);
+    if (position.dx > screenSize.width + 50)
+      position = Offset(-50, position.dy);
+    if (position.dy < -50)
+      position = Offset(position.dx, screenSize.height + 50);
+    if (position.dy > screenSize.height + 50)
+      position = Offset(position.dx, -50);
+
+    // Slightly vary the angle for wandering effect
+    angle += sin(time * 0.3) * 0.02;
+  }
+}
+
+//------------------------------------------------------------------------------
+// CUSTOM PAINTERS (VISUAL EFFECTS)
+//------------------------------------------------------------------------------
+
+// Wave background painter that creates flowing wave effect
+class WaveBackgroundPainter extends CustomPainter {
+  final List<WaveLayer> layers;
+  final double time;
+
+  WaveBackgroundPainter(this.layers, this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final layer in layers) {
+      final path = Path();
+
+      // Start at left bottom
+      path.moveTo(0, size.height);
+
+      // Calculate y position for each point on x-axis for curved wave
+      final waveHeight = size.height * layer.heightFactor;
+      final baseY = size.height - waveHeight;
+
+      for (double x = 0; x <= size.width; x += 5) {
+        final y = baseY +
+            sin(x * layer.frequency + layer.phase + time * layer.speed) *
+                layer.amplitude;
+        path.lineTo(x, y);
+      }
+
+      // Complete the path
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+
+      // Fill wave with gradient
+      final paint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            layer.color.withOpacity(0.6),
+            layer.color.withOpacity(0.3),
+            layer.color.withOpacity(0.1),
+          ],
+        ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
+        ..style = PaintingStyle.fill;
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant WaveBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+// Light spots painter for small glowing particles
+class LightSpotsPainter extends CustomPainter {
+  static const int spotCount = 50;
+  final List<Offset> _positions = [];
+  final List<double> _sizes = [];
+  final List<double> _opacities = [];
+
+  LightSpotsPainter() {
+    final random = Random();
+    for (int i = 0; i < spotCount; i++) {
+      _positions.add(
+        Offset(random.nextDouble() * 1000, random.nextDouble() * 1000),
+      );
+      _sizes.add(1 + random.nextDouble() * 4);
+      _opacities.add(0.1 + random.nextDouble() * 0.5);
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+
+    for (int i = 0; i < spotCount; i++) {
+      // Calculate pulsating opacity
+      final pulseRate = 0.5 + (_positions[i].dx * 0.001);
+      final dynamicOpacity = _opacities[i] * (0.7 + sin(now * pulseRate) * 0.3);
+
+      // Create a radial gradient for each light spot
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+          stops: const [0.0, 1.0],
+        ).createShader(
+          Rect.fromCircle(
+            center: Offset(
+              _positions[i].dx % size.width,
+              _positions[i].dy % size.height,
+            ),
+            radius: _sizes[i] * 4,
+          ),
+        );
+
+      // Draw the light spot
+      canvas.drawCircle(
+        Offset(_positions[i].dx % size.width, _positions[i].dy % size.height),
+        _sizes[i],
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Circuit pattern painter for logo background
+class CircuitPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = min(size.width, size.height) / 2;
+    final random = Random(12345); // Fixed seed for consistent pattern
+
+    // Draw circuit lines
+    for (int i = 0; i < 24; i++) {
+      final angle1 = random.nextDouble() * pi * 2;
+      final angle2 = random.nextDouble() * pi * 2;
+
+      // Calculate points on circle
+      final x1 = centerX + cos(angle1) * radius * 0.7;
+      final y1 = centerY + sin(angle1) * radius * 0.7;
+      final x2 = centerX + cos(angle2) * radius * 0.9;
+      final y2 = centerY + sin(angle2) * radius * 0.9;
+
+      // Line paint
+      final paint = Paint()
+        ..color = const Color(
+          0xFF4ECDC4,
+        ).withOpacity(0.4 + random.nextDouble() * 0.3)
+        ..strokeWidth = 1 + random.nextDouble() * 1.5
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke;
+
+      final now = DateTime.now().millisecondsSinceEpoch / 1000;
+      final pulseRate = 0.5 + i * 0.1;
+      final opacity = 0.3 + sin(now * pulseRate) * 0.2;
+
+      // Add curve to path
+      final path = Path();
+      path.moveTo(x1, y1);
+
+      // Control points for curve
+      final midX = (x1 + x2) / 2;
+      final midY = (y1 + y2) / 2;
+      final ctrlX = midX + (random.nextDouble() - 0.5) * radius * 0.3;
+      final ctrlY = midY + (random.nextDouble() - 0.5) * radius * 0.3;
+
+      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
+
+      // Draw circuit path
+      canvas.drawPath(path, paint);
+
+      // Add nodes at endpoints with glowing effect
+      final nodePaint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x1, y1), 1.5, nodePaint);
+      canvas.drawCircle(Offset(x2, y2), 2.0, nodePaint);
+    }
+
+    // Draw outer glowing ring
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(0.8),
+          const Color(0xFF4ECDC4).withOpacity(0),
+        ],
+      ).createShader(
+        Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+      );
+
+    canvas.drawCircle(Offset(centerX, centerY), radius * 0.85, ringPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Network background painter
+class NetworkBackgroundPainter extends CustomPainter {
+  final List<ParticleNode> nodes;
+  final List<Connection> connections;
+  final double time;
+  final Size size;
+
+  NetworkBackgroundPainter({
+    required this.nodes,
+    required this.connections,
+    required this.time,
+    required this.size,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Update nodes
+    for (final node in nodes) {
+      node.update(time, size);
+    }
+
+    // Draw connections
+    for (final connection in connections) {
+      final startNode = nodes[connection.startNodeIndex];
+      final endNode = nodes[connection.endNodeIndex];
+
+      final distance = (startNode.position - endNode.position).distance;
+
+      if (distance <= connection.maxDistance) {
+        // Calculate opacity based on distance
+        final opacity = 1.0 - (distance / connection.maxDistance);
+
+        // Create a gradient for the connection line
+        final paint = Paint()
+          ..shader = LinearGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
+              const Color(0xFF0D3445).withOpacity(opacity * 0.3),
+            ],
+          ).createShader(
+            Rect.fromPoints(startNode.position, endNode.position),
+          )
+          ..strokeWidth = connection.thickness * opacity
+          ..strokeCap = StrokeCap.round;
+
+        // Draw the connection
+        canvas.drawLine(startNode.position, endNode.position, paint);
+      }
+    }
+
+    // Draw nodes
+    for (final node in nodes) {
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(node.opacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(center: node.position, radius: node.size * 4),
+        );
+
+      canvas.drawCircle(node.position, node.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant NetworkBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+// Light rays painter
+class LightRaysPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+
+    // Origin point for light rays
+    final origin = Offset(width * 0.5, height * -0.2);
+
+    // Create rays with varying lengths and angles
+    for (int i = 0; i < 8; i++) {
+      final angle = (pi * i / 8) + (pi / 16);
+      final rayLength = height * 1.5;
+
+      final endX = origin.dx + cos(angle) * rayLength;
+      final endY = origin.dy + sin(angle) * rayLength;
+
+      final rayPath = Path()
+        ..moveTo(origin.dx, origin.dy)
+        ..lineTo(endX, endY)
+        ..lineTo(endX + width * 0.15, endY)
+        ..lineTo(origin.dx, origin.dy)
+        ..close();
+
+      final rayPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF135777).withOpacity(0.3),
+            const Color(0xFF135777).withOpacity(0),
+          ],
+        ).createShader(Rect.fromPoints(origin, Offset(endX, endY)));
+
+      canvas.drawPath(rayPath, rayPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Subtle waves painter
+class SubtleWavesPainter extends CustomPainter {
+  final double time;
+
+  SubtleWavesPainter(this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+
+    // Draw multiple layers of subtle waves
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 20,
+      frequency: 0.015,
+      phase: time * 0.2,
+      yPosition: height * 0.75,
+      color: const Color(0xFF4ECDC4).withOpacity(0.1),
+    );
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 15,
+      frequency: 0.02,
+      phase: time * -0.15,
+      yPosition: height * 0.6,
+      color: const Color(0xFF135777).withOpacity(0.07),
+    );
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 30,
+      frequency: 0.01,
+      phase: time * 0.1,
+      yPosition: height * 0.9,
+      color: const Color(0xFF0D3445).withOpacity(0.05),
+    );
+  }
+
+  void _drawWave({
+    required Canvas canvas,
+    required double width,
+    required double height,
+    required double amplitude,
+    required double frequency,
+    required double phase,
+    required double yPosition,
+    required Color color,
+  }) {
+    final path = Path();
+
+    // Start from left bottom
+    path.moveTo(0, height);
+
+    // Draw wave
+    for (double x = 0; x <= width; x += 5) {
+      final y = yPosition + sin(x * frequency + phase) * amplitude;
+      path.lineTo(x, y);
+    }
+
+    // Complete path
+    path.lineTo(width, height);
+    path.lineTo(0, height);
+    path.close();
+
+    // Fill with gradient
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color, color.withOpacity(0)],
+      ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant SubtleWavesPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+// Hexagonal pattern painter for logo background
+class HexagonalPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = min(size.width, size.height) / 2;
+    final random = Random(12345); // Fixed seed for consistent pattern
+
+    // Draw hexagons around the circle
+    for (int ring = 0; ring < 2; ring++) {
+      final ringRadius = radius * (0.65 + ring * 0.3);
+      final hexCount = 6 + ring * 2;
+
+      for (int i = 0; i < hexCount; i++) {
+        final angle = (2 * pi * i / hexCount);
+        final x = centerX + cos(angle) * ringRadius;
+        final y = centerY + sin(angle) * ringRadius;
+
+        // Draw hexagon
+        _drawHexagon(
+          canvas,
+          x,
+          y,
+          5 + random.nextDouble() * 5,
+          const Color(0xFF4ECDC4).withOpacity(0.2 + random.nextDouble() * 0.2),
+        );
+      }
+    }
+
+    // Draw circuit-like connections
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+    final paint = Paint()
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 12; i++) {
+      final angle1 = (2 * pi * i / 12);
+      final angle2 = angle1 + pi / 6 + random.nextDouble() * (pi / 3);
+
+      final r1 = radius * 0.7;
+      final r2 = radius * 0.9;
+
+      final x1 = centerX + cos(angle1) * r1;
+      final y1 = centerY + sin(angle1) * r1;
+
+      final x2 = centerX + cos(angle2) * r2;
+      final y2 = centerY + sin(angle2) * r2;
+
+      // Add pulsating effect based on time
+      final glow = (sin(now + i) + 1) / 2;
+      paint.color = const Color(0xFF4ECDC4).withOpacity(0.3 + glow * 0.3);
+
+      // Draw path with curve for circuit-like effect
+      final path = Path();
+      path.moveTo(x1, y1);
+
+      final ctrlX = (x1 + x2) / 2 + (random.nextDouble() - 0.5) * 20;
+      final ctrlY = (y1 + y2) / 2 + (random.nextDouble() - 0.5) * 20;
+
+      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
+      canvas.drawPath(path, paint);
+
+      // Draw small nodes at the ends
+      final nodePaint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x1, y1), 2, nodePaint);
+      canvas.drawCircle(Offset(x2, y2), 2, nodePaint);
+    }
+  }
+
+  void _drawHexagon(
+    Canvas canvas,
+    double x,
+    double y,
+    double size,
+    Color color,
+  ) {
+    final path = Path();
+
+    for (int i = 0; i < 6; i++) {
+      final angle = (pi / 3) * i;
+      final xPoint = x + cos(angle) * size;
+      final yPoint = y + sin(angle) * size;
+
+      if (i == 0) {
+        path.moveTo(xPoint, yPoint);
+      } else {
+        path.lineTo(xPoint, yPoint);
+      }
+    }
+
+    path.close();
+
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Background animations for level selection screen
+class LevelSelectBackgroundPainter extends CustomPainter {
+  final double time;
+  final Random _random = Random(42);
+
+  LevelSelectBackgroundPainter(this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw flowing lines background
+    _drawFlowingLines(canvas, size);
+
+    // Draw subtle wave at bottom
+    _drawWave(canvas, size);
+
+    // Draw glowing particles
+    _drawGlowingParticles(canvas, size);
+  }
+
+  void _drawFlowingLines(Canvas canvas, Size size) {
+    final lineCount = 10;
+    final lineWidth = 1.0;
+
+    for (int i = 0; i < lineCount; i++) {
+      final y = (size.height / (lineCount + 1)) * (i + 1);
+      final path = Path();
+
+      path.moveTo(0, y);
+
+      final amplitude = 20.0 + _random.nextDouble() * 20;
+      final frequency = 0.01 + _random.nextDouble() * 0.01;
+      final phase = time * (0.1 + _random.nextDouble() * 0.2) + i;
+
+      for (double x = 0; x <= size.width; x += 5) {
+        path.lineTo(x, y + sin(x * frequency + phase) * amplitude);
+      }
+
+      final paint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = lineWidth;
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  void _drawWave(Canvas canvas, Size size) {
+    final path = Path();
+
+    final baseY = size.height * 0.9;
+    path.moveTo(0, baseY);
+
+    for (double x = 0; x <= size.width; x += 5) {
+      final dx1 = sin(x * 0.01 + time * 0.2) * 15;
+      final dx2 = sin(x * 0.02 + time * 0.1) * 10;
+      path.lineTo(x, baseY + dx1 + dx2);
+    }
+
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(0.2),
+          const Color(0xFF4ECDC4).withOpacity(0),
+        ],
+      ).createShader(
+        Rect.fromLTWH(0, baseY, size.width, size.height - baseY),
+      );
+
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawGlowingParticles(Canvas canvas, Size size) {
+    const particleCount = 30;
+
+    for (int i = 0; i < particleCount; i++) {
+      final x = ((time * (0.1 + i * 0.01)) % 2) * size.width;
+      final y = ((i * 37) % size.height) + sin(time + i) * 20;
+
+      final radius = 1.5 + sin(time * 0.8 + i) * 1.0;
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(0.6),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(center: Offset(x, y), radius: radius * 4),
+        );
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant LevelSelectBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+// Circuit pattern background for level tiles
+class CircuitPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(12345);
+    final lineCount = 6;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
+
+    // Draw a few curved lines to resemble circuits
+    for (int i = 0; i < lineCount; i++) {
+      final path = Path();
+
+      final startX = random.nextDouble() * size.width;
+      final startY = random.nextDouble() * size.height;
+
+      path.moveTo(startX, startY);
+
+      for (int j = 0; j < 2; j++) {
+        final endX = random.nextDouble() * size.width;
+        final endY = random.nextDouble() * size.height;
+
+        final controlX1 = startX + (endX - startX) * random.nextDouble();
+        final controlY1 = startY + (endY - startY) * random.nextDouble();
+
+        path.quadraticBezierTo(controlX1, controlY1, endX, endY);
+
+        // Draw small "nodes" at points
+        canvas.drawCircle(
+          Offset(endX, endY),
+          1.5,
+          Paint()..color = const Color(0xFF4ECDC4).withOpacity(0.3),
+        );
+      }
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Game background painter for animated background
+class GameBackgroundPainter extends CustomPainter {
+  final double time;
+  final List<ParticleDot> particles;
+
+  GameBackgroundPainter({required this.time, required this.particles});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Update particle positions
+    for (final particle in particles) {
+      particle.update(time, size);
+    }
+
+    // Draw subtle background grid
+    _drawGrid(canvas, size);
+
+    // Draw flowing particles
+    _drawParticles(canvas, size);
+
+    // Draw subtle pulsating glow at bottom
+    _drawBottomGlow(canvas, size);
+  }
+
+  void _drawGrid(Canvas canvas, Size size) {
+    final lineCount = 10;
+    final horizontalSpacing = size.width / lineCount;
+    final verticalSpacing = size.height / lineCount;
+
+    final paint = Paint()
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    // Draw vertical lines
+    for (int i = 1; i < lineCount; i++) {
+      final x = horizontalSpacing * i;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    // Draw horizontal lines
+    for (int i = 1; i < lineCount; i++) {
+      final y = verticalSpacing * i;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  void _drawParticles(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      // Make opacity pulsate slightly
+      final pulsingOpacity = particle.opacity *
+          (0.7 + sin(time + particle.position.dx * 0.01) * 0.3);
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(
+            center: particle.position,
+            radius: particle.size * 6,
+          ),
+        );
+
+      canvas.drawCircle(particle.position, particle.size, paint);
+    }
+
+    // Draw connections between some nearby particles
+    for (int i = 0; i < particles.length; i++) {
+      for (int j = i + 1; j < particles.length; j++) {
+        final distance =
+            (particles[i].position - particles[j].position).distance;
+        if (distance < 100) {
+          final opacity = (1 - distance / 100) * 0.1;
+
+          final paint = Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+            ..strokeWidth = 0.5
+            ..style = PaintingStyle.stroke;
+
+          canvas.drawLine(particles[i].position, particles[j].position, paint);
+        }
+      }
+    }
+  }
+
+  void _drawBottomGlow(Canvas canvas, Size size) {
+    final centerY = size.height * 0.9;
+    final glowRadius = size.width * 0.8;
+    final glowOpacity = 0.05 + sin(time * 0.5) * 0.02;
+
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(glowOpacity),
+          Colors.transparent,
+        ],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(size.width / 2, centerY),
+          radius: glowRadius,
+        ),
+      );
+
+    canvas.drawCircle(Offset(size.width / 2, centerY), glowRadius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant GameBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+//------------------------------------------------------------------------------
+// REUSABLE UI COMPONENTS
+//------------------------------------------------------------------------------
+
+class GlowingActionButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final String text;
+
+  const GlowingActionButton({
+    super.key,
+    required this.onPressed,
+    required this.text,
+  });
+
+  @override
+  State<GlowingActionButton> createState() => _GlowingActionButtonState();
+}
+
+class _GlowingActionButtonState extends State<GlowingActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _pulseAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.05), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
+    ]).animate(_pulseController);
+
+    _pulseController.repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onPressed();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _isPressed ? 0.95 : _pulseAnimation.value,
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 2,
+                left: 32,
+                right: 32,
+                bottom: 4,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF4ECDC4),
+                    const Color(0xFF4ECDC4).withOpacity(0.8),
+                  ],
+                ),
+                boxShadow: [
+                  // Inner glow
+                  BoxShadow(
+                    color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                    blurRadius: _pulseAnimation.value * 15,
+                    spreadRadius: _pulseAnimation.value * 4,
+                  ),
+                  // Bottom shadow for 3D effect
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 150),
+                style: TextStyle(
+                  color: _isPressed ? Colors.white70 : Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.play_arrow, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(widget.text),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+//------------------------------------------------------------------------------
+// START SCREEN
+//------------------------------------------------------------------------------
+
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
 
@@ -174,10 +1237,6 @@ class _StartScreenState extends State<StartScreen>
   final Random _random = Random();
   final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
   Timer? _animationTimer;
-
-  // Background animation variables
-
-  // Dynamic background effects
 
   @override
   void initState() {
@@ -438,8 +1497,10 @@ class _StartScreenState extends State<StartScreen>
                     return Opacity(
                       opacity: _scoreOpacityAnimation.value,
                       child: Transform.translate(
-                        offset:
-                            Offset(0, 20 * (1 - _scoreOpacityAnimation.value)),
+                        offset: Offset(
+                          0,
+                          20 * (1 - _scoreOpacityAnimation.value),
+                        ),
                         child: child,
                       ),
                     );
@@ -450,7 +1511,9 @@ class _StartScreenState extends State<StartScreen>
                       if (snapshot.hasData) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
                             color: Colors.white.withOpacity(0.1),
@@ -505,326 +1568,9 @@ class _StartScreenState extends State<StartScreen>
   }
 }
 
-// Wave layer model for background waves
-class WaveLayer {
-  final Color color;
-  final double speed;
-  final double amplitude;
-  final double frequency;
-  final double phase;
-  final double heightFactor;
-
-  WaveLayer({
-    required this.color,
-    required this.speed,
-    required this.amplitude,
-    required this.frequency,
-    required this.phase,
-    required this.heightFactor,
-  });
-}
-
-// Wave background painter that creates flowing wave effect
-class WaveBackgroundPainter extends CustomPainter {
-  final List<WaveLayer> layers;
-  final double time;
-
-  WaveBackgroundPainter(this.layers, this.time);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final layer in layers) {
-      final path = Path();
-
-      // Start at left bottom
-      path.moveTo(0, size.height);
-
-      // Calculate y position for each point on x-axis for curved wave
-      final waveHeight = size.height * layer.heightFactor;
-      final baseY = size.height - waveHeight;
-
-      for (double x = 0; x <= size.width; x += 5) {
-        final y = baseY +
-            sin(x * layer.frequency + layer.phase + time * layer.speed) *
-                layer.amplitude;
-        path.lineTo(x, y);
-      }
-
-      // Complete the path
-      path.lineTo(size.width, size.height);
-      path.lineTo(0, size.height);
-      path.close();
-
-      // Fill wave with gradient
-      final paint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            layer.color.withOpacity(0.6),
-            layer.color.withOpacity(0.3),
-            layer.color.withOpacity(0.1),
-          ],
-        ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
-        ..style = PaintingStyle.fill;
-
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant WaveBackgroundPainter oldDelegate) {
-    return oldDelegate.time != time;
-  }
-}
-
-// Light spots painter for small glowing particles
-class LightSpotsPainter extends CustomPainter {
-  static const int spotCount = 50;
-  final List<Offset> _positions = [];
-  final List<double> _sizes = [];
-  final List<double> _opacities = [];
-
-  LightSpotsPainter() {
-    final random = Random();
-    for (int i = 0; i < spotCount; i++) {
-      _positions.add(Offset(
-        random.nextDouble() * 1000,
-        random.nextDouble() * 1000,
-      ));
-      _sizes.add(1 + random.nextDouble() * 4);
-      _opacities.add(0.1 + random.nextDouble() * 0.5);
-    }
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final now = DateTime.now().millisecondsSinceEpoch / 1000;
-
-    for (int i = 0; i < spotCount; i++) {
-      // Calculate pulsating opacity
-      final pulseRate = 0.5 + (_positions[i].dx * 0.001);
-      final dynamicOpacity = _opacities[i] * (0.7 + sin(now * pulseRate) * 0.3);
-
-      // Create a radial gradient for each light spot
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-          stops: const [0.0, 1.0],
-        ).createShader(
-          Rect.fromCircle(
-            center: Offset(
-                _positions[i].dx % size.width, _positions[i].dy % size.height),
-            radius: _sizes[i] * 4,
-          ),
-        );
-
-      // Draw the light spot
-      canvas.drawCircle(
-        Offset(_positions[i].dx % size.width, _positions[i].dy % size.height),
-        _sizes[i],
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// Circuit pattern painter for logo background
-class CircuitPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
-    final radius = min(size.width, size.height) / 2;
-    final random = Random(12345); // Fixed seed for consistent pattern
-
-    // Draw circuit lines
-    for (int i = 0; i < 24; i++) {
-      final angle1 = random.nextDouble() * pi * 2;
-      final angle2 = random.nextDouble() * pi * 2;
-
-      // Calculate points on circle
-      final x1 = centerX + cos(angle1) * radius * 0.7;
-      final y1 = centerY + sin(angle1) * radius * 0.7;
-      final x2 = centerX + cos(angle2) * radius * 0.9;
-      final y2 = centerY + sin(angle2) * radius * 0.9;
-
-      // Line paint
-      final paint = Paint()
-        ..color =
-            const Color(0xFF4ECDC4).withOpacity(0.4 + random.nextDouble() * 0.3)
-        ..strokeWidth = 1 + random.nextDouble() * 1.5
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-
-      final now = DateTime.now().millisecondsSinceEpoch / 1000;
-      final pulseRate = 0.5 + i * 0.1;
-      final opacity = 0.3 + sin(now * pulseRate) * 0.2;
-
-      // Add curve to path
-      final path = Path();
-      path.moveTo(x1, y1);
-
-      // Control points for curve
-      final midX = (x1 + x2) / 2;
-      final midY = (y1 + y2) / 2;
-      final ctrlX = midX + (random.nextDouble() - 0.5) * radius * 0.3;
-      final ctrlY = midY + (random.nextDouble() - 0.5) * radius * 0.3;
-
-      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
-
-      // Draw circuit path
-      canvas.drawPath(path, paint);
-
-      // Add nodes at endpoints with glowing effect
-      final nodePaint = Paint()
-        ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
-        ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x1, y1), 1.5, nodePaint);
-      canvas.drawCircle(Offset(x2, y2), 2.0, nodePaint);
-    }
-
-    // Draw outer glowing ring
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFF4ECDC4).withOpacity(0.8),
-          const Color(0xFF4ECDC4).withOpacity(0),
-        ],
-      ).createShader(
-          Rect.fromCircle(center: Offset(centerX, centerY), radius: radius));
-
-    canvas.drawCircle(Offset(centerX, centerY), radius * 0.85, ringPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class GlowingActionButton extends StatefulWidget {
-  final VoidCallback onPressed;
-  final String text;
-
-  const GlowingActionButton({
-    super.key,
-    required this.onPressed,
-    required this.text,
-  });
-
-  @override
-  State<GlowingActionButton> createState() => _GlowingActionButtonState();
-}
-
-class _GlowingActionButtonState extends State<GlowingActionButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  bool _isPressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _pulseAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.05), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
-    ]).animate(_pulseController);
-
-    _pulseController.repeat();
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onPressed();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedBuilder(
-        animation: _pulseController,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _isPressed ? 0.95 : _pulseAnimation.value,
-            child: Container(
-              padding: const EdgeInsets.only(
-                top: 2,
-                left: 32,
-                right: 32,
-                bottom: 4,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    const Color(0xFF4ECDC4),
-                    const Color(0xFF4ECDC4).withOpacity(0.8),
-                  ],
-                ),
-                boxShadow: [
-                  // Inner glow
-                  BoxShadow(
-                    color: const Color(0xFF4ECDC4).withOpacity(0.3),
-                    blurRadius: _pulseAnimation.value * 15,
-                    spreadRadius: _pulseAnimation.value * 4,
-                  ),
-                  // Bottom shadow for 3D effect
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    offset: const Offset(0, 4),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 150),
-                style: TextStyle(
-                  color: _isPressed ? Colors.white70 : Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.5,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.play_arrow, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Text(widget.text),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
+//------------------------------------------------------------------------------
+// LEVEL SELECTION SCREEN
+//------------------------------------------------------------------------------
 
 class LevelSelectionScreen extends StatefulWidget {
   const LevelSelectionScreen({super.key});
@@ -855,12 +1601,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     // Start the animation timer for background effects
     _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
@@ -964,7 +1708,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                       ).animate(_controller),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
@@ -1028,8 +1774,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  GameScreen(level: level),
+                                              builder: (context) => GameScreen(
+                                                level: level,
+                                              ),
                                             ),
                                           ).then((_) {
                                             _loadUnlockedLevel();
@@ -1072,8 +1819,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                       boxShadow: [
                                         BoxShadow(
                                           color: isUnlocked
-                                              ? const Color(0xFF4ECDC4)
-                                                  .withOpacity(0.3)
+                                              ? const Color(
+                                                  0xFF4ECDC4,
+                                                ).withOpacity(0.3)
                                               : Colors.black38,
                                           blurRadius: isHovered ? 12 : 5,
                                           spreadRadius: isHovered ? 2 : 0,
@@ -1081,8 +1829,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                       ],
                                       border: Border.all(
                                         color: isUnlocked
-                                            ? const Color(0xFF4ECDC4)
-                                                .withOpacity(0.5)
+                                            ? const Color(
+                                                0xFF4ECDC4,
+                                              ).withOpacity(0.5)
                                             : Colors.transparent,
                                         width: 1.5,
                                       ),
@@ -1104,7 +1853,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                           children: [
                                             AnimatedContainer(
                                               duration: const Duration(
-                                                  milliseconds: 200),
+                                                milliseconds: 200,
+                                              ),
                                               width: isHovered && isUnlocked
                                                   ? 60
                                                   : 55,
@@ -1114,13 +1864,16 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
                                                 color: isUnlocked
-                                                    ? const Color(0xFF4ECDC4)
-                                                        .withOpacity(0.2)
+                                                    ? const Color(
+                                                        0xFF4ECDC4,
+                                                      ).withOpacity(0.2)
                                                     : Colors.grey.shade700
                                                         .withOpacity(0.2),
                                                 border: Border.all(
                                                   color: isUnlocked
-                                                      ? const Color(0xFF4ECDC4)
+                                                      ? const Color(
+                                                          0xFF4ECDC4,
+                                                        )
                                                       : Colors.grey.shade600,
                                                   width: 1.5,
                                                 ),
@@ -1133,7 +1886,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                                     fontWeight: FontWeight.bold,
                                                     color: isUnlocked
                                                         ? const Color(
-                                                            0xFF4ECDC4)
+                                                            0xFF4ECDC4,
+                                                          )
                                                         : Colors.grey.shade400,
                                                   ),
                                                 ),
@@ -1148,9 +1902,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                                     level.dotsMove
                                                         ? Icons.moving
                                                         : Icons.grid_on,
-                                                    color:
-                                                        const Color(0xFF4ECDC4)
-                                                            .withOpacity(0.7),
+                                                    color: const Color(
+                                                      0xFF4ECDC4,
+                                                    ).withOpacity(0.7),
                                                     size: 14,
                                                   ),
                                                   const SizedBox(width: 5),
@@ -1168,7 +1922,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                             if (isUnlocked && highScore > 0)
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    top: 4.0),
+                                                  top: 4.0,
+                                                ),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -1198,8 +1953,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                         if (!isUnlocked)
                                           Container(
                                             decoration: BoxDecoration(
-                                              color:
-                                                  Colors.black.withOpacity(0.5),
+                                              color: Colors.black.withOpacity(
+                                                0.5,
+                                              ),
                                               borderRadius:
                                                   BorderRadius.circular(15),
                                             ),
@@ -1266,10 +2022,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
             const SizedBox(height: 15),
             const Text(
               'This will reset all level unlocks and high scores. This action cannot be undone.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.white70),
             ),
           ],
         ),
@@ -1278,9 +2031,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
             onPressed: () {
               Navigator.of(context).pop();
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white70,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.white70),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -1291,7 +2042,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE63946),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -1339,154 +2093,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
   }
 }
 
-// Circuit pattern background for level tiles
-class CircuitPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(12345);
-    final lineCount = 6;
-
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0
-      ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
-
-    // Draw a few curved lines to resemble circuits
-    for (int i = 0; i < lineCount; i++) {
-      final path = Path();
-
-      final startX = random.nextDouble() * size.width;
-      final startY = random.nextDouble() * size.height;
-
-      path.moveTo(startX, startY);
-
-      for (int j = 0; j < 2; j++) {
-        final endX = random.nextDouble() * size.width;
-        final endY = random.nextDouble() * size.height;
-
-        final controlX1 = startX + (endX - startX) * random.nextDouble();
-        final controlY1 = startY + (endY - startY) * random.nextDouble();
-
-        path.quadraticBezierTo(controlX1, controlY1, endX, endY);
-
-        // Draw small "nodes" at points
-        canvas.drawCircle(
-          Offset(endX, endY),
-          1.5,
-          Paint()..color = const Color(0xFF4ECDC4).withOpacity(0.3),
-        );
-      }
-
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Background animations for level selection screen
-class LevelSelectBackgroundPainter extends CustomPainter {
-  final double time;
-  final Random _random = Random(42);
-
-  LevelSelectBackgroundPainter(this.time);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Draw flowing lines background
-    _drawFlowingLines(canvas, size);
-
-    // Draw subtle wave at bottom
-    _drawWave(canvas, size);
-
-    // Draw glowing particles
-    _drawGlowingParticles(canvas, size);
-  }
-
-  void _drawFlowingLines(Canvas canvas, Size size) {
-    final lineCount = 10;
-    final lineWidth = 1.0;
-
-    for (int i = 0; i < lineCount; i++) {
-      final y = (size.height / (lineCount + 1)) * (i + 1);
-      final path = Path();
-
-      path.moveTo(0, y);
-
-      final amplitude = 20.0 + _random.nextDouble() * 20;
-      final frequency = 0.01 + _random.nextDouble() * 0.01;
-      final phase = time * (0.1 + _random.nextDouble() * 0.2) + i;
-
-      for (double x = 0; x <= size.width; x += 5) {
-        path.lineTo(x, y + sin(x * frequency + phase) * amplitude);
-      }
-
-      final paint = Paint()
-        ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = lineWidth;
-
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  void _drawWave(Canvas canvas, Size size) {
-    final path = Path();
-
-    final baseY = size.height * 0.9;
-    path.moveTo(0, baseY);
-
-    for (double x = 0; x <= size.width; x += 5) {
-      final dx1 = sin(x * 0.01 + time * 0.2) * 15;
-      final dx2 = sin(x * 0.02 + time * 0.1) * 10;
-      path.lineTo(x, baseY + dx1 + dx2);
-    }
-
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    final paint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          const Color(0xFF4ECDC4).withOpacity(0.2),
-          const Color(0xFF4ECDC4).withOpacity(0),
-        ],
-      ).createShader(Rect.fromLTWH(0, baseY, size.width, size.height - baseY));
-
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawGlowingParticles(Canvas canvas, Size size) {
-    const particleCount = 30;
-
-    for (int i = 0; i < particleCount; i++) {
-      final x = ((time * (0.1 + i * 0.01)) % 2) * size.width;
-      final y = ((i * 37) % size.height) + sin(time + i) * 20;
-
-      final radius = 1.5 + sin(time * 0.8 + i) * 1.0;
-
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(0.6),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-        ).createShader(
-            Rect.fromCircle(center: Offset(x, y), radius: radius * 4));
-
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant LevelSelectBackgroundPainter oldDelegate) {
-    return oldDelegate.time != time;
-  }
-}
+//------------------------------------------------------------------------------
+// GAME SCREEN AND LOGIC
+//------------------------------------------------------------------------------
 
 class GameScreen extends StatefulWidget {
   final GameLevel level;
@@ -1542,18 +2151,22 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _setupBackground();
 
     // Start background animation timer
-    _backgroundAnimationTimer =
-        Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      _backgroundTimeNotifier.value += 0.016;
-    });
+    _backgroundAnimationTimer = Timer.periodic(
+      const Duration(milliseconds: 16),
+      (timer) {
+        _backgroundTimeNotifier.value += 0.016;
+      },
+    );
   }
 
   void _setupBackground() {
     // Generate background particles
     _backgroundParticles = List.generate(30, (index) {
       return ParticleDot(
-        position:
-            Offset(random.nextDouble() * 1000, random.nextDouble() * 2000),
+        position: Offset(
+          random.nextDouble() * 1000,
+          random.nextDouble() * 2000,
+        ),
         size: 1.0 + random.nextDouble() * 2.0,
         opacity: 0.1 + random.nextDouble() * 0.2,
         speed: 0.1 + random.nextDouble() * 0.2,
@@ -1720,7 +2333,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
       // Find a position that doesn't overlap with other dots
       final newPosition = _findNonOverlappingPosition(
-          i, safeWidth, safeTop, safeBottom, dotSize);
+        i,
+        safeWidth,
+        safeTop,
+        safeBottom,
+        dotSize,
+      );
 
       // Create tween animation
       final animation = Tween<Offset>(
@@ -1745,7 +2363,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         if (status == AnimationStatus.completed && mounted && i < dots.length) {
           // Find a new non-overlapping position
           final newPosition = _findNonOverlappingPosition(
-              i, safeWidth, safeTop, safeBottom, dotSize);
+            i,
+            safeWidth,
+            safeTop,
+            safeBottom,
+            dotSize,
+          );
 
           // Create a new tween animation with new positions
           final newAnimation = Tween<Offset>(
@@ -1776,8 +2399,13 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   // New helper method to find a position that doesn't overlap with other dots
-  Offset _findNonOverlappingPosition(int dotIndex, double safeWidth,
-      double safeTop, double safeBottom, double dotSize) {
+  Offset _findNonOverlappingPosition(
+    int dotIndex,
+    double safeWidth,
+    double safeTop,
+    double safeBottom,
+    double dotSize,
+  ) {
     const maxAttempts = 30;
     int attempts = 0;
 
@@ -1811,8 +2439,10 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // If we couldn't find a non-overlapping position after max attempts,
     // just return a random position and hope for the best
-    return Offset(random.nextDouble() * safeWidth,
-        safeTop + random.nextDouble() * (safeBottom - safeTop));
+    return Offset(
+      random.nextDouble() * safeWidth,
+      safeTop + random.nextDouble() * (safeBottom - safeTop),
+    );
   }
 
   void _showSequence() {
@@ -2236,11 +2866,15 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
               // Lives display with enhanced styling - moved down a bit
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black12,
                     borderRadius: BorderRadius.circular(15),
@@ -2281,8 +2915,10 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 decoration: BoxDecoration(
                   color: showingSequence
@@ -2359,8 +2995,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 BoxShadow(
                                   color: dot.isHighlighted
                                       ? Colors.orange.withOpacity(0.8)
-                                      : const Color(0xFF4ECDC4)
-                                          .withOpacity(0.4),
+                                      : const Color(
+                                          0xFF4ECDC4,
+                                        ).withOpacity(0.4),
                                   blurRadius: dot.isHighlighted ? 20 : 10,
                                   spreadRadius: dot.isHighlighted ? 5 : 1,
                                 ),
@@ -2465,592 +3102,5 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       controller.dispose();
     }
     super.dispose();
-  }
-}
-
-// Dot data class
-class Dot {
-  final int id;
-  final Offset position;
-  final double size;
-  final bool isActive;
-  final bool isHighlighted;
-
-  Dot({
-    required this.id,
-    required this.position,
-    required this.size,
-    required this.isActive,
-    required this.isHighlighted,
-  });
-
-  Dot copyWith({
-    int? id,
-    Offset? position,
-    double? size,
-    bool? isActive,
-    bool? isHighlighted,
-  }) {
-    return Dot(
-      id: id ?? this.id,
-      position: position ?? this.position,
-      size: size ?? this.size,
-      isActive: isActive ?? this.isActive,
-      isHighlighted: isHighlighted ?? this.isHighlighted,
-    );
-  }
-}
-
-class LevelAchievement {
-  final bool isNewHighScore;
-  final bool isNewLevelUnlocked;
-  final int previousHighScore;
-
-  LevelAchievement({
-    required this.isNewHighScore,
-    required this.isNewLevelUnlocked,
-    required this.previousHighScore,
-  });
-
-  // A special achievement is either a new high score or unlocking a new level
-  bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
-}
-
-// Node model for background particles
-class ParticleNode {
-  Offset position;
-  final double size;
-  final double speed;
-  double angle; // Direction angle
-  final double opacity;
-
-  ParticleNode({
-    required this.position,
-    required this.size,
-    required this.speed,
-    required this.angle,
-    required this.opacity,
-  });
-
-  void update(double time, Size screenSize) {
-    // Move node slowly in its direction
-    position = Offset(
-      position.dx + cos(angle) * speed,
-      position.dy + sin(angle) * speed,
-    );
-
-    // Wrap around when going off screen
-    if (position.dx < -50)
-      position = Offset(screenSize.width + 50, position.dy);
-    if (position.dx > screenSize.width + 50)
-      position = Offset(-50, position.dy);
-    if (position.dy < -50)
-      position = Offset(position.dx, screenSize.height + 50);
-    if (position.dy > screenSize.height + 50)
-      position = Offset(position.dx, -50);
-
-    // Slightly adjust angle for smooth movement
-    angle += (sin(time * 0.5) * 0.03);
-  }
-}
-
-// Connection between nodes
-class Connection {
-  final int startNodeIndex;
-  final int endNodeIndex;
-  final double maxDistance;
-  final double thickness;
-
-  Connection({
-    required this.startNodeIndex,
-    required this.endNodeIndex,
-    required this.maxDistance,
-    required this.thickness,
-  });
-}
-
-// Network background painter
-class NetworkBackgroundPainter extends CustomPainter {
-  final List<ParticleNode> nodes;
-  final List<Connection> connections;
-  final double time;
-  final Size size;
-
-  NetworkBackgroundPainter({
-    required this.nodes,
-    required this.connections,
-    required this.time,
-    required this.size,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Update nodes
-    for (final node in nodes) {
-      node.update(time, size);
-    }
-
-    // Draw connections
-    for (final connection in connections) {
-      final startNode = nodes[connection.startNodeIndex];
-      final endNode = nodes[connection.endNodeIndex];
-
-      final distance = (startNode.position - endNode.position).distance;
-
-      if (distance <= connection.maxDistance) {
-        // Calculate opacity based on distance
-        final opacity = 1.0 - (distance / connection.maxDistance);
-
-        // Create a gradient for the connection line
-        final paint = Paint()
-          ..shader = LinearGradient(
-            colors: [
-              const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
-              const Color(0xFF0D3445).withOpacity(opacity * 0.3),
-            ],
-          ).createShader(Rect.fromPoints(
-            startNode.position,
-            endNode.position,
-          ))
-          ..strokeWidth = connection.thickness * opacity
-          ..strokeCap = StrokeCap.round;
-
-        // Draw the connection
-        canvas.drawLine(startNode.position, endNode.position, paint);
-      }
-    }
-
-    // Draw nodes
-    for (final node in nodes) {
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(node.opacity),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-        ).createShader(Rect.fromCircle(
-          center: node.position,
-          radius: node.size * 4,
-        ));
-
-      canvas.drawCircle(node.position, node.size, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant NetworkBackgroundPainter oldDelegate) {
-    return oldDelegate.time != time;
-  }
-}
-
-// Light rays painter
-class LightRaysPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final width = size.width;
-    final height = size.height;
-
-    // Origin point for light rays
-    final origin = Offset(width * 0.5, height * -0.2);
-
-    // Create rays with varying lengths and angles
-    for (int i = 0; i < 8; i++) {
-      final angle = (pi * i / 8) + (pi / 16);
-      final rayLength = height * 1.5;
-
-      final endX = origin.dx + cos(angle) * rayLength;
-      final endY = origin.dy + sin(angle) * rayLength;
-
-      final rayPath = Path()
-        ..moveTo(origin.dx, origin.dy)
-        ..lineTo(endX, endY)
-        ..lineTo(endX + width * 0.15, endY)
-        ..lineTo(origin.dx, origin.dy)
-        ..close();
-
-      final rayPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF135777).withOpacity(0.3),
-            const Color(0xFF135777).withOpacity(0),
-          ],
-        ).createShader(Rect.fromPoints(
-          origin,
-          Offset(endX, endY),
-        ));
-
-      canvas.drawPath(rayPath, rayPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Subtle waves painter
-class SubtleWavesPainter extends CustomPainter {
-  final double time;
-
-  SubtleWavesPainter(this.time);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final width = size.width;
-    final height = size.height;
-
-    // Draw multiple layers of subtle waves
-    _drawWave(
-      canvas: canvas,
-      width: width,
-      height: height,
-      amplitude: 20,
-      frequency: 0.015,
-      phase: time * 0.2,
-      yPosition: height * 0.75,
-      color: const Color(0xFF4ECDC4).withOpacity(0.1),
-    );
-
-    _drawWave(
-      canvas: canvas,
-      width: width,
-      height: height,
-      amplitude: 15,
-      frequency: 0.02,
-      phase: time * -0.15,
-      yPosition: height * 0.6,
-      color: const Color(0xFF135777).withOpacity(0.07),
-    );
-
-    _drawWave(
-      canvas: canvas,
-      width: width,
-      height: height,
-      amplitude: 30,
-      frequency: 0.01,
-      phase: time * 0.1,
-      yPosition: height * 0.9,
-      color: const Color(0xFF0D3445).withOpacity(0.05),
-    );
-  }
-
-  void _drawWave({
-    required Canvas canvas,
-    required double width,
-    required double height,
-    required double amplitude,
-    required double frequency,
-    required double phase,
-    required double yPosition,
-    required Color color,
-  }) {
-    final path = Path();
-
-    // Start from left bottom
-    path.moveTo(0, height);
-
-    // Draw wave
-    for (double x = 0; x <= width; x += 5) {
-      final y = yPosition + sin(x * frequency + phase) * amplitude;
-      path.lineTo(x, y);
-    }
-
-    // Complete path
-    path.lineTo(width, height);
-    path.lineTo(0, height);
-    path.close();
-
-    // Fill with gradient
-    final paint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          color,
-          color.withOpacity(0),
-        ],
-      ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
-      ..style = PaintingStyle.fill;
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant SubtleWavesPainter oldDelegate) {
-    return oldDelegate.time != time;
-  }
-}
-
-// Hexagonal pattern painter for logo background
-class HexagonalPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
-    final radius = min(size.width, size.height) / 2;
-    final random = Random(12345); // Fixed seed for consistent pattern
-
-    // Draw hexagons around the circle
-    for (int ring = 0; ring < 2; ring++) {
-      final ringRadius = radius * (0.65 + ring * 0.3);
-      final hexCount = 6 + ring * 2;
-
-      for (int i = 0; i < hexCount; i++) {
-        final angle = (2 * pi * i / hexCount);
-        final x = centerX + cos(angle) * ringRadius;
-        final y = centerY + sin(angle) * ringRadius;
-
-        // Draw hexagon
-        _drawHexagon(
-          canvas,
-          x,
-          y,
-          5 + random.nextDouble() * 5,
-          const Color(0xFF4ECDC4).withOpacity(0.2 + random.nextDouble() * 0.2),
-        );
-      }
-    }
-
-    // Draw circuit-like connections
-    final now = DateTime.now().millisecondsSinceEpoch / 1000;
-    final paint = Paint()
-      ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    for (int i = 0; i < 12; i++) {
-      final angle1 = (2 * pi * i / 12);
-      final angle2 = angle1 + pi / 6 + random.nextDouble() * (pi / 3);
-
-      final r1 = radius * 0.7;
-      final r2 = radius * 0.9;
-
-      final x1 = centerX + cos(angle1) * r1;
-      final y1 = centerY + sin(angle1) * r1;
-
-      final x2 = centerX + cos(angle2) * r2;
-      final y2 = centerY + sin(angle2) * r2;
-
-      // Add pulsating effect based on time
-      final glow = (sin(now + i) + 1) / 2;
-      paint.color = const Color(0xFF4ECDC4).withOpacity(0.3 + glow * 0.3);
-
-      // Draw path with curve for circuit-like effect
-      final path = Path();
-      path.moveTo(x1, y1);
-
-      final ctrlX = (x1 + x2) / 2 + (random.nextDouble() - 0.5) * 20;
-      final ctrlY = (y1 + y2) / 2 + (random.nextDouble() - 0.5) * 20;
-
-      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
-      canvas.drawPath(path, paint);
-
-      // Draw small nodes at the ends
-      final nodePaint = Paint()
-        ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
-        ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x1, y1), 2, nodePaint);
-      canvas.drawCircle(Offset(x2, y2), 2, nodePaint);
-    }
-  }
-
-  void _drawHexagon(
-      Canvas canvas, double x, double y, double size, Color color) {
-    final path = Path();
-
-    for (int i = 0; i < 6; i++) {
-      final angle = (pi / 3) * i;
-      final xPoint = x + cos(angle) * size;
-      final yPoint = y + sin(angle) * size;
-
-      if (i == 0) {
-        path.moveTo(xPoint, yPoint);
-      } else {
-        path.lineTo(xPoint, yPoint);
-      }
-    }
-
-    path.close();
-
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// Background particle dot for game screen
-class ParticleDot {
-  Offset position;
-  final double size;
-  final double opacity;
-  final double speed;
-  double angle;
-
-  ParticleDot({
-    required this.position,
-    required this.size,
-    required this.opacity,
-    required this.speed,
-    required this.angle,
-  });
-
-  void update(double time, Size screenSize) {
-    // Apply slow movement in the dot's direction
-    position = Offset(
-      position.dx + cos(angle) * speed,
-      position.dy + sin(angle) * speed,
-    );
-
-    // Wrap around screen edges
-    if (position.dx < -50)
-      position = Offset(screenSize.width + 50, position.dy);
-    if (position.dx > screenSize.width + 50)
-      position = Offset(-50, position.dy);
-    if (position.dy < -50)
-      position = Offset(position.dx, screenSize.height + 50);
-    if (position.dy > screenSize.height + 50)
-      position = Offset(position.dx, -50);
-
-    // Slightly vary the angle for wandering effect
-    angle += sin(time * 0.3) * 0.02;
-  }
-}
-
-// Game background painter for animated background
-class GameBackgroundPainter extends CustomPainter {
-  final double time;
-  final List<ParticleDot> particles;
-
-  GameBackgroundPainter({
-    required this.time,
-    required this.particles,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Update particle positions
-    for (final particle in particles) {
-      particle.update(time, size);
-    }
-
-    // Draw subtle background grid
-    _drawGrid(canvas, size);
-
-    // Draw flowing particles
-    _drawParticles(canvas, size);
-
-    // Draw subtle pulsating glow at bottom
-    _drawBottomGlow(canvas, size);
-  }
-
-  void _drawGrid(Canvas canvas, Size size) {
-    final lineCount = 10;
-    final horizontalSpacing = size.width / lineCount;
-    final verticalSpacing = size.height / lineCount;
-
-    final paint = Paint()
-      ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
-
-    // Draw vertical lines
-    for (int i = 1; i < lineCount; i++) {
-      final x = horizontalSpacing * i;
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        paint,
-      );
-    }
-
-    // Draw horizontal lines
-    for (int i = 1; i < lineCount; i++) {
-      final y = verticalSpacing * i;
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        paint,
-      );
-    }
-  }
-
-  void _drawParticles(Canvas canvas, Size size) {
-    for (final particle in particles) {
-      // Make opacity pulsate slightly
-      final pulsingOpacity = particle.opacity *
-          (0.7 + sin(time + particle.position.dx * 0.01) * 0.3);
-
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-        ).createShader(
-          Rect.fromCircle(
-            center: particle.position,
-            radius: particle.size * 6,
-          ),
-        );
-
-      canvas.drawCircle(particle.position, particle.size, paint);
-    }
-
-    // Draw connections between some nearby particles
-    for (int i = 0; i < particles.length; i++) {
-      for (int j = i + 1; j < particles.length; j++) {
-        final distance =
-            (particles[i].position - particles[j].position).distance;
-        if (distance < 100) {
-          final opacity = (1 - distance / 100) * 0.1;
-
-          final paint = Paint()
-            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
-            ..strokeWidth = 0.5
-            ..style = PaintingStyle.stroke;
-
-          canvas.drawLine(particles[i].position, particles[j].position, paint);
-        }
-      }
-    }
-  }
-
-  void _drawBottomGlow(Canvas canvas, Size size) {
-    final centerY = size.height * 0.9;
-    final glowRadius = size.width * 0.8;
-    final glowOpacity = 0.05 + sin(time * 0.5) * 0.02;
-
-    final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFF4ECDC4).withOpacity(glowOpacity),
-          Colors.transparent,
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width / 2, centerY),
-          radius: glowRadius,
-        ),
-      );
-
-    canvas.drawCircle(
-      Offset(size.width / 2, centerY),
-      glowRadius,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant GameBackgroundPainter oldDelegate) {
-    return oldDelegate.time != time;
   }
 }
