@@ -438,10 +438,8 @@ class _StartScreenState extends State<StartScreen>
                     return Opacity(
                       opacity: _scoreOpacityAnimation.value,
                       child: Transform.translate(
-                        offset: Offset(
-                          0,
-                          20 * (1 - _scoreOpacityAnimation.value),
-                        ),
+                        offset:
+                            Offset(0, 20 * (1 - _scoreOpacityAnimation.value)),
                         child: child,
                       ),
                     );
@@ -452,9 +450,7 @@ class _StartScreenState extends State<StartScreen>
                       if (snapshot.hasData) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
+                              horizontal: 20, vertical: 10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
                             color: Colors.white.withOpacity(0.1),
@@ -548,8 +544,7 @@ class WaveBackgroundPainter extends CustomPainter {
       final baseY = size.height - waveHeight;
 
       for (double x = 0; x <= size.width; x += 5) {
-        final y =
-            baseY +
+        final y = baseY +
             sin(x * layer.frequency + layer.phase + time * layer.speed) *
                 layer.amplitude;
         path.lineTo(x, y);
@@ -561,18 +556,17 @@ class WaveBackgroundPainter extends CustomPainter {
       path.close();
 
       // Fill wave with gradient
-      final paint =
-          Paint()
-            ..shader = LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                layer.color.withOpacity(0.6),
-                layer.color.withOpacity(0.3),
-                layer.color.withOpacity(0.1),
-              ],
-            ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
-            ..style = PaintingStyle.fill;
+      final paint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            layer.color.withOpacity(0.6),
+            layer.color.withOpacity(0.3),
+            layer.color.withOpacity(0.1),
+          ],
+        ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
+        ..style = PaintingStyle.fill;
 
       canvas.drawPath(path, paint);
     }
@@ -594,9 +588,10 @@ class LightSpotsPainter extends CustomPainter {
   LightSpotsPainter() {
     final random = Random();
     for (int i = 0; i < spotCount; i++) {
-      _positions.add(
-        Offset(random.nextDouble() * 1000, random.nextDouble() * 1000),
-      );
+      _positions.add(Offset(
+        random.nextDouble() * 1000,
+        random.nextDouble() * 1000,
+      ));
       _sizes.add(1 + random.nextDouble() * 4);
       _opacities.add(0.1 + random.nextDouble() * 0.5);
     }
@@ -612,23 +607,20 @@ class LightSpotsPainter extends CustomPainter {
       final dynamicOpacity = _opacities[i] * (0.7 + sin(now * pulseRate) * 0.3);
 
       // Create a radial gradient for each light spot
-      final paint =
-          Paint()
-            ..shader = RadialGradient(
-              colors: [
-                const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
-                const Color(0xFF4ECDC4).withOpacity(0),
-              ],
-              stops: const [0.0, 1.0],
-            ).createShader(
-              Rect.fromCircle(
-                center: Offset(
-                  _positions[i].dx % size.width,
-                  _positions[i].dy % size.height,
-                ),
-                radius: _sizes[i] * 4,
-              ),
-            );
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+          stops: const [0.0, 1.0],
+        ).createShader(
+          Rect.fromCircle(
+            center: Offset(
+                _positions[i].dx % size.width, _positions[i].dy % size.height),
+            radius: _sizes[i] * 4,
+          ),
+        );
 
       // Draw the light spot
       canvas.drawCircle(
@@ -664,14 +656,12 @@ class CircuitPainter extends CustomPainter {
       final y2 = centerY + sin(angle2) * radius * 0.9;
 
       // Line paint
-      final paint =
-          Paint()
-            ..color = const Color(
-              0xFF4ECDC4,
-            ).withOpacity(0.4 + random.nextDouble() * 0.3)
-            ..strokeWidth = 1 + random.nextDouble() * 1.5
-            ..strokeCap = StrokeCap.round
-            ..style = PaintingStyle.stroke;
+      final paint = Paint()
+        ..color =
+            const Color(0xFF4ECDC4).withOpacity(0.4 + random.nextDouble() * 0.3)
+        ..strokeWidth = 1 + random.nextDouble() * 1.5
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke;
 
       final now = DateTime.now().millisecondsSinceEpoch / 1000;
       final pulseRate = 0.5 + i * 0.1;
@@ -693,28 +683,25 @@ class CircuitPainter extends CustomPainter {
       canvas.drawPath(path, paint);
 
       // Add nodes at endpoints with glowing effect
-      final nodePaint =
-          Paint()
-            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
-            ..style = PaintingStyle.fill;
+      final nodePaint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+        ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x1, y1), 1.5, nodePaint);
       canvas.drawCircle(Offset(x2, y2), 2.0, nodePaint);
     }
 
     // Draw outer glowing ring
-    final ringPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..shader = RadialGradient(
-            colors: [
-              const Color(0xFF4ECDC4).withOpacity(0.8),
-              const Color(0xFF4ECDC4).withOpacity(0),
-            ],
-          ).createShader(
-            Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
-          );
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(0.8),
+          const Color(0xFF4ECDC4).withOpacity(0),
+        ],
+      ).createShader(
+          Rect.fromCircle(center: Offset(centerX, centerY), radius: radius));
 
     canvas.drawCircle(Offset(centerX, centerY), radius * 0.85, ringPaint);
   }
@@ -868,10 +855,12 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOut,
+      ),
+    );
 
     // Start the animation timer for background effects
     _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
@@ -975,9 +964,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                       ).animate(_controller),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                            horizontal: 20, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
@@ -1016,10 +1003,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                       child: GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
                         itemCount: gameLevels.length,
                         itemBuilder: (context, index) {
                           final level = gameLevels[index];
@@ -1035,23 +1022,20 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                 duration: const Duration(milliseconds: 200),
                                 scale: isHovered ? 1.05 : 1.0,
                                 child: GestureDetector(
-                                  onTap:
-                                      isUnlocked
-                                          ? () {
-                                            HapticFeedback.mediumImpact();
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) => GameScreen(
-                                                      level: level,
-                                                    ),
-                                              ),
-                                            ).then((_) {
-                                              _loadUnlockedLevel();
-                                            });
-                                          }
-                                          : null,
+                                  onTap: isUnlocked
+                                      ? () {
+                                          HapticFeedback.mediumImpact();
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  GameScreen(level: level),
+                                            ),
+                                          ).then((_) {
+                                            _loadUnlockedLevel();
+                                          });
+                                        }
+                                      : null,
                                   onTapDown: (_) {
                                     setState(() {
                                       _hoveredLevel = level.levelNumber;
@@ -1069,42 +1053,37 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      gradient:
-                                          isUnlocked
-                                              ? LinearGradient(
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                                colors: [
-                                                  const Color(0xFF125673),
-                                                  const Color(0xFF0D3445),
-                                                ],
-                                              )
-                                              : LinearGradient(
-                                                colors: [
-                                                  Colors.grey.shade800,
-                                                  Colors.grey.shade900,
-                                                ],
-                                              ),
+                                      gradient: isUnlocked
+                                          ? LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                const Color(0xFF125673),
+                                                const Color(0xFF0D3445),
+                                              ],
+                                            )
+                                          : LinearGradient(
+                                              colors: [
+                                                Colors.grey.shade800,
+                                                Colors.grey.shade900,
+                                              ],
+                                            ),
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color:
-                                              isUnlocked
-                                                  ? const Color(
-                                                    0xFF4ECDC4,
-                                                  ).withOpacity(0.3)
-                                                  : Colors.black38,
+                                          color: isUnlocked
+                                              ? const Color(0xFF4ECDC4)
+                                                  .withOpacity(0.3)
+                                              : Colors.black38,
                                           blurRadius: isHovered ? 12 : 5,
                                           spreadRadius: isHovered ? 2 : 0,
                                         ),
                                       ],
                                       border: Border.all(
-                                        color:
-                                            isUnlocked
-                                                ? const Color(
-                                                  0xFF4ECDC4,
-                                                ).withOpacity(0.5)
-                                                : Colors.transparent,
+                                        color: isUnlocked
+                                            ? const Color(0xFF4ECDC4)
+                                                .withOpacity(0.5)
+                                            : Colors.transparent,
                                         width: 1.5,
                                       ),
                                     ),
@@ -1125,34 +1104,24 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                           children: [
                                             AnimatedContainer(
                                               duration: const Duration(
-                                                milliseconds: 200,
-                                              ),
-                                              width:
-                                                  isHovered && isUnlocked
-                                                      ? 60
-                                                      : 55,
-                                              height:
-                                                  isHovered && isUnlocked
-                                                      ? 60
-                                                      : 55,
+                                                  milliseconds: 200),
+                                              width: isHovered && isUnlocked
+                                                  ? 60
+                                                  : 55,
+                                              height: isHovered && isUnlocked
+                                                  ? 60
+                                                  : 55,
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color:
-                                                    isUnlocked
-                                                        ? const Color(
-                                                          0xFF4ECDC4,
-                                                        ).withOpacity(0.2)
-                                                        : Colors.grey.shade700
-                                                            .withOpacity(0.2),
+                                                color: isUnlocked
+                                                    ? const Color(0xFF4ECDC4)
+                                                        .withOpacity(0.2)
+                                                    : Colors.grey.shade700
+                                                        .withOpacity(0.2),
                                                 border: Border.all(
-                                                  color:
-                                                      isUnlocked
-                                                          ? const Color(
-                                                            0xFF4ECDC4,
-                                                          )
-                                                          : Colors
-                                                              .grey
-                                                              .shade600,
+                                                  color: isUnlocked
+                                                      ? const Color(0xFF4ECDC4)
+                                                      : Colors.grey.shade600,
                                                   width: 1.5,
                                                 ),
                                               ),
@@ -1162,14 +1131,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                                   style: TextStyle(
                                                     fontSize: 26,
                                                     fontWeight: FontWeight.bold,
-                                                    color:
-                                                        isUnlocked
-                                                            ? const Color(
-                                                              0xFF4ECDC4,
-                                                            )
-                                                            : Colors
-                                                                .grey
-                                                                .shade400,
+                                                    color: isUnlocked
+                                                        ? const Color(
+                                                            0xFF4ECDC4)
+                                                        : Colors.grey.shade400,
                                                   ),
                                                 ),
                                               ),
@@ -1183,9 +1148,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                                     level.dotsMove
                                                         ? Icons.moving
                                                         : Icons.grid_on,
-                                                    color: const Color(
-                                                      0xFF4ECDC4,
-                                                    ).withOpacity(0.7),
+                                                    color:
+                                                        const Color(0xFF4ECDC4)
+                                                            .withOpacity(0.7),
                                                     size: 14,
                                                   ),
                                                   const SizedBox(width: 5),
@@ -1203,8 +1168,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                             if (isUnlocked && highScore > 0)
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                  top: 4.0,
-                                                ),
+                                                    top: 4.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -1234,9 +1198,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                         if (!isUnlocked)
                                           Container(
                                             decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(
-                                                0.5,
-                                              ),
+                                              color:
+                                                  Colors.black.withOpacity(0.5),
                                               borderRadius:
                                                   BorderRadius.circular(15),
                                             ),
@@ -1272,70 +1235,71 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
     HapticFeedback.mediumImpact();
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: const Color(0xFF0D3445),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: const Color(0xFF4ECDC4).withOpacity(0.5),
-                width: 2,
-              ),
-            ),
-            title: const Text(
-              'Reset All Progress?',
-              style: TextStyle(color: Colors.white),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.warning_rounded,
-                    color: Colors.orange,
-                    size: 50,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  'This will reset all level unlocks and high scores. This action cannot be undone.',
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.white70),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _resetAllProgress();
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE63946),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('Reset'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0D3445),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: const Color(0xFF4ECDC4).withOpacity(0.5),
+            width: 2,
           ),
+        ),
+        title: const Text(
+          'Reset All Progress?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.warning_rounded,
+                color: Colors.orange,
+                size: 50,
+              ),
+            ),
+            const SizedBox(height: 15),
+            const Text(
+              'This will reset all level unlocks and high scores. This action cannot be undone.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white70,
+            ),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _resetAllProgress();
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE63946),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1382,11 +1346,10 @@ class CircuitPatternPainter extends CustomPainter {
     final random = Random(12345);
     final lineCount = 6;
 
-    final paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0
-          ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
 
     // Draw a few curved lines to resemble circuits
     for (int i = 0; i < lineCount; i++) {
@@ -1459,11 +1422,10 @@ class LevelSelectBackgroundPainter extends CustomPainter {
         path.lineTo(x, y + sin(x * frequency + phase) * amplitude);
       }
 
-      final paint =
-          Paint()
-            ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = lineWidth;
+      final paint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = lineWidth;
 
       canvas.drawPath(path, paint);
     }
@@ -1485,18 +1447,15 @@ class LevelSelectBackgroundPainter extends CustomPainter {
     path.lineTo(0, size.height);
     path.close();
 
-    final paint =
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF4ECDC4).withOpacity(0.2),
-              const Color(0xFF4ECDC4).withOpacity(0),
-            ],
-          ).createShader(
-            Rect.fromLTWH(0, baseY, size.width, size.height - baseY),
-          );
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(0.2),
+          const Color(0xFF4ECDC4).withOpacity(0),
+        ],
+      ).createShader(Rect.fromLTWH(0, baseY, size.width, size.height - baseY));
 
     canvas.drawPath(path, paint);
   }
@@ -1510,16 +1469,14 @@ class LevelSelectBackgroundPainter extends CustomPainter {
 
       final radius = 1.5 + sin(time * 0.8 + i) * 1.0;
 
-      final paint =
-          Paint()
-            ..shader = RadialGradient(
-              colors: [
-                const Color(0xFF4ECDC4).withOpacity(0.6),
-                const Color(0xFF4ECDC4).withOpacity(0),
-              ],
-            ).createShader(
-              Rect.fromCircle(center: Offset(x, y), radius: radius * 4),
-            );
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(0.6),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+            Rect.fromCircle(center: Offset(x, y), radius: radius * 4));
 
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
@@ -1585,22 +1542,18 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _setupBackground();
 
     // Start background animation timer
-    _backgroundAnimationTimer = Timer.periodic(
-      const Duration(milliseconds: 16),
-      (timer) {
-        _backgroundTimeNotifier.value += 0.016;
-      },
-    );
+    _backgroundAnimationTimer =
+        Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      _backgroundTimeNotifier.value += 0.016;
+    });
   }
 
   void _setupBackground() {
     // Generate background particles
     _backgroundParticles = List.generate(30, (index) {
       return ParticleDot(
-        position: Offset(
-          random.nextDouble() * 1000,
-          random.nextDouble() * 2000,
-        ),
+        position:
+            Offset(random.nextDouble() * 1000, random.nextDouble() * 2000),
         size: 1.0 + random.nextDouble() * 2.0,
         opacity: 0.1 + random.nextDouble() * 0.2,
         speed: 0.1 + random.nextDouble() * 0.2,
@@ -1767,12 +1720,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
       // Find a position that doesn't overlap with other dots
       final newPosition = _findNonOverlappingPosition(
-        i,
-        safeWidth,
-        safeTop,
-        safeBottom,
-        dotSize,
-      );
+          i, safeWidth, safeTop, safeBottom, dotSize);
 
       // Create tween animation
       final animation = Tween<Offset>(
@@ -1797,12 +1745,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         if (status == AnimationStatus.completed && mounted && i < dots.length) {
           // Find a new non-overlapping position
           final newPosition = _findNonOverlappingPosition(
-            i,
-            safeWidth,
-            safeTop,
-            safeBottom,
-            dotSize,
-          );
+              i, safeWidth, safeTop, safeBottom, dotSize);
 
           // Create a new tween animation with new positions
           final newAnimation = Tween<Offset>(
@@ -1833,13 +1776,8 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   // New helper method to find a position that doesn't overlap with other dots
-  Offset _findNonOverlappingPosition(
-    int dotIndex,
-    double safeWidth,
-    double safeTop,
-    double safeBottom,
-    double dotSize,
-  ) {
+  Offset _findNonOverlappingPosition(int dotIndex, double safeWidth,
+      double safeTop, double safeBottom, double dotSize) {
     const maxAttempts = 30;
     int attempts = 0;
 
@@ -1873,10 +1811,8 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // If we couldn't find a non-overlapping position after max attempts,
     // just return a random position and hope for the best
-    return Offset(
-      random.nextDouble() * safeWidth,
-      safeTop + random.nextDouble() * (safeBottom - safeTop),
-    );
+    return Offset(random.nextDouble() * safeWidth,
+        safeTop + random.nextDouble() * (safeBottom - safeTop));
   }
 
   void _showSequence() {
@@ -2049,67 +1985,64 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder:
-            (context) => AlertDialog(
-              title: Text(
-                achievement.isSpecialAchievement
-                    ? 'Congratulations!'
-                    : 'Level Complete',
-                style: TextStyle(
-                  fontSize: 24,
-                  color:
-                      achievement.isSpecialAchievement
-                          ? Colors.green
-                          : Colors.blue,
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Level $level Completed!',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text('Final Score: $score'),
-                  Text('Time Bonus: +$timeBonus'),
-                  if (perfectBonus > 0) const Text('Perfect Level Bonus: +50'),
-                  const SizedBox(height: 15),
-                  if (achievement.isNewHighScore)
-                    Text(
-                      'New High Score! Previous best: ${achievement.previousHighScore}',
-                      style: const TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  if (achievement.isNewLevelUnlocked)
-                    const Text(
-                      'You\'ve unlocked the next level!',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
-                    Navigator.of(context).pop(); // Return to level selection
-                  },
-                  child: const Text(
-                    'Return to Menu',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
+        builder: (context) => AlertDialog(
+          title: Text(
+            achievement.isSpecialAchievement
+                ? 'Congratulations!'
+                : 'Level Complete',
+            style: TextStyle(
+              fontSize: 24,
+              color:
+                  achievement.isSpecialAchievement ? Colors.green : Colors.blue,
             ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Level $level Completed!',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text('Final Score: $score'),
+              Text('Time Bonus: +$timeBonus'),
+              if (perfectBonus > 0) const Text('Perfect Level Bonus: +50'),
+              const SizedBox(height: 15),
+              if (achievement.isNewHighScore)
+                Text(
+                  'New High Score! Previous best: ${achievement.previousHighScore}',
+                  style: const TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              if (achievement.isNewLevelUnlocked)
+                const Text(
+                  'You\'ve unlocked the next level!',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Return to level selection
+              },
+              child: const Text(
+                'Return to Menu',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
@@ -2161,38 +2094,37 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Game Over'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Final Score: $score'),
-                const SizedBox(height: 10),
-                const Text('Try again to complete this level!'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Return to level selection
-                },
-                child: const Text('Level Selection'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _initializeGame(); // Restart the current level
-                    _generateLevel();
-                  });
-                },
-                child: const Text('Try Again'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Game Over'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Final Score: $score'),
+            const SizedBox(height: 10),
+            const Text('Try again to complete this level!'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Return to level selection
+            },
+            child: const Text('Level Selection'),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _initializeGame(); // Restart the current level
+                _generateLevel();
+              });
+            },
+            child: const Text('Try Again'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2208,12 +2140,11 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void _showErrorAnimation() {
     // Flash the screen red
     OverlayEntry entry = OverlayEntry(
-      builder:
-          (context) => Positioned.fill(
-            child: Container(
-              color: Colors.red.withAlpha(76), // 0.3 opacity = 76/255
-            ),
-          ),
+      builder: (context) => Positioned.fill(
+        child: Container(
+          color: Colors.red.withAlpha(76), // 0.3 opacity = 76/255
+        ),
+      ),
     );
 
     Overlay.of(context).insert(entry);
@@ -2305,15 +2236,11 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
               // Lives display with enhanced styling - moved down a bit
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 16,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.black12,
                     borderRadius: BorderRadius.circular(15),
@@ -2354,18 +2281,13 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 decoration: BoxDecoration(
-                  color:
-                      showingSequence
-                          ? const Color(0xFF4ECDC4) // Now matches our theme
-                          : (awaitingInput
-                              ? Colors.green
-                              : Colors.grey.shade700),
+                  color: showingSequence
+                      ? const Color(0xFF4ECDC4) // Now matches our theme
+                      : (awaitingInput ? Colors.green : Colors.grey.shade700),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
@@ -2435,12 +2357,10 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color:
-                                      dot.isHighlighted
-                                          ? Colors.orange.withOpacity(0.8)
-                                          : const Color(
-                                            0xFF4ECDC4,
-                                          ).withOpacity(0.4),
+                                  color: dot.isHighlighted
+                                      ? Colors.orange.withOpacity(0.8)
+                                      : const Color(0xFF4ECDC4)
+                                          .withOpacity(0.4),
                                   blurRadius: dot.isHighlighted ? 20 : 10,
                                   spreadRadius: dot.isHighlighted ? 5 : 1,
                                 ),
@@ -2483,15 +2403,13 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color:
-                                        countdownNumber == 0
-                                            ? Colors.green.withOpacity(0.3)
-                                            : Colors.blue.withOpacity(0.3),
+                                    color: countdownNumber == 0
+                                        ? Colors.green.withOpacity(0.3)
+                                        : Colors.blue.withOpacity(0.3),
                                     border: Border.all(
-                                      color:
-                                          countdownNumber == 0
-                                              ? Colors.green
-                                              : Colors.blue,
+                                      color: countdownNumber == 0
+                                          ? Colors.green
+                                          : Colors.blue,
                                       width: 3,
                                     ),
                                     boxShadow: [
@@ -2684,18 +2602,18 @@ class NetworkBackgroundPainter extends CustomPainter {
         final opacity = 1.0 - (distance / connection.maxDistance);
 
         // Create a gradient for the connection line
-        final paint =
-            Paint()
-              ..shader = LinearGradient(
-                colors: [
-                  const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
-                  const Color(0xFF0D3445).withOpacity(opacity * 0.3),
-                ],
-              ).createShader(
-                Rect.fromPoints(startNode.position, endNode.position),
-              )
-              ..strokeWidth = connection.thickness * opacity
-              ..strokeCap = StrokeCap.round;
+        final paint = Paint()
+          ..shader = LinearGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
+              const Color(0xFF0D3445).withOpacity(opacity * 0.3),
+            ],
+          ).createShader(Rect.fromPoints(
+            startNode.position,
+            endNode.position,
+          ))
+          ..strokeWidth = connection.thickness * opacity
+          ..strokeCap = StrokeCap.round;
 
         // Draw the connection
         canvas.drawLine(startNode.position, endNode.position, paint);
@@ -2704,16 +2622,16 @@ class NetworkBackgroundPainter extends CustomPainter {
 
     // Draw nodes
     for (final node in nodes) {
-      final paint =
-          Paint()
-            ..shader = RadialGradient(
-              colors: [
-                const Color(0xFF4ECDC4).withOpacity(node.opacity),
-                const Color(0xFF4ECDC4).withOpacity(0),
-              ],
-            ).createShader(
-              Rect.fromCircle(center: node.position, radius: node.size * 4),
-            );
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(node.opacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(Rect.fromCircle(
+          center: node.position,
+          radius: node.size * 4,
+        ));
 
       canvas.drawCircle(node.position, node.size, paint);
     }
@@ -2743,24 +2661,25 @@ class LightRaysPainter extends CustomPainter {
       final endX = origin.dx + cos(angle) * rayLength;
       final endY = origin.dy + sin(angle) * rayLength;
 
-      final rayPath =
-          Path()
-            ..moveTo(origin.dx, origin.dy)
-            ..lineTo(endX, endY)
-            ..lineTo(endX + width * 0.15, endY)
-            ..lineTo(origin.dx, origin.dy)
-            ..close();
+      final rayPath = Path()
+        ..moveTo(origin.dx, origin.dy)
+        ..lineTo(endX, endY)
+        ..lineTo(endX + width * 0.15, endY)
+        ..lineTo(origin.dx, origin.dy)
+        ..close();
 
-      final rayPaint =
-          Paint()
-            ..shader = LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                const Color(0xFF135777).withOpacity(0.3),
-                const Color(0xFF135777).withOpacity(0),
-              ],
-            ).createShader(Rect.fromPoints(origin, Offset(endX, endY)));
+      final rayPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF135777).withOpacity(0.3),
+            const Color(0xFF135777).withOpacity(0),
+          ],
+        ).createShader(Rect.fromPoints(
+          origin,
+          Offset(endX, endY),
+        ));
 
       canvas.drawPath(rayPath, rayPaint);
     }
@@ -2843,14 +2762,16 @@ class SubtleWavesPainter extends CustomPainter {
     path.close();
 
     // Fill with gradient
-    final paint =
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [color, color.withOpacity(0)],
-          ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
-          ..style = PaintingStyle.fill;
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          color,
+          color.withOpacity(0),
+        ],
+      ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
+      ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, paint);
   }
@@ -2893,12 +2814,11 @@ class HexagonalPatternPainter extends CustomPainter {
 
     // Draw circuit-like connections
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
-    final paint =
-        Paint()
-          ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
-          ..strokeWidth = 1.5
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
+    final paint = Paint()
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
     for (int i = 0; i < 12; i++) {
       final angle1 = (2 * pi * i / 12);
@@ -2928,10 +2848,9 @@ class HexagonalPatternPainter extends CustomPainter {
       canvas.drawPath(path, paint);
 
       // Draw small nodes at the ends
-      final nodePaint =
-          Paint()
-            ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
-            ..style = PaintingStyle.fill;
+      final nodePaint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
+        ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x1, y1), 2, nodePaint);
       canvas.drawCircle(Offset(x2, y2), 2, nodePaint);
@@ -2939,12 +2858,7 @@ class HexagonalPatternPainter extends CustomPainter {
   }
 
   void _drawHexagon(
-    Canvas canvas,
-    double x,
-    double y,
-    double size,
-    Color color,
-  ) {
+      Canvas canvas, double x, double y, double size, Color color) {
     final path = Path();
 
     for (int i = 0; i < 6; i++) {
@@ -2961,11 +2875,10 @@ class HexagonalPatternPainter extends CustomPainter {
 
     path.close();
 
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = 1.5
-          ..style = PaintingStyle.stroke;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
 
     canvas.drawPath(path, paint);
   }
@@ -3017,7 +2930,10 @@ class GameBackgroundPainter extends CustomPainter {
   final double time;
   final List<ParticleDot> particles;
 
-  GameBackgroundPainter({required this.time, required this.particles});
+  GameBackgroundPainter({
+    required this.time,
+    required this.particles,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -3041,45 +2957,50 @@ class GameBackgroundPainter extends CustomPainter {
     final horizontalSpacing = size.width / lineCount;
     final verticalSpacing = size.height / lineCount;
 
-    final paint =
-        Paint()
-          ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.5;
+    final paint = Paint()
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
 
     // Draw vertical lines
     for (int i = 1; i < lineCount; i++) {
       final x = horizontalSpacing * i;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
     }
 
     // Draw horizontal lines
     for (int i = 1; i < lineCount; i++) {
       final y = verticalSpacing * i;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
     }
   }
 
   void _drawParticles(Canvas canvas, Size size) {
     for (final particle in particles) {
       // Make opacity pulsate slightly
-      final pulsingOpacity =
-          particle.opacity *
+      final pulsingOpacity = particle.opacity *
           (0.7 + sin(time + particle.position.dx * 0.01) * 0.3);
 
-      final paint =
-          Paint()
-            ..shader = RadialGradient(
-              colors: [
-                const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
-                const Color(0xFF4ECDC4).withOpacity(0),
-              ],
-            ).createShader(
-              Rect.fromCircle(
-                center: particle.position,
-                radius: particle.size * 6,
-              ),
-            );
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(
+            center: particle.position,
+            radius: particle.size * 6,
+          ),
+        );
 
       canvas.drawCircle(particle.position, particle.size, paint);
     }
@@ -3092,11 +3013,10 @@ class GameBackgroundPainter extends CustomPainter {
         if (distance < 100) {
           final opacity = (1 - distance / 100) * 0.1;
 
-          final paint =
-              Paint()
-                ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
-                ..strokeWidth = 0.5
-                ..style = PaintingStyle.stroke;
+          final paint = Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+            ..strokeWidth = 0.5
+            ..style = PaintingStyle.stroke;
 
           canvas.drawLine(particles[i].position, particles[j].position, paint);
         }
@@ -3109,21 +3029,24 @@ class GameBackgroundPainter extends CustomPainter {
     final glowRadius = size.width * 0.8;
     final glowOpacity = 0.05 + sin(time * 0.5) * 0.02;
 
-    final paint =
-        Paint()
-          ..shader = RadialGradient(
-            colors: [
-              const Color(0xFF4ECDC4).withOpacity(glowOpacity),
-              Colors.transparent,
-            ],
-          ).createShader(
-            Rect.fromCircle(
-              center: Offset(size.width / 2, centerY),
-              radius: glowRadius,
-            ),
-          );
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(glowOpacity),
+          Colors.transparent,
+        ],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(size.width / 2, centerY),
+          radius: glowRadius,
+        ),
+      );
 
-    canvas.drawCircle(Offset(size.width / 2, centerY), glowRadius, paint);
+    canvas.drawCircle(
+      Offset(size.width / 2, centerY),
+      glowRadius,
+      paint,
+    );
   }
 
   @override
