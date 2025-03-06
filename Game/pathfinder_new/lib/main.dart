@@ -3332,7 +3332,7 @@ class GameResultsScreen extends StatelessWidget {
                   elevation: 6,
                 ),
                 child: const Text(
-                  'Continue',
+                  'Menu',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
