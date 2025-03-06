@@ -1,10 +1,20 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
   runApp(const PathFinderApp());
 }
 
@@ -16,7 +26,12 @@ class PathFinderApp extends StatelessWidget {
     return MaterialApp(
       title: 'Path Finder',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xFF0D3445),
+        scaffoldBackgroundColor: const Color(0xFF0D3445),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0D3445),
+          brightness: Brightness.dark,
+        ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const StartScreen(),
@@ -138,84 +153,352 @@ final List<GameLevel> gameLevels = [
   ),
 ];
 
-class StartScreen extends StatelessWidget {
+class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
 
   @override
+  State<StartScreen> createState() => _StartScreenState();
+}
+
+class _StartScreenState extends State<StartScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _logoScaleAnimation;
+  late Animation<double> _logoOpacityAnimation;
+  late Animation<double> _buttonScaleAnimation;
+  late Animation<double> _buttonOpacityAnimation;
+  late Animation<double> _scoreOpacityAnimation;
+
+  // For new background animation
+  final List<WaveLayer> _waveLayers = [];
+  final Random _random = Random();
+  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
+  Timer? _animationTimer;
+
+  // Background animation variables
+
+  // Dynamic background effects
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize animation controller
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2500),
+      vsync: this,
+    );
+
+    // Logo animations - delayed start, elastic finish
+    _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
+      ),
+    );
+
+    _logoOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
+      ),
+    );
+
+    // Button animations - start after logo
+    _buttonScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 0.8, curve: Curves.elasticOut),
+      ),
+    );
+
+    _buttonOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 0.6, curve: Curves.easeIn),
+      ),
+    );
+
+    // Score animation - last to appear
+    _scoreOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.7, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
+    // Generate wave layers for background animation
+    _generateWaveLayers();
+
+    // Start the animation timer for waves
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      _timeNotifier.value += 0.016; // Increments time for wave animation
+    });
+
+    // Start the entrance animation
+    _controller.forward();
+  }
+
+  void _generateWaveLayers() {
+    // Color scheme based on the #0D3445 theme with slight variations
+    final List<Color> baseColors = [
+      const Color(0xFF0D3445),
+      const Color(0xFF125673),
+      const Color(0xFF1A789B),
+      const Color(0xFF4ECDC4),
+    ];
+
+    // Create multiple wave layers with different properties
+    for (int i = 0; i < 5; i++) {
+      final baseColor = baseColors[_random.nextInt(baseColors.length)];
+
+      _waveLayers.add(
+        WaveLayer(
+          color: baseColor.withOpacity(0.07 + _random.nextDouble() * 0.08),
+          speed: 0.3 + _random.nextDouble() * 0.7,
+          amplitude: 20 + _random.nextDouble() * 40,
+          frequency: 0.005 + _random.nextDouble() * 0.01,
+          phase: _random.nextDouble() * pi * 2,
+          heightFactor: 0.5 + _random.nextDouble() * 0.5,
+        ),
+      );
+    }
+  }
+
+  // Removed unused _setupBackground method
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _animationTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade800, Colors.blue.shade200],
+      body: Stack(
+        children: [
+          // Base gradient background
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF0D3445),
+                  const Color(0xFF0A2A38),
+                  const Color(0xFF061A25),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'PATH FINDER',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 10.0,
-                      color: Colors.black38,
-                      offset: Offset(5.0, 5.0),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LevelSelectionScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 50,
-                    vertical: 15,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text(
-                  'Start Game',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              FutureBuilder<int>(
-                future: _getHighScore(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(
-                      'High Score: ${snapshot.data}',
-                      style: const TextStyle(fontSize: 18, color: Colors.white),
+
+          // Dynamic wave background
+          ValueListenableBuilder(
+            valueListenable: _timeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: WaveBackgroundPainter(_waveLayers, time),
+              );
+            },
+          ),
+
+          // Floating light particles
+          CustomPaint(
+            size: Size(size.width, size.height),
+            painter: LightSpotsPainter(),
+          ),
+
+          // Main content with animations
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo animation
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _logoOpacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _logoScaleAnimation.value,
+                        child: child,
+                      ),
                     );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
+                  },
+                  child: Column(
+                    children: [
+                      // Digital circuit effect surrounding the logo
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return RadialGradient(
+                            center: Alignment.center,
+                            radius: 0.5,
+                            colors: [
+                              const Color(0xFF4ECDC4),
+                              const Color(0xFF4ECDC4).withOpacity(0.3),
+                            ],
+                          ).createShader(bounds);
+                        },
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                                blurRadius: 30,
+                                spreadRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: CustomPaint(
+                            painter: CircuitPainter(),
+                            child: const Center(
+                              child: Icon(
+                                Icons.route,
+                                size: 60,
+                                color: Color(0xFF4ECDC4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return const LinearGradient(
+                            colors: [Color(0xFF4ECDC4), Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ).createShader(bounds);
+                        },
+                        child: const Text(
+                          'PATH FINDER',
+                          style: TextStyle(
+                            fontSize: 46,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 3.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 60),
+
+                // Button animation - same as before
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _buttonOpacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _buttonScaleAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: GlowingActionButton(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 800),
+                          pageBuilder: (_, animation, __) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: const LevelSelectionScreen(),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    text: 'START GAME',
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // High score animation - same as before
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _scoreOpacityAnimation.value,
+                      child: Transform.translate(
+                        offset: Offset(
+                          0,
+                          20 * (1 - _scoreOpacityAnimation.value),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: FutureBuilder<int>(
+                    future: _getHighScore(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white.withOpacity(0.1),
+                            border: Border.all(
+                              color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4ECDC4).withOpacity(0.2),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.emoji_events,
+                                color: Color(0xFF4ECDC4),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'HIGH SCORE: ${snapshot.data}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF4ECDC4),
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -226,6 +509,336 @@ class StartScreen extends StatelessWidget {
   }
 }
 
+// Wave layer model for background waves
+class WaveLayer {
+  final Color color;
+  final double speed;
+  final double amplitude;
+  final double frequency;
+  final double phase;
+  final double heightFactor;
+
+  WaveLayer({
+    required this.color,
+    required this.speed,
+    required this.amplitude,
+    required this.frequency,
+    required this.phase,
+    required this.heightFactor,
+  });
+}
+
+// Wave background painter that creates flowing wave effect
+class WaveBackgroundPainter extends CustomPainter {
+  final List<WaveLayer> layers;
+  final double time;
+
+  WaveBackgroundPainter(this.layers, this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final layer in layers) {
+      final path = Path();
+
+      // Start at left bottom
+      path.moveTo(0, size.height);
+
+      // Calculate y position for each point on x-axis for curved wave
+      final waveHeight = size.height * layer.heightFactor;
+      final baseY = size.height - waveHeight;
+
+      for (double x = 0; x <= size.width; x += 5) {
+        final y =
+            baseY +
+            sin(x * layer.frequency + layer.phase + time * layer.speed) *
+                layer.amplitude;
+        path.lineTo(x, y);
+      }
+
+      // Complete the path
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+
+      // Fill wave with gradient
+      final paint =
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                layer.color.withOpacity(0.6),
+                layer.color.withOpacity(0.3),
+                layer.color.withOpacity(0.1),
+              ],
+            ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
+            ..style = PaintingStyle.fill;
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant WaveBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+// Light spots painter for small glowing particles
+class LightSpotsPainter extends CustomPainter {
+  static const int spotCount = 50;
+  final List<Offset> _positions = [];
+  final List<double> _sizes = [];
+  final List<double> _opacities = [];
+
+  LightSpotsPainter() {
+    final random = Random();
+    for (int i = 0; i < spotCount; i++) {
+      _positions.add(
+        Offset(random.nextDouble() * 1000, random.nextDouble() * 1000),
+      );
+      _sizes.add(1 + random.nextDouble() * 4);
+      _opacities.add(0.1 + random.nextDouble() * 0.5);
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+
+    for (int i = 0; i < spotCount; i++) {
+      // Calculate pulsating opacity
+      final pulseRate = 0.5 + (_positions[i].dx * 0.001);
+      final dynamicOpacity = _opacities[i] * (0.7 + sin(now * pulseRate) * 0.3);
+
+      // Create a radial gradient for each light spot
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+              stops: const [0.0, 1.0],
+            ).createShader(
+              Rect.fromCircle(
+                center: Offset(
+                  _positions[i].dx % size.width,
+                  _positions[i].dy % size.height,
+                ),
+                radius: _sizes[i] * 4,
+              ),
+            );
+
+      // Draw the light spot
+      canvas.drawCircle(
+        Offset(_positions[i].dx % size.width, _positions[i].dy % size.height),
+        _sizes[i],
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Circuit pattern painter for logo background
+class CircuitPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = min(size.width, size.height) / 2;
+    final random = Random(12345); // Fixed seed for consistent pattern
+
+    // Draw circuit lines
+    for (int i = 0; i < 24; i++) {
+      final angle1 = random.nextDouble() * pi * 2;
+      final angle2 = random.nextDouble() * pi * 2;
+
+      // Calculate points on circle
+      final x1 = centerX + cos(angle1) * radius * 0.7;
+      final y1 = centerY + sin(angle1) * radius * 0.7;
+      final x2 = centerX + cos(angle2) * radius * 0.9;
+      final y2 = centerY + sin(angle2) * radius * 0.9;
+
+      // Line paint
+      final paint =
+          Paint()
+            ..color = const Color(
+              0xFF4ECDC4,
+            ).withOpacity(0.4 + random.nextDouble() * 0.3)
+            ..strokeWidth = 1 + random.nextDouble() * 1.5
+            ..strokeCap = StrokeCap.round
+            ..style = PaintingStyle.stroke;
+
+      final now = DateTime.now().millisecondsSinceEpoch / 1000;
+      final pulseRate = 0.5 + i * 0.1;
+      final opacity = 0.3 + sin(now * pulseRate) * 0.2;
+
+      // Add curve to path
+      final path = Path();
+      path.moveTo(x1, y1);
+
+      // Control points for curve
+      final midX = (x1 + x2) / 2;
+      final midY = (y1 + y2) / 2;
+      final ctrlX = midX + (random.nextDouble() - 0.5) * radius * 0.3;
+      final ctrlY = midY + (random.nextDouble() - 0.5) * radius * 0.3;
+
+      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
+
+      // Draw circuit path
+      canvas.drawPath(path, paint);
+
+      // Add nodes at endpoints with glowing effect
+      final nodePaint =
+          Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+            ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x1, y1), 1.5, nodePaint);
+      canvas.drawCircle(Offset(x2, y2), 2.0, nodePaint);
+    }
+
+    // Draw outer glowing ring
+    final ringPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..shader = RadialGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(0.8),
+              const Color(0xFF4ECDC4).withOpacity(0),
+            ],
+          ).createShader(
+            Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+          );
+
+    canvas.drawCircle(Offset(centerX, centerY), radius * 0.85, ringPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class GlowingActionButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final String text;
+
+  const GlowingActionButton({
+    super.key,
+    required this.onPressed,
+    required this.text,
+  });
+
+  @override
+  State<GlowingActionButton> createState() => _GlowingActionButtonState();
+}
+
+class _GlowingActionButtonState extends State<GlowingActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _pulseAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.05), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
+    ]).animate(_pulseController);
+
+    _pulseController.repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onPressed();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _isPressed ? 0.95 : _pulseAnimation.value,
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 2,
+                left: 32,
+                right: 32,
+                bottom: 4,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF4ECDC4),
+                    const Color(0xFF4ECDC4).withOpacity(0.8),
+                  ],
+                ),
+                boxShadow: [
+                  // Inner glow
+                  BoxShadow(
+                    color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                    blurRadius: _pulseAnimation.value * 15,
+                    spreadRadius: _pulseAnimation.value * 4,
+                  ),
+                  // Bottom shadow for 3D effect
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 150),
+                style: TextStyle(
+                  color: _isPressed ? Colors.white70 : Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.play_arrow, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(widget.text),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class LevelSelectionScreen extends StatefulWidget {
   const LevelSelectionScreen({super.key});
 
@@ -233,13 +846,48 @@ class LevelSelectionScreen extends StatefulWidget {
   State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
 }
 
-class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
+class _LevelSelectionScreenState extends State<LevelSelectionScreen>
+    with SingleTickerProviderStateMixin {
   int unlockedLevel = 1;
+  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
+  Timer? _animationTimer;
+  int? _hoveredLevel;
+
+  // Animation controller for page entrance
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadUnlockedLevel();
+
+    // Setup animation controller
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    // Start the animation timer for background effects
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      _timeNotifier.value += 0.016;
+    });
+
+    // Start entrance animation
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _animationTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUnlockedLevel() async {
@@ -253,148 +901,410 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Level')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showResetConfirmation,
-        backgroundColor: Colors.red,
-        tooltip: 'Reset All Progress',
-        child: const Icon(Icons.refresh),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade400, Colors.blue.shade100],
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Select Level',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Select a Level:',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      floatingActionButton: FadeTransition(
+        opacity: _fadeAnimation,
+        child: FloatingActionButton(
+          onPressed: _showResetConfirmation,
+          backgroundColor: const Color(0xFFE63946),
+          foregroundColor: Colors.white,
+          elevation: 6,
+          tooltip: 'Reset All Progress',
+          child: const Icon(Icons.refresh),
+        ),
+      ),
+      body: Stack(
+        children: [
+          // Background base gradient
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0D3445),
+                  Color(0xFF042f46),
+                  Color(0xFF021e2b),
+                ],
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: gameLevels.length,
-                  itemBuilder: (context, index) {
-                    final level = gameLevels[index];
-                    final isUnlocked = level.levelNumber <= unlockedLevel;
+            ),
+          ),
 
-                    return FutureBuilder<int>(
-                      future: _getLevelHighScore(level.levelNumber),
-                      builder: (context, snapshot) {
-                        final highScore = snapshot.data ?? 0;
+          // Background animated waves
+          ValueListenableBuilder(
+            valueListenable: _timeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: LevelSelectBackgroundPainter(time),
+              );
+            },
+          ),
 
-                        return GestureDetector(
-                          onTap:
-                              isUnlocked
-                                  ? () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) =>
-                                                GameScreen(level: level),
-                                      ),
-                                    ).then((_) {
-                                      // Refresh unlocked levels when returning from game
-                                      _loadUnlockedLevel();
-                                    });
-                                  }
-                                  : null,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  isUnlocked
-                                      ? Colors.white
-                                      : Colors.grey.shade400,
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 5,
-                                  offset: const Offset(2, 2),
-                                ),
-                              ],
+          // Level Grid content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.0, -0.2),
+                        end: Offset.zero,
+                      ).animate(_controller),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.gamepad,
+                              color: Color(0xFF4ECDC4),
+                              size: 24,
                             ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '${level.levelNumber}',
-                                      style: TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
+                            SizedBox(width: 10),
+                            Text(
+                              'Choose Your Challenge',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                        itemCount: gameLevels.length,
+                        itemBuilder: (context, index) {
+                          final level = gameLevels[index];
+                          final isUnlocked = level.levelNumber <= unlockedLevel;
+                          final isHovered = _hoveredLevel == level.levelNumber;
+
+                          return FutureBuilder<int>(
+                            future: _getLevelHighScore(level.levelNumber),
+                            builder: (context, snapshot) {
+                              final highScore = snapshot.data ?? 0;
+
+                              return AnimatedScale(
+                                duration: const Duration(milliseconds: 200),
+                                scale: isHovered ? 1.05 : 1.0,
+                                child: GestureDetector(
+                                  onTap:
+                                      isUnlocked
+                                          ? () {
+                                            HapticFeedback.mediumImpact();
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) => GameScreen(
+                                                      level: level,
+                                                    ),
+                                              ),
+                                            ).then((_) {
+                                              _loadUnlockedLevel();
+                                            });
+                                          }
+                                          : null,
+                                  onTapDown: (_) {
+                                    setState(() {
+                                      _hoveredLevel = level.levelNumber;
+                                    });
+                                  },
+                                  onTapUp: (_) {
+                                    setState(() {
+                                      _hoveredLevel = null;
+                                    });
+                                  },
+                                  onTapCancel: () {
+                                    setState(() {
+                                      _hoveredLevel = null;
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient:
+                                          isUnlocked
+                                              ? LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: [
+                                                  const Color(0xFF125673),
+                                                  const Color(0xFF0D3445),
+                                                ],
+                                              )
+                                              : LinearGradient(
+                                                colors: [
+                                                  Colors.grey.shade800,
+                                                  Colors.grey.shade900,
+                                                ],
+                                              ),
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              isUnlocked
+                                                  ? const Color(
+                                                    0xFF4ECDC4,
+                                                  ).withOpacity(0.3)
+                                                  : Colors.black38,
+                                          blurRadius: isHovered ? 12 : 5,
+                                          spreadRadius: isHovered ? 2 : 0,
+                                        ),
+                                      ],
+                                      border: Border.all(
                                         color:
                                             isUnlocked
-                                                ? Colors.blue
-                                                : Colors.grey.shade700,
+                                                ? const Color(
+                                                  0xFF4ECDC4,
+                                                ).withOpacity(0.5)
+                                                : Colors.transparent,
+                                        width: 1.5,
                                       ),
                                     ),
-                                    if (isUnlocked && highScore > 0)
-                                      Text(
-                                        'Best: $highScore',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey.shade700,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Background circuit pattern
+                                        if (isUnlocked)
+                                          CustomPaint(
+                                            painter: CircuitPatternPainter(),
+                                            size: Size.infinite,
+                                          ),
+
+                                        // Level content
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            AnimatedContainer(
+                                              duration: const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              width:
+                                                  isHovered && isUnlocked
+                                                      ? 60
+                                                      : 55,
+                                              height:
+                                                  isHovered && isUnlocked
+                                                      ? 60
+                                                      : 55,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color:
+                                                    isUnlocked
+                                                        ? const Color(
+                                                          0xFF4ECDC4,
+                                                        ).withOpacity(0.2)
+                                                        : Colors.grey.shade700
+                                                            .withOpacity(0.2),
+                                                border: Border.all(
+                                                  color:
+                                                      isUnlocked
+                                                          ? const Color(
+                                                            0xFF4ECDC4,
+                                                          )
+                                                          : Colors
+                                                              .grey
+                                                              .shade600,
+                                                  width: 1.5,
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  '${level.levelNumber}',
+                                                  style: TextStyle(
+                                                    fontSize: 26,
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        isUnlocked
+                                                            ? const Color(
+                                                              0xFF4ECDC4,
+                                                            )
+                                                            : Colors
+                                                                .grey
+                                                                .shade400,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            if (isUnlocked)
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    level.dotsMove
+                                                        ? Icons.moving
+                                                        : Icons.grid_on,
+                                                    color: const Color(
+                                                      0xFF4ECDC4,
+                                                    ).withOpacity(0.7),
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 5),
+                                                  Text(
+                                                    level.dotsMove
+                                                        ? "Moving"
+                                                        : "Static",
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.white70,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            if (isUnlocked && highScore > 0)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4.0,
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.emoji_events,
+                                                      color: Color(0xFFFFD700),
+                                                      size: 14,
+                                                    ),
+                                                    const SizedBox(width: 2),
+                                                    Text(
+                                                      '$highScore',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white70,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
                                         ),
-                                      ),
-                                  ],
-                                ),
-                                if (!isUnlocked)
-                                  const Icon(
-                                    Icons.lock,
-                                    color: Colors.black38,
-                                    size: 30,
+
+                                        // Lock overlay
+                                        if (!isUnlocked)
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(
+                                                0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            child: const Center(
+                                              child: Icon(
+                                                Icons.lock,
+                                                color: Colors.white70,
+                                                size: 30,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   void _showResetConfirmation() {
+    HapticFeedback.mediumImpact();
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Reset All Progress?'),
-            content: const Column(
+            backgroundColor: const Color(0xFF0D3445),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: const Color(0xFF4ECDC4).withOpacity(0.5),
+                width: 2,
+              ),
+            ),
+            title: const Text(
+              'Reset All Progress?',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.warning, color: Colors.orange, size: 50),
-                SizedBox(height: 10),
-                Text(
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.warning_rounded,
+                    color: Colors.orange,
+                    size: 50,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const Text(
                   'This will reset all level unlocks and high scores. This action cannot be undone.',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
                 ),
               ],
             ),
@@ -403,14 +1313,25 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
+                style: TextButton.styleFrom(foregroundColor: Colors.white70),
                 child: const Text('Cancel'),
               ),
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
                   _resetAllProgress();
                   Navigator.of(context).pop();
                 },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE63946),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 child: const Text('Reset'),
               ),
             ],
@@ -454,6 +1375,162 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   }
 }
 
+// Circuit pattern background for level tiles
+class CircuitPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(12345);
+    final lineCount = 6;
+
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
+
+    // Draw a few curved lines to resemble circuits
+    for (int i = 0; i < lineCount; i++) {
+      final path = Path();
+
+      final startX = random.nextDouble() * size.width;
+      final startY = random.nextDouble() * size.height;
+
+      path.moveTo(startX, startY);
+
+      for (int j = 0; j < 2; j++) {
+        final endX = random.nextDouble() * size.width;
+        final endY = random.nextDouble() * size.height;
+
+        final controlX1 = startX + (endX - startX) * random.nextDouble();
+        final controlY1 = startY + (endY - startY) * random.nextDouble();
+
+        path.quadraticBezierTo(controlX1, controlY1, endX, endY);
+
+        // Draw small "nodes" at points
+        canvas.drawCircle(
+          Offset(endX, endY),
+          1.5,
+          Paint()..color = const Color(0xFF4ECDC4).withOpacity(0.3),
+        );
+      }
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Background animations for level selection screen
+class LevelSelectBackgroundPainter extends CustomPainter {
+  final double time;
+  final Random _random = Random(42);
+
+  LevelSelectBackgroundPainter(this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw flowing lines background
+    _drawFlowingLines(canvas, size);
+
+    // Draw subtle wave at bottom
+    _drawWave(canvas, size);
+
+    // Draw glowing particles
+    _drawGlowingParticles(canvas, size);
+  }
+
+  void _drawFlowingLines(Canvas canvas, Size size) {
+    final lineCount = 10;
+    final lineWidth = 1.0;
+
+    for (int i = 0; i < lineCount; i++) {
+      final y = (size.height / (lineCount + 1)) * (i + 1);
+      final path = Path();
+
+      path.moveTo(0, y);
+
+      final amplitude = 20.0 + _random.nextDouble() * 20;
+      final frequency = 0.01 + _random.nextDouble() * 0.01;
+      final phase = time * (0.1 + _random.nextDouble() * 0.2) + i;
+
+      for (double x = 0; x <= size.width; x += 5) {
+        path.lineTo(x, y + sin(x * frequency + phase) * amplitude);
+      }
+
+      final paint =
+          Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = lineWidth;
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  void _drawWave(Canvas canvas, Size size) {
+    final path = Path();
+
+    final baseY = size.height * 0.9;
+    path.moveTo(0, baseY);
+
+    for (double x = 0; x <= size.width; x += 5) {
+      final dx1 = sin(x * 0.01 + time * 0.2) * 15;
+      final dx2 = sin(x * 0.02 + time * 0.1) * 10;
+      path.lineTo(x, baseY + dx1 + dx2);
+    }
+
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    final paint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(0.2),
+              const Color(0xFF4ECDC4).withOpacity(0),
+            ],
+          ).createShader(
+            Rect.fromLTWH(0, baseY, size.width, size.height - baseY),
+          );
+
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawGlowingParticles(Canvas canvas, Size size) {
+    const particleCount = 30;
+
+    for (int i = 0; i < particleCount; i++) {
+      final x = ((time * (0.1 + i * 0.01)) % 2) * size.width;
+      final y = ((i * 37) % size.height) + sin(time + i) * 20;
+
+      final radius = 1.5 + sin(time * 0.8 + i) * 1.0;
+
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(0.6),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+            ).createShader(
+              Rect.fromCircle(center: Offset(x, y), radius: radius * 4),
+            );
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant LevelSelectBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
 class GameScreen extends StatefulWidget {
   final GameLevel level;
 
@@ -491,6 +1568,11 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late List<AnimationController> moveControllers;
   late List<Animation<Offset>> moveAnimations;
 
+  // Background animation variables
+  final ValueNotifier<double> _backgroundTimeNotifier = ValueNotifier(0);
+  Timer? _backgroundAnimationTimer;
+  late List<ParticleDot> _backgroundParticles;
+
   @override
   void initState() {
     super.initState();
@@ -498,6 +1580,33 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     moveControllers = [];
     moveAnimations = [];
     _initializeGame();
+
+    // Initialize background effects
+    _setupBackground();
+
+    // Start background animation timer
+    _backgroundAnimationTimer = Timer.periodic(
+      const Duration(milliseconds: 16),
+      (timer) {
+        _backgroundTimeNotifier.value += 0.016;
+      },
+    );
+  }
+
+  void _setupBackground() {
+    // Generate background particles
+    _backgroundParticles = List.generate(30, (index) {
+      return ParticleDot(
+        position: Offset(
+          random.nextDouble() * 1000,
+          random.nextDouble() * 2000,
+        ),
+        size: 1.0 + random.nextDouble() * 2.0,
+        opacity: 0.1 + random.nextDouble() * 0.2,
+        speed: 0.1 + random.nextDouble() * 0.2,
+        angle: random.nextDouble() * pi * 2,
+      );
+    });
   }
 
   @override
@@ -559,10 +1668,40 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final safeTop = 100.0 + safeAreaInsets.top; // Top padding + status bar
     final safeBottom = screenHeight - dotSize;
 
-    // Generate dots with random positions within safe bounds
+    // Maximum attempts to prevent infinite loops
+    final maxAttempts = 100;
+
+    // Generate dots with random positions within safe bounds, avoiding overlaps
     for (int i = 0; i < dotCount; i++) {
-      final xPos = random.nextDouble() * safeWidth;
-      final yPos = safeTop + random.nextDouble() * (safeBottom - safeTop);
+      bool validPosition = false;
+      int attempts = 0;
+      double xPos = 0;
+      double yPos = 0;
+
+      // Keep trying positions until finding one without overlaps or exceeding max attempts
+      while (!validPosition && attempts < maxAttempts) {
+        attempts++;
+        xPos = random.nextDouble() * safeWidth;
+        yPos = safeTop + random.nextDouble() * (safeBottom - safeTop);
+
+        validPosition = true; // Assume position is valid until proven otherwise
+
+        // Check against all previously placed dots
+        for (var existingDot in dots) {
+          // Calculate distance between dot centers
+          final distance = (Offset(xPos, yPos) - existingDot.position).distance;
+          // Minimum distance to avoid overlap (sum of radii with a small buffer)
+          final minDistance = dotSize * 1.2;
+
+          if (distance < minDistance) {
+            validPosition = false; // This position overlaps, try again
+            break;
+          }
+        }
+      }
+
+      // If couldn't find non-overlapping position after max attempts, use the last attempt anyway
+      // This is a fallback to ensure the game can continue
 
       dots.add(
         Dot(
@@ -626,20 +1765,24 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       final safeTop = 100.0 + safeAreaInsets.top; // Top padding + status bar
       final safeBottom = screenHeight - dotSize;
 
-      // Calculate a new random position within safe bounds
-      final newX = random.nextDouble() * safeWidth;
-      final newY = safeTop + random.nextDouble() * (safeBottom - safeTop);
+      // Find a position that doesn't overlap with other dots
+      final newPosition = _findNonOverlappingPosition(
+        i,
+        safeWidth,
+        safeTop,
+        safeBottom,
+        dotSize,
+      );
 
       // Create tween animation
       final animation = Tween<Offset>(
         begin: dots[i].position,
-        end: Offset(newX, newY),
+        end: newPosition,
       ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
 
       // Add listener to update dot position
       animation.addListener(() {
         if (mounted && i < dots.length) {
-          // Check if index is valid
           setState(() {
             dots[i] = dots[i].copyWith(position: animation.value);
           });
@@ -652,14 +1795,19 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       // When animation completes, start a new one in a different direction
       controller.addStatusListener((status) {
         if (status == AnimationStatus.completed && mounted && i < dots.length) {
-          // Calculate new safe position within screen bounds
-          final newX = random.nextDouble() * safeWidth;
-          final newY = safeTop + random.nextDouble() * (safeBottom - safeTop);
+          // Find a new non-overlapping position
+          final newPosition = _findNonOverlappingPosition(
+            i,
+            safeWidth,
+            safeTop,
+            safeBottom,
+            dotSize,
+          );
 
           // Create a new tween animation with new positions
           final newAnimation = Tween<Offset>(
             begin: dots[i].position,
-            end: Offset(newX, newY),
+            end: newPosition,
           ).animate(
             CurvedAnimation(parent: controller, curve: Curves.easeInOut),
           );
@@ -682,6 +1830,53 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         }
       });
     }
+  }
+
+  // New helper method to find a position that doesn't overlap with other dots
+  Offset _findNonOverlappingPosition(
+    int dotIndex,
+    double safeWidth,
+    double safeTop,
+    double safeBottom,
+    double dotSize,
+  ) {
+    const maxAttempts = 30;
+    int attempts = 0;
+
+    while (attempts < maxAttempts) {
+      // Generate random position
+      final xPos = random.nextDouble() * safeWidth;
+      final yPos = safeTop + random.nextDouble() * (safeBottom - safeTop);
+      final testPosition = Offset(xPos, yPos);
+
+      bool overlaps = false;
+
+      // Check against all other dots
+      for (int i = 0; i < dots.length; i++) {
+        if (i == dotIndex) continue; // Skip checking against self
+
+        final distance = (testPosition - dots[i].position).distance;
+        final minDistance = dotSize * 1.2; // Avoid overlap with some buffer
+
+        if (distance < minDistance) {
+          overlaps = true;
+          break;
+        }
+      }
+
+      if (!overlaps) {
+        return testPosition; // Found a good position
+      }
+
+      attempts++;
+    }
+
+    // If we couldn't find a non-overlapping position after max attempts,
+    // just return a random position and hope for the best
+    return Offset(
+      random.nextDouble() * safeWidth,
+      safeTop + random.nextDouble() * (safeBottom - safeTop),
+    );
   }
 
   void _showSequence() {
@@ -1030,137 +2225,313 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Level $level'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          'Level $level',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          Container(
+            margin: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D3445).withOpacity(0.7),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
             child: Center(
               child: Text(
                 'Score: $score',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF4ECDC4),
                 ),
               ),
             ),
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Lives display
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                maxLives,
-                (index) => Icon(
-                  Icons.favorite,
-                  color: index < lives ? Colors.red : Colors.grey,
-                  size: 28,
-                ),
+          // Background gradient
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF0D3445),
+                  Color(0xFF042538),
+                  Color(0xFF021824),
+                ],
               ),
             ),
           ),
 
-          // Game status indicator
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            color:
-                showingSequence
-                    ? Colors.yellow
-                    : (awaitingInput ? Colors.green : Colors.grey),
-            width: double.infinity,
-            child: Text(
-              showingSequence
-                  ? 'Watch carefully...'
-                  : (awaitingInput ? 'Your turn!' : 'Get ready...'),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
+          // Animated background effects
+          ValueListenableBuilder(
+            valueListenable: _backgroundTimeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: GameBackgroundPainter(
+                  time: time,
+                  particles: _backgroundParticles,
+                ),
+              );
+            },
           ),
 
-          // Game area
-          Expanded(
-            child: Stack(
-              children: [
-                // Dots display code remains the same...
-                for (final dot in dots)
-                  Positioned(
-                    left: dot.position.dx,
-                    top: dot.position.dy,
-                    child: GestureDetector(
-                      onTap: () => _handleDotTap(dot.id),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: dot.isHighlighted ? dot.size * 1.3 : dot.size,
-                        height: dot.isHighlighted ? dot.size * 1.3 : dot.size,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color:
-                              dot.isHighlighted
-                                  ? Colors
-                                      .orange // More attention-grabbing color
-                                  : Colors.blue.withOpacity(0.6),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  dot.isHighlighted
-                                      ? Colors.orange.withOpacity(0.8)
-                                      : Colors.black26,
-                              blurRadius: dot.isHighlighted ? 20 : 5,
-                              spreadRadius: dot.isHighlighted ? 5 : 1,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${dot.id + 1}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize:
-                                  dot.isHighlighted
-                                      ? 24
-                                      : 16, // Larger text when highlighted
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+          // Game content
+          Column(
+            children: [
+              // Increased space for status bar and app bar to avoid overlap
+              SizedBox(height: MediaQuery.of(context).padding.top + 70),
 
-                // Countdown overlay
-                if (countdownNumber != null)
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.black.withOpacity(0.5),
-                      child: Center(
-                        child: AnimatedScale(
-                          scale: countdownNumber == 0 ? 1.5 : 1.0,
+              // Lives display with enhanced styling - moved down a bit
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: const Color(0xFF4ECDC4).withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      maxLives,
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: AnimatedOpacity(
                           duration: const Duration(milliseconds: 300),
-                          child: Text(
-                            countdownNumber == 0
-                                ? "GO!"
-                                : countdownNumber.toString(),
-                            style: TextStyle(
-                              fontSize: 80,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  countdownNumber == 0
-                                      ? Colors.green
-                                      : Colors.white,
-                            ),
+                          opacity: index < lives ? 1.0 : 0.3,
+                          child: Icon(
+                            Icons.favorite,
+                            color: index < lives ? Colors.red : Colors.grey,
+                            size: 28,
+                            shadows: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+              ),
+
+              // Game status indicator with improved styling
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                decoration: BoxDecoration(
+                  color:
+                      showingSequence
+                          ? const Color(0xFF4ECDC4) // Now matches our theme
+                          : (awaitingInput
+                              ? Colors.green
+                              : Colors.grey.shade700),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: const Offset(0, 3),
+                      blurRadius: 5,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                width: double.infinity,
+                child: Text(
+                  showingSequence
+                      ? 'Watch carefully...'
+                      : (awaitingInput ? 'Your turn!' : 'Get ready...'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(1, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Game area
+              Expanded(
+                child: Stack(
+                  children: [
+                    // Dots display
+                    for (final dot in dots)
+                      Positioned(
+                        left: dot.position.dx,
+                        top: dot.position.dy,
+                        child: GestureDetector(
+                          onTap: () => _handleDotTap(dot.id),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            width:
+                                dot.isHighlighted ? dot.size * 1.3 : dot.size,
+                            height:
+                                dot.isHighlighted ? dot.size * 1.3 : dot.size,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  dot.isHighlighted
+                                      ? Colors.orange
+                                      : const Color(0xFF4ECDC4),
+                                  dot.isHighlighted
+                                      ? Colors.orange.shade700
+                                      : Colors.blue.shade700,
+                                ],
+                                center: const Alignment(-0.3, -0.3),
+                                focal: const Alignment(-0.5, -0.5),
+                                focalRadius: 0.2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      dot.isHighlighted
+                                          ? Colors.orange.withOpacity(0.8)
+                                          : const Color(
+                                            0xFF4ECDC4,
+                                          ).withOpacity(0.4),
+                                  blurRadius: dot.isHighlighted ? 20 : 10,
+                                  spreadRadius: dot.isHighlighted ? 5 : 1,
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 150),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: dot.isHighlighted ? 24 : 16,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      offset: const Offset(1, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Text('${dot.id + 1}'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Countdown overlay
+                    if (countdownNumber != null)
+                      Positioned.fill(
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                          child: Container(
+                            color: Colors.black.withOpacity(0.5),
+                            child: Center(
+                              child: AnimatedScale(
+                                scale: countdownNumber == 0 ? 1.5 : 1.0,
+                                duration: const Duration(milliseconds: 300),
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:
+                                        countdownNumber == 0
+                                            ? Colors.green.withOpacity(0.3)
+                                            : Colors.blue.withOpacity(0.3),
+                                    border: Border.all(
+                                      color:
+                                          countdownNumber == 0
+                                              ? Colors.green
+                                              : Colors.blue,
+                                      width: 3,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: (countdownNumber == 0
+                                                ? Colors.green
+                                                : Colors.blue)
+                                            .withOpacity(0.5),
+                                        blurRadius: 20,
+                                        spreadRadius: 5,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    countdownNumber == 0
+                                        ? "GO!"
+                                        : countdownNumber.toString(),
+                                    style: TextStyle(
+                                      fontSize: 80,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.5),
+                                          offset: const Offset(2, 2),
+                                          blurRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1169,6 +2540,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _backgroundAnimationTimer?.cancel();
+    _backgroundTimeNotifier.dispose();
+
     for (var controller in moveControllers) {
       controller.dispose();
     }
@@ -1224,439 +2598,536 @@ class LevelAchievement {
   bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
 }
 
-class StartScreen extends StatefulWidget {
-  const StartScreen({super.key});
+// Node model for background particles
+class ParticleNode {
+  Offset position;
+  final double size;
+  final double speed;
+  double angle; // Direction angle
+  final double opacity;
 
-  @override
-  State<StartScreen> createState() => _StartScreenState();
+  ParticleNode({
+    required this.position,
+    required this.size,
+    required this.speed,
+    required this.angle,
+    required this.opacity,
+  });
+
+  void update(double time, Size screenSize) {
+    // Move node slowly in its direction
+    position = Offset(
+      position.dx + cos(angle) * speed,
+      position.dy + sin(angle) * speed,
+    );
+
+    // Wrap around when going off screen
+    if (position.dx < -50)
+      position = Offset(screenSize.width + 50, position.dy);
+    if (position.dx > screenSize.width + 50)
+      position = Offset(-50, position.dy);
+    if (position.dy < -50)
+      position = Offset(position.dx, screenSize.height + 50);
+    if (position.dy > screenSize.height + 50)
+      position = Offset(position.dx, -50);
+
+    // Slightly adjust angle for smooth movement
+    angle += (sin(time * 0.5) * 0.03);
+  }
 }
 
-class _StartScreenState extends State<StartScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _logoScaleAnimation;
-  late Animation<double> _logoOpacityAnimation;
-  late Animation<double> _buttonScaleAnimation;
-  late Animation<double> _buttonOpacityAnimation;
-  late Animation<double> _scoreOpacityAnimation;
+// Connection between nodes
+class Connection {
+  final int startNodeIndex;
+  final int endNodeIndex;
+  final double maxDistance;
+  final double thickness;
 
-  // For background animation
-  final List<WaveLayer> _waveLayers = [];
-  final Random _random = Random();
-  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
-  Timer? _animationTimer;
+  Connection({
+    required this.startNodeIndex,
+    required this.endNodeIndex,
+    required this.maxDistance,
+    required this.thickness,
+  });
+}
+
+// Network background painter
+class NetworkBackgroundPainter extends CustomPainter {
+  final List<ParticleNode> nodes;
+  final List<Connection> connections;
+  final double time;
+  final Size size;
+
+  NetworkBackgroundPainter({
+    required this.nodes,
+    required this.connections,
+    required this.time,
+    required this.size,
+  });
 
   @override
-  void initState() {
-    super.initState();
-    // Initialize animation controller
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 2500),
-      vsync: this,
-    );
+  void paint(Canvas canvas, Size size) {
+    // Update nodes
+    for (final node in nodes) {
+      node.update(time, size);
+    }
 
-    // Logo animations - delayed start, elastic finish
-    _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
-      ),
-    );
+    // Draw connections
+    for (final connection in connections) {
+      final startNode = nodes[connection.startNodeIndex];
+      final endNode = nodes[connection.endNodeIndex];
 
-    _logoOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
-      ),
-    );
+      final distance = (startNode.position - endNode.position).distance;
 
-    // Button animations - start after logo
-    _buttonScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 0.8, curve: Curves.elasticOut),
-      ),
-    );
+      if (distance <= connection.maxDistance) {
+        // Calculate opacity based on distance
+        final opacity = 1.0 - (distance / connection.maxDistance);
 
-    _buttonOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 0.6, curve: Curves.easeIn),
-      ),
-    );
+        // Create a gradient for the connection line
+        final paint =
+            Paint()
+              ..shader = LinearGradient(
+                colors: [
+                  const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
+                  const Color(0xFF0D3445).withOpacity(opacity * 0.3),
+                ],
+              ).createShader(
+                Rect.fromPoints(startNode.position, endNode.position),
+              )
+              ..strokeWidth = connection.thickness * opacity
+              ..strokeCap = StrokeCap.round;
 
-    // Score animation - last to appear
-    _scoreOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.7, 1.0, curve: Curves.easeIn),
-      ),
-    );
+        // Draw the connection
+        canvas.drawLine(startNode.position, endNode.position, paint);
+      }
+    }
 
-    // Generate wave layers for background animation
-    _generateWaveLayers();
+    // Draw nodes
+    for (final node in nodes) {
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(node.opacity),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+            ).createShader(
+              Rect.fromCircle(center: node.position, radius: node.size * 4),
+            );
 
-    // Start the animation timer for waves
-    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      _timeNotifier.value += 0.016; // Increments time for wave animation
-    });
-
-    // Start the entrance animation
-    _controller.forward();
-  }
-
-  void _generateWaveLayers() {
-    // Color scheme based on the #0D3445 theme with slight variations
-    final List<Color> baseColors = [
-      const Color(0xFF0D3445),
-      const Color(0xFF125673),
-      const Color(0xFF1A789B),
-      const Color(0xFF4ECDC4),
-    ];
-
-    // Create multiple wave layers with different properties
-    for (int i = 0; i < 5; i++) {
-      final baseColor = baseColors[_random.nextInt(baseColors.length)];
-
-      _waveLayers.add(
-        WaveLayer(
-          color: baseColor.withOpacity(0.07 + _random.nextDouble() * 0.08),
-          speed: 0.3 + _random.nextDouble() * 0.7,
-          amplitude: 20 + _random.nextDouble() * 40,
-          frequency: 0.005 + _random.nextDouble() * 0.01,
-          phase: _random.nextDouble() * pi * 2,
-          heightFactor: 0.5 + _random.nextDouble() * 0.5,
-        ),
-      );
+      canvas.drawCircle(node.position, node.size, paint);
     }
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    _animationTimer?.cancel();
-    _timeNotifier.dispose();
-    super.dispose();
+  bool shouldRepaint(covariant NetworkBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
   }
+}
 
+// Light rays painter
+class LightRaysPainter extends CustomPainter {
   @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Base gradient background
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0D3445),
-                  Color(0xFF0A2A38),
-                  Color(0xFF061A25),
-                ],
-              ),
-            ),
-          ),
+    // Origin point for light rays
+    final origin = Offset(width * 0.5, height * -0.2);
 
-          // Dynamic wave background
-          ValueListenableBuilder(
-            valueListenable: _timeNotifier,
-            builder: (context, time, child) {
-              return CustomPaint(
-                size: Size(size.width, size.height),
-                painter: WaveBackgroundPainter(_waveLayers, time),
-              );
-            },
-          ),
+    // Create rays with varying lengths and angles
+    for (int i = 0; i < 8; i++) {
+      final angle = (pi * i / 8) + (pi / 16);
+      final rayLength = height * 1.5;
 
-          // Floating light particles
-          CustomPaint(
-            size: Size(size.width, size.height),
-            painter: LightSpotsPainter(),
-          ),
+      final endX = origin.dx + cos(angle) * rayLength;
+      final endY = origin.dy + sin(angle) * rayLength;
 
-          // Main content with animations
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo animation
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _logoOpacityAnimation.value,
-                      child: Transform.scale(
-                        scale: _logoScaleAnimation.value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      // Digital circuit effect surrounding the logo
-                      ShaderMask(
-                        shaderCallback: (bounds) {
-                          return RadialGradient(
-                            center: Alignment.center,
-                            radius: 0.5,
-                            colors: [
-                              const Color(0xFF4ECDC4),
-                              const Color(0xFF4ECDC4).withOpacity(0.3),
-                            ],
-                          ).createShader(bounds);
-                        },
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.05),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF4ECDC4).withOpacity(0.3),
-                                blurRadius: 30,
-                                spreadRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: CustomPaint(
-                            painter: CircuitPainter(),
-                            child: const Center(
-                              child: Icon(
-                                Icons.route,
-                                size: 60,
-                                color: Color(0xFF4ECDC4),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ShaderMask(
-                        shaderCallback: (bounds) {
-                          return const LinearGradient(
-                            colors: [Color(0xFF4ECDC4), Colors.white],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ).createShader(bounds);
-                        },
-                        child: const Text(
-                          'PATH FINDER',
-                          style: TextStyle(
-                            fontSize: 46,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 3.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      final rayPath =
+          Path()
+            ..moveTo(origin.dx, origin.dy)
+            ..lineTo(endX, endY)
+            ..lineTo(endX + width * 0.15, endY)
+            ..lineTo(origin.dx, origin.dy)
+            ..close();
 
-                const SizedBox(height: 60),
-
-                // Button animation
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _buttonOpacityAnimation.value,
-                      child: Transform.scale(
-                        scale: _buttonScaleAnimation.value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: GlowingActionButton(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          transitionDuration: const Duration(milliseconds: 800),
-                          pageBuilder: (_, animation, __) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: const LevelSelectionScreen(),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    text: 'START GAME',
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // High score animation
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _scoreOpacityAnimation.value,
-                      child: Transform.translate(
-                        offset: Offset(
-                          0,
-                          20 * (1 - _scoreOpacityAnimation.value),
-                        ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: FutureBuilder<int>(
-                    future: _getHighScore(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.white.withOpacity(0.1),
-                            border: Border.all(
-                              color: const Color(0xFF4ECDC4).withOpacity(0.3),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF4ECDC4).withOpacity(0.2),
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.emoji_events,
-                                color: Color(0xFF4ECDC4),
-                                size: 24,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'HIGH SCORE: ${snapshot.data}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF4ECDC4),
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ),
+      final rayPaint =
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                const Color(0xFF135777).withOpacity(0.3),
+                const Color(0xFF135777).withOpacity(0),
               ],
+            ).createShader(Rect.fromPoints(origin, Offset(endX, endY)));
+
+      canvas.drawPath(rayPath, rayPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Subtle waves painter
+class SubtleWavesPainter extends CustomPainter {
+  final double time;
+
+  SubtleWavesPainter(this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+
+    // Draw multiple layers of subtle waves
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 20,
+      frequency: 0.015,
+      phase: time * 0.2,
+      yPosition: height * 0.75,
+      color: const Color(0xFF4ECDC4).withOpacity(0.1),
+    );
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 15,
+      frequency: 0.02,
+      phase: time * -0.15,
+      yPosition: height * 0.6,
+      color: const Color(0xFF135777).withOpacity(0.07),
+    );
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 30,
+      frequency: 0.01,
+      phase: time * 0.1,
+      yPosition: height * 0.9,
+      color: const Color(0xFF0D3445).withOpacity(0.05),
+    );
+  }
+
+  void _drawWave({
+    required Canvas canvas,
+    required double width,
+    required double height,
+    required double amplitude,
+    required double frequency,
+    required double phase,
+    required double yPosition,
+    required Color color,
+  }) {
+    final path = Path();
+
+    // Start from left bottom
+    path.moveTo(0, height);
+
+    // Draw wave
+    for (double x = 0; x <= width; x += 5) {
+      final y = yPosition + sin(x * frequency + phase) * amplitude;
+      path.lineTo(x, y);
+    }
+
+    // Complete path
+    path.lineTo(width, height);
+    path.lineTo(0, height);
+    path.close();
+
+    // Fill with gradient
+    final paint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [color, color.withOpacity(0)],
+          ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
+          ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant SubtleWavesPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+// Hexagonal pattern painter for logo background
+class HexagonalPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = min(size.width, size.height) / 2;
+    final random = Random(12345); // Fixed seed for consistent pattern
+
+    // Draw hexagons around the circle
+    for (int ring = 0; ring < 2; ring++) {
+      final ringRadius = radius * (0.65 + ring * 0.3);
+      final hexCount = 6 + ring * 2;
+
+      for (int i = 0; i < hexCount; i++) {
+        final angle = (2 * pi * i / hexCount);
+        final x = centerX + cos(angle) * ringRadius;
+        final y = centerY + sin(angle) * ringRadius;
+
+        // Draw hexagon
+        _drawHexagon(
+          canvas,
+          x,
+          y,
+          5 + random.nextDouble() * 5,
+          const Color(0xFF4ECDC4).withOpacity(0.2 + random.nextDouble() * 0.2),
+        );
+      }
+    }
+
+    // Draw circuit-like connections
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+    final paint =
+        Paint()
+          ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 12; i++) {
+      final angle1 = (2 * pi * i / 12);
+      final angle2 = angle1 + pi / 6 + random.nextDouble() * (pi / 3);
+
+      final r1 = radius * 0.7;
+      final r2 = radius * 0.9;
+
+      final x1 = centerX + cos(angle1) * r1;
+      final y1 = centerY + sin(angle1) * r1;
+
+      final x2 = centerX + cos(angle2) * r2;
+      final y2 = centerY + sin(angle2) * r2;
+
+      // Add pulsating effect based on time
+      final glow = (sin(now + i) + 1) / 2;
+      paint.color = const Color(0xFF4ECDC4).withOpacity(0.3 + glow * 0.3);
+
+      // Draw path with curve for circuit-like effect
+      final path = Path();
+      path.moveTo(x1, y1);
+
+      final ctrlX = (x1 + x2) / 2 + (random.nextDouble() - 0.5) * 20;
+      final ctrlY = (y1 + y2) / 2 + (random.nextDouble() - 0.5) * 20;
+
+      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
+      canvas.drawPath(path, paint);
+
+      // Draw small nodes at the ends
+      final nodePaint =
+          Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
+            ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x1, y1), 2, nodePaint);
+      canvas.drawCircle(Offset(x2, y2), 2, nodePaint);
+    }
+  }
+
+  void _drawHexagon(
+    Canvas canvas,
+    double x,
+    double y,
+    double size,
+    Color color,
+  ) {
+    final path = Path();
+
+    for (int i = 0; i < 6; i++) {
+      final angle = (pi / 3) * i;
+      final xPoint = x + cos(angle) * size;
+      final yPoint = y + sin(angle) * size;
+
+      if (i == 0) {
+        path.moveTo(xPoint, yPoint);
+      } else {
+        path.lineTo(xPoint, yPoint);
+      }
+    }
+
+    path.close();
+
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Background particle dot for game screen
+class ParticleDot {
+  Offset position;
+  final double size;
+  final double opacity;
+  final double speed;
+  double angle;
+
+  ParticleDot({
+    required this.position,
+    required this.size,
+    required this.opacity,
+    required this.speed,
+    required this.angle,
+  });
+
+  void update(double time, Size screenSize) {
+    // Apply slow movement in the dot's direction
+    position = Offset(
+      position.dx + cos(angle) * speed,
+      position.dy + sin(angle) * speed,
+    );
+
+    // Wrap around screen edges
+    if (position.dx < -50)
+      position = Offset(screenSize.width + 50, position.dy);
+    if (position.dx > screenSize.width + 50)
+      position = Offset(-50, position.dy);
+    if (position.dy < -50)
+      position = Offset(position.dx, screenSize.height + 50);
+    if (position.dy > screenSize.height + 50)
+      position = Offset(position.dx, -50);
+
+    // Slightly vary the angle for wandering effect
+    angle += sin(time * 0.3) * 0.02;
+  }
+}
+
+// Game background painter for animated background
+class GameBackgroundPainter extends CustomPainter {
+  final double time;
+  final List<ParticleDot> particles;
+
+  GameBackgroundPainter({required this.time, required this.particles});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Update particle positions
+    for (final particle in particles) {
+      particle.update(time, size);
+    }
+
+    // Draw subtle background grid
+    _drawGrid(canvas, size);
+
+    // Draw flowing particles
+    _drawParticles(canvas, size);
+
+    // Draw subtle pulsating glow at bottom
+    _drawBottomGlow(canvas, size);
+  }
+
+  void _drawGrid(Canvas canvas, Size size) {
+    final lineCount = 10;
+    final horizontalSpacing = size.width / lineCount;
+    final verticalSpacing = size.height / lineCount;
+
+    final paint =
+        Paint()
+          ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.5;
+
+    // Draw vertical lines
+    for (int i = 1; i < lineCount; i++) {
+      final x = horizontalSpacing * i;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    // Draw horizontal lines
+    for (int i = 1; i < lineCount; i++) {
+      final y = verticalSpacing * i;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  void _drawParticles(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      // Make opacity pulsate slightly
+      final pulsingOpacity =
+          particle.opacity *
+          (0.7 + sin(time + particle.position.dx * 0.01) * 0.3);
+
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+            ).createShader(
+              Rect.fromCircle(
+                center: particle.position,
+                radius: particle.size * 6,
+              ),
+            );
+
+      canvas.drawCircle(particle.position, particle.size, paint);
+    }
+
+    // Draw connections between some nearby particles
+    for (int i = 0; i < particles.length; i++) {
+      for (int j = i + 1; j < particles.length; j++) {
+        final distance =
+            (particles[i].position - particles[j].position).distance;
+        if (distance < 100) {
+          final opacity = (1 - distance / 100) * 0.1;
+
+          final paint =
+              Paint()
+                ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+                ..strokeWidth = 0.5
+                ..style = PaintingStyle.stroke;
+
+          canvas.drawLine(particles[i].position, particles[j].position, paint);
+        }
+      }
+    }
+  }
+
+  void _drawBottomGlow(Canvas canvas, Size size) {
+    final centerY = size.height * 0.9;
+    final glowRadius = size.width * 0.8;
+    final glowOpacity = 0.05 + sin(time * 0.5) * 0.02;
+
+    final paint =
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(glowOpacity),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width / 2, centerY),
+              radius: glowRadius,
             ),
-          ),
-        ],
-      ),
-    );
+          );
+
+    canvas.drawCircle(Offset(size.width / 2, centerY), glowRadius, paint);
   }
 
-  Future<int> _getHighScore() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('highScore') ?? 0;
+  @override
+  bool shouldRepaint(covariant GameBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
   }
 }
-
-class LevelSelectionScreen extends StatefulWidget {
-  const LevelSelectionScreen({super.key});
-
-  @override
-  State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
-}
-
-class _LevelSelectionScreenState extends State<LevelSelectionScreen>
-    with SingleTickerProviderStateMixin {
-  int unlockedLevel = 1;
-  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
-  Timer? _animationTimer;
-  int? _hoveredLevel;
-
-  // Animation controller for page entrance
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUnlockedLevel();
-
-    // Setup animation controller
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
-
-    // Start the animation timer for background effects
-    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      _timeNotifier.value += 0.016;
-    });
-
-    // Start entrance animation
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _animationTimer?.cancel();
-    _timeNotifier.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadUnlockedLevel() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedUnlockedLevel = prefs.getInt('unlockedLevel') ?? 1;
-
-    setState(() {
-      unlockedLevel = savedUnlockedLevel;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Select Level',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      floatingActionButton: FadeTransition(
-        opacity: _fadeAnimation,
-        child: FloatingActionButton(
-          onPressed: _showResetConfirmation,
-          backgroundColor: const
