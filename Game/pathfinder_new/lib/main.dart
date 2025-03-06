@@ -81,21 +81,21 @@ final List<GameLevel> gameLevels = [
   ), // More dots but same sequence
   const GameLevel(
     levelNumber: 3,
-    dotCount: 5,
+    dotCount: 6,
     sequenceLength: 4,
   ), // Same dots, longer sequence
   // SHUFFLE-STOP LEVELS - Incremental movement introduction
   const GameLevel(
     levelNumber: 4,
-    dotCount: 3, // Keep dot count same as level 3
-    sequenceLength: 3, // Keep sequence same as level 3
+    dotCount: 4, // Keep dot count same as level 3
+    sequenceLength: 4, // Keep sequence same as level 3
     dotsMove: true,
     shuffleAndStop: true,
     movementSpeed: 0.4, // Very slow movement for introduction
   ),
   const GameLevel(
     levelNumber: 5,
-    dotCount: 4, // Now increase dot count
+    dotCount: 5, // Now increase dot count
     sequenceLength: 4, // Keep sequence length the same
     dotsMove: true,
     shuffleAndStop: true,
@@ -103,7 +103,7 @@ final List<GameLevel> gameLevels = [
   ),
   const GameLevel(
     levelNumber: 6,
-    dotCount: 5,
+    dotCount: 6,
     sequenceLength: 4, // Now increase sequence length
     dotsMove: true,
     shuffleAndStop: true,
@@ -111,15 +111,15 @@ final List<GameLevel> gameLevels = [
   ),
   const GameLevel(
     levelNumber: 7,
-    dotCount: 5,
-    sequenceLength: 4,
+    dotCount: 6,
+    sequenceLength: 5,
     dotsMove: true,
     shuffleAndStop: true,
     movementSpeed: 0.7,
   ),
   const GameLevel(
     levelNumber: 8,
-    dotCount: 5,
+    dotCount: 7,
     sequenceLength: 5,
     dotsMove: true,
     shuffleAndStop: true,
@@ -127,8 +127,8 @@ final List<GameLevel> gameLevels = [
   ),
   const GameLevel(
     levelNumber: 9,
-    dotCount: 6,
-    sequenceLength: 5,
+    dotCount: 7,
+    sequenceLength: 6,
     dotsMove: true,
     shuffleAndStop: true,
     movementSpeed: 0.9,
