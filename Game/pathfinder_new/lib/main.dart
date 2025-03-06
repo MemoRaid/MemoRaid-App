@@ -1573,3 +1573,90 @@ class _StartScreenState extends State<StartScreen>
     return prefs.getInt('highScore') ?? 0;
   }
 }
+
+class LevelSelectionScreen extends StatefulWidget {
+  const LevelSelectionScreen({super.key});
+
+  @override
+  State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
+}
+
+class _LevelSelectionScreenState extends State<LevelSelectionScreen>
+    with SingleTickerProviderStateMixin {
+  int unlockedLevel = 1;
+  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
+  Timer? _animationTimer;
+  int? _hoveredLevel;
+
+  // Animation controller for page entrance
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnlockedLevel();
+
+    // Setup animation controller
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    // Start the animation timer for background effects
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      _timeNotifier.value += 0.016;
+    });
+
+    // Start entrance animation
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _animationTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUnlockedLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUnlockedLevel = prefs.getInt('unlockedLevel') ?? 1;
+
+    setState(() {
+      unlockedLevel = savedUnlockedLevel;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Select Level',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      floatingActionButton: FadeTransition(
+        opacity: _fadeAnimation,
+        child: FloatingActionButton(
+          onPressed: _showResetConfirmation,
+          backgroundColor: const
