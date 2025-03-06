@@ -1223,3 +1223,353 @@ class LevelAchievement {
   // A special achievement is either a new high score or unlocking a new level
   bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
 }
+
+class StartScreen extends StatefulWidget {
+  const StartScreen({super.key});
+
+  @override
+  State<StartScreen> createState() => _StartScreenState();
+}
+
+class _StartScreenState extends State<StartScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _logoScaleAnimation;
+  late Animation<double> _logoOpacityAnimation;
+  late Animation<double> _buttonScaleAnimation;
+  late Animation<double> _buttonOpacityAnimation;
+  late Animation<double> _scoreOpacityAnimation;
+
+  // For background animation
+  final List<WaveLayer> _waveLayers = [];
+  final Random _random = Random();
+  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
+  Timer? _animationTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize animation controller
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2500),
+      vsync: this,
+    );
+
+    // Logo animations - delayed start, elastic finish
+    _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
+      ),
+    );
+
+    _logoOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
+      ),
+    );
+
+    // Button animations - start after logo
+    _buttonScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 0.8, curve: Curves.elasticOut),
+      ),
+    );
+
+    _buttonOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 0.6, curve: Curves.easeIn),
+      ),
+    );
+
+    // Score animation - last to appear
+    _scoreOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.7, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
+    // Generate wave layers for background animation
+    _generateWaveLayers();
+
+    // Start the animation timer for waves
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      _timeNotifier.value += 0.016; // Increments time for wave animation
+    });
+
+    // Start the entrance animation
+    _controller.forward();
+  }
+
+  void _generateWaveLayers() {
+    // Color scheme based on the #0D3445 theme with slight variations
+    final List<Color> baseColors = [
+      const Color(0xFF0D3445),
+      const Color(0xFF125673),
+      const Color(0xFF1A789B),
+      const Color(0xFF4ECDC4),
+    ];
+
+    // Create multiple wave layers with different properties
+    for (int i = 0; i < 5; i++) {
+      final baseColor = baseColors[_random.nextInt(baseColors.length)];
+
+      _waveLayers.add(
+        WaveLayer(
+          color: baseColor.withOpacity(0.07 + _random.nextDouble() * 0.08),
+          speed: 0.3 + _random.nextDouble() * 0.7,
+          amplitude: 20 + _random.nextDouble() * 40,
+          frequency: 0.005 + _random.nextDouble() * 0.01,
+          phase: _random.nextDouble() * pi * 2,
+          heightFactor: 0.5 + _random.nextDouble() * 0.5,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _animationTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Base gradient background
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0D3445),
+                  Color(0xFF0A2A38),
+                  Color(0xFF061A25),
+                ],
+              ),
+            ),
+          ),
+
+          // Dynamic wave background
+          ValueListenableBuilder(
+            valueListenable: _timeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: WaveBackgroundPainter(_waveLayers, time),
+              );
+            },
+          ),
+
+          // Floating light particles
+          CustomPaint(
+            size: Size(size.width, size.height),
+            painter: LightSpotsPainter(),
+          ),
+
+          // Main content with animations
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo animation
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _logoOpacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _logoScaleAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      // Digital circuit effect surrounding the logo
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return RadialGradient(
+                            center: Alignment.center,
+                            radius: 0.5,
+                            colors: [
+                              const Color(0xFF4ECDC4),
+                              const Color(0xFF4ECDC4).withOpacity(0.3),
+                            ],
+                          ).createShader(bounds);
+                        },
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                                blurRadius: 30,
+                                spreadRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: CustomPaint(
+                            painter: CircuitPainter(),
+                            child: const Center(
+                              child: Icon(
+                                Icons.route,
+                                size: 60,
+                                color: Color(0xFF4ECDC4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return const LinearGradient(
+                            colors: [Color(0xFF4ECDC4), Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ).createShader(bounds);
+                        },
+                        child: const Text(
+                          'PATH FINDER',
+                          style: TextStyle(
+                            fontSize: 46,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 3.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 60),
+
+                // Button animation
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _buttonOpacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _buttonScaleAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: GlowingActionButton(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 800),
+                          pageBuilder: (_, animation, __) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: const LevelSelectionScreen(),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    text: 'START GAME',
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // High score animation
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _scoreOpacityAnimation.value,
+                      child: Transform.translate(
+                        offset: Offset(
+                          0,
+                          20 * (1 - _scoreOpacityAnimation.value),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: FutureBuilder<int>(
+                    future: _getHighScore(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white.withOpacity(0.1),
+                            border: Border.all(
+                              color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4ECDC4).withOpacity(0.2),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.emoji_events,
+                                color: Color(0xFF4ECDC4),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'HIGH SCORE: ${snapshot.data}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF4ECDC4),
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<int> _getHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('highScore') ?? 0;
+  }
+}
