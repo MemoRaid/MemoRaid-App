@@ -364,3 +364,13 @@ class _StartScreenState extends State<StartScreen>
     );
   }
 }
+
+// LEVEL SELECTION SCREEN
+
+// This is the Level Selection Screen widget where users can choose which level to play
+class LevelSelectionScreen extends StatefulWidget {
+  const LevelSelectionScreen({super.key});
+
+  @override
+  State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
+}
