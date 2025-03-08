@@ -1130,3 +1130,102 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
+ /// Setup animations for dot movement
+  void _setupMovementAnimations() {
+    if (dots.isEmpty) return;
+
+    // Dispose existing controllers
+    for (var controller in moveControllers) {
+      controller.dispose();
+    }
+
+    moveControllers = [];
+    moveAnimations = [];
+    targetPositions = List.filled(dots.length, Offset.zero);
+
+    // Get screen dimensions for dot placement
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height * 0.7;
+    final safeAreaInsets = MediaQuery.of(context).padding;
+
+    // Create animation controller for each dot
+    for (int i = 0; i < dots.length; i++) {
+      final controller = AnimationController(
+        duration: dotMovementDuration,
+        vsync: this,
+      );
+
+      final dotSize = dots[i].size;
+      final safeWidth = screenWidth - dotSize;
+      final safeTop = 100.0 + safeAreaInsets.top;
+      final safeBottom = screenHeight - dotSize;
+
+      // Find a new position that doesn't overlap with other dots
+      final newPosition = _findNonOverlappingPosition(
+        i,
+        safeWidth,
+        safeTop,
+        safeBottom,
+        dotSize,
+      );
+
+      targetPositions[i] = newPosition;
+
+      // Create animation from current to new position
+      final animation = Tween<Offset>(
+        begin: dots[i].position,
+        end: newPosition,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+      // Update dot position during animation
+      animation.addListener(() {
+        if (mounted && i < dots.length) {
+          setState(() {
+            dots[i] = dots[i].copyWith(position: animation.value);
+          });
+        }
+      });
+
+      moveControllers.add(controller);
+      moveAnimations.add(animation);
+
+      // When animation completes, generate a new target position
+      controller.addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted && i < dots.length) {
+          final newPosition = _findNonOverlappingPosition(
+            i,
+            safeWidth,
+            safeTop,
+            safeBottom,
+            dotSize,
+          );
+
+          targetPositions[i] = newPosition;
+
+          final newAnimation = Tween<Offset>(
+            begin: dots[i].position,
+            end: newPosition,
+          ).animate(
+            CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+          );
+
+          newAnimation.addListener(() {
+            if (mounted && i < dots.length) {
+              setState(() {
+                dots[i] = dots[i].copyWith(position: newAnimation.value);
+              });
+            }
+          });
+
+          if (i < moveAnimations.length) {
+            moveAnimations[i] = newAnimation;
+          }
+
+          controller.reset();
+          controller.forward();
+        }
+      });
+    }
+  }
+
+
