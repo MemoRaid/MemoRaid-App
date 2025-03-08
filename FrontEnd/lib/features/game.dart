@@ -938,3 +938,116 @@ class GameScreen extends StatefulWidget {
   @override
   GameScreenState createState() => GameScreenState();
 }
+class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
+  // Game configuration constants
+  static const int maxLives = 3;
+  static const Duration sequenceDisplayDuration = Duration(milliseconds: 1000);
+  static const Duration shuffleDuration = Duration(seconds: 5);
+
+  // Game state variables
+  late int level;
+  late int score;
+  late int lives;
+  late int dotCount; // Number of dots in the level
+  late int sequenceLength; // Length of the sequence to memorize
+  late List<Dot> dots; // List of all dots in the game
+  late List<int> sequence; // The sequence of dots to memorize
+  late int currentIndex; // Current position in the sequence during player input
+  late bool showingSequence; // Whether the sequence is being displayed
+  late bool awaitingInput; // Whether player input is expected
+  late bool gameOver; // Whether the game is over
+  late Random random; // Random number generator
+  late int startTime; // When the level started (for time bonus calculation)
+  bool _isFirstBuild = true;
+  int? countdownNumber; // Countdown number before player input
+  late bool dotsMove; // Whether dots move around
+  late bool shuffleAndStop; // Whether dots shuffle and then stop
+  Duration dotMovementDuration = const Duration(milliseconds: 1500);
+  String gameStatusText = 'Get ready...';
+
+  // Animation controllers and animations for dot movement
+  late List<AnimationController> moveControllers;
+  late List<Animation<Offset>> moveAnimations;
+
+  // Background animation elements
+  final ValueNotifier<double> _backgroundTimeNotifier = ValueNotifier(0);
+  Timer? _backgroundAnimationTimer;
+  late List<ParticleDot> _backgroundParticles;
+
+  // Tracks target positions for all dots
+  List<Offset> targetPositions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    random = Random();
+    moveControllers = [];
+    moveAnimations = [];
+    _initializeGame();
+
+    _setupBackground();
+
+    // Setup timer for background animation
+    _backgroundAnimationTimer = Timer.periodic(
+      const Duration(milliseconds: 16),
+      (timer) {
+        _backgroundTimeNotifier.value += 0.016;
+      },
+    );
+  }
+
+  /// Sets up background particle effects
+  void _setupBackground() {
+    _backgroundParticles = List.generate(30, (index) {
+      return ParticleDot(
+        position: Offset(
+          random.nextDouble() * 1000,
+          random.nextDouble() * 2000,
+        ),
+        size: 1.0 + random.nextDouble() * 2.0,
+        opacity: 0.1 + random.nextDouble() * 0.2,
+        speed: 0.1 + random.nextDouble() * 0.2,
+        angle: random.nextDouble() * pi * 2,
+      );
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Wait for first build to get screen dimensions
+    if (!_isFirstBuild) {
+      _generateLevel();
+    } else {
+      _isFirstBuild = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _generateLevel();
+        }
+      });
+    }
+  }
+
+  /// Initialize game state with level parameters
+  void _initializeGame() {
+    level = widget.level.levelNumber;
+    score = 0;
+    lives = maxLives;
+    dotCount = widget.level.dotCount;
+    sequenceLength = widget.level.sequenceLength;
+    dotsMove = widget.level.dotsMove;
+    shuffleAndStop = widget.level.shuffleAndStop;
+
+    // Adjust movement speed based on level configuration
+    dotMovementDuration = Duration(
+      milliseconds: (1500 / widget.level.movementSpeed).round(),
+    );
+
+    dots = [];
+    sequence = [];
+    currentIndex = 0;
+    showingSequence = false;
+    awaitingInput = false;
+    gameOver = false;
+    startTime = DateTime.now().millisecondsSinceEpoch;
+  }
