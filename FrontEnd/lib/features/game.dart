@@ -928,3 +928,13 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
     return GameDataManager.getLevelHighScore(level);
   }
 }
+
+// GAME SCREEN
+class GameScreen extends StatefulWidget {
+  final GameLevel level;
+
+  const GameScreen({super.key, required this.level});
+
+  @override
+  GameScreenState createState() => GameScreenState();
+}
