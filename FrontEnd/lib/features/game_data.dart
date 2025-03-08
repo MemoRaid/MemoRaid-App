@@ -250,3 +250,96 @@ class ParticleDot {
     angle += sin(time * 0.3) * 0.02;
   }
 }
+
+/// Manages persistent game data including scores and level progression
+/// Uses SharedPreferences to save data between game sessions
+class GameDataManager {
+  /// Retrieves the overall highest score across all levels
+  static Future<int> getHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('highScore') ?? 0;
+  }
+
+  /// Gets the highest level unlocked by the player
+  static Future<int> getUnlockedLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('unlockedLevel') ?? 1; // Default to level 1
+  }
+
+  /// Saves newly unlocked level progress
+  static Future<void> saveUnlockedLevel(int level) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('unlockedLevel', level);
+  }
+
+  /// Gets the high score for a specific level
+  static Future<int> getLevelHighScore(int level) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('highScore_level_$level') ?? 0;
+  }
+
+  /// Saves a high score for a specific level (only if better than previous)
+  static Future<void> saveLevelHighScore(int level, int score) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentLevelHigh = prefs.getInt('highScore_level_$level') ?? 0;
+
+    if (score > currentLevelHigh) {
+      await prefs.setInt('highScore_level_$level', score);
+    }
+  }
+
+  /// Checks if the player achieved anything noteworthy in the level
+  /// Returns details about high scores and level unlocking
+  static Future<LevelAchievement> checkLevelAchievement(
+    int level,
+    int score,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Check if this is a new level high score
+    final currentLevelHigh = prefs.getInt('highScore_level_$level') ?? 0;
+    final isNewHighScore = score > currentLevelHigh;
+
+    if (isNewHighScore) {
+      await prefs.setInt('highScore_level_$level', score);
+    }
+
+    // Check if this is a new overall high score
+    final currentHigh = prefs.getInt('highScore') ?? 0;
+    if (score > currentHigh) {
+      await prefs.setInt('highScore', score);
+    }
+
+    // Check if this unlocks a new level
+    final currentUnlockedLevel = prefs.getInt('unlockedLevel') ?? 1;
+    bool isNewLevelUnlocked = false;
+
+    if (level >= currentUnlockedLevel && level < gameLevels.length) {
+      isNewLevelUnlocked = true;
+      await prefs.setInt('unlockedLevel', level + 1);
+    }
+
+    return LevelAchievement(
+      isNewHighScore: isNewHighScore,
+      isNewLevelUnlocked: isNewLevelUnlocked,
+      previousHighScore: currentLevelHigh,
+    );
+  }
+
+  /// Resets all game progress
+  /// Used for testing or when player wants to start fresh
+  static Future<void> resetAllProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Reset unlocked level back to 1
+    await prefs.setInt('unlockedLevel', 1);
+
+    // Reset overall high score
+    await prefs.setInt('highScore', 0);
+
+    // Reset individual level high scores
+    for (final level in gameLevels) {
+      await prefs.remove('highScore_level_${level.levelNumber}');
+    }
+  }
+}
