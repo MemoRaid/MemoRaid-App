@@ -1972,6 +1972,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 }
+
 // GAME RESULTS SCREEN
 class GameResultsScreen extends StatelessWidget {
   // Properties to display game results
@@ -1980,9 +1981,9 @@ class GameResultsScreen extends StatelessWidget {
   final int timeBonus; // Bonus points from completing level quickly
   final int perfectBonus; // Bonus points from perfect level completion
   final LevelAchievement
-      achievement; // Contains achievement data like high scores
+  achievement; // Contains achievement data like high scores
   final VoidCallback
-      onContinue; // Function to call when "Menu" button is pressed
+  onContinue; // Function to call when "Menu" button is pressed
 
   const GameResultsScreen({
     Key? key,
@@ -2010,8 +2011,9 @@ class GameResultsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF4ECDC4)
-                    .withOpacity(0.3), // Teal glow effect
+                color: const Color(
+                  0xFF4ECDC4,
+                ).withOpacity(0.3), // Teal glow effect
                 blurRadius: 15,
                 spreadRadius: 5,
               ),
@@ -2031,10 +2033,7 @@ class GameResultsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.black.withOpacity(0.3),
-                  border: Border.all(
-                    color: const Color(0xFF4ECDC4),
-                    width: 2,
-                  ),
+                  border: Border.all(color: const Color(0xFF4ECDC4), width: 2),
                 ),
                 child: Icon(
                   // Trophy icon for special achievements, check mark for regular completion
@@ -2043,11 +2042,13 @@ class GameResultsScreen extends StatelessWidget {
                       : Icons.check_circle,
                   size: 40,
                   // Gold color for special achievements, teal for regular
-                  color: achievement.isSpecialAchievement
-                      ? const Color(0xFFFFD700)
-                      : const Color(0xFF4ECDC4),
+                  color:
+                      achievement.isSpecialAchievement
+                          ? const Color(0xFFFFD700)
+                          : const Color(0xFF4ECDC4),
                 ),
-              ),              const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
               // Main title - changes based on achievement type
               Text(
                 achievement.isSpecialAchievement
@@ -2115,8 +2116,10 @@ class GameResultsScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4ECDC4), // Teal button
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -2137,3 +2140,97 @@ class GameResultsScreen extends StatelessWidget {
       ),
     );
   }
+
+  // Helper method to build score row with label and value
+  // isTotal parameter controls if row has enhanced styling for total score
+  Widget _buildScoreRow(String label, int value, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Score label (left side)
+          Text(
+            label,
+            style: TextStyle(
+              // Larger font and bold for total score
+              fontSize: isTotal ? 20 : 18,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
+          // Score value (right side)
+          Text(
+            '+$value',
+            style: TextStyle(
+              // Larger font, bold, and teal color for total score
+              fontSize: isTotal ? 24 : 18,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: isTotal ? const Color(0xFF4ECDC4) : Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build achievement notification rows
+  // Used for displaying high score and level unlock achievements
+  Widget _buildAchievementRow(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      // Container with color matching the achievement type
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15), // Semi-transparent background
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          // Icon with circular background
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(0.2),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          // Achievement text content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Achievement title (e.g., "New High Score!")
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                // Achievement subtitle with additional info
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
