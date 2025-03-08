@@ -1972,3 +1972,79 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 }
+// GAME RESULTS SCREEN
+class GameResultsScreen extends StatelessWidget {
+  // Properties to display game results
+  final int level; // Current level number
+  final int score; // Total score achieved
+  final int timeBonus; // Bonus points from completing level quickly
+  final int perfectBonus; // Bonus points from perfect level completion
+  final LevelAchievement
+      achievement; // Contains achievement data like high scores
+  final VoidCallback
+      onContinue; // Function to call when "Menu" button is pressed
+
+  const GameResultsScreen({
+    Key? key,
+    required this.level,
+    required this.score,
+    required this.timeBonus,
+    required this.perfectBonus,
+    required this.achievement,
+    required this.onContinue,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Main scaffold with semi-transparent background
+    return Scaffold(
+      backgroundColor: Colors.black54,
+      body: Center(
+        child: Container(
+          // Responsive width based on screen size
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          // Styled container with cyberpunk/tech theme colors
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D3445), // Dark blue background
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF4ECDC4)
+                    .withOpacity(0.3), // Teal glow effect
+                blurRadius: 15,
+                spreadRadius: 5,
+              ),
+            ],
+            border: Border.all(
+              color: const Color(0xFF4ECDC4).withOpacity(0.5), // Teal border
+              width: 2,
+            ),
+          ),
+          // Main content column
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top icon that changes based on achievement type
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.3),
+                  border: Border.all(
+                    color: const Color(0xFF4ECDC4),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  // Trophy icon for special achievements, check mark for regular completion
+                  achievement.isSpecialAchievement
+                      ? Icons.emoji_events
+                      : Icons.check_circle,
+                  size: 40,
+                  // Gold color for special achievements, teal for regular
+                  color: achievement.isSpecialAchievement
+                      ? const Color(0xFFFFD700)
+                      : const Color(0xFF4ECDC4),
+                ),
+              ),
