@@ -2234,3 +2234,21 @@ class GameResultsScreen extends StatelessWidget {
     );
   }
 }
+
+// This widget displays the game over screen when a player loses
+// It shows the final score and provides options to retry or return to menu
+class GameOverScreen extends StatelessWidget {
+  // Player's final score to display
+  final int score;
+  // Callback function for when player chooses to retry
+  final VoidCallback onRetry;
+  // Callback function for when player chooses to exit to menu
+  final VoidCallback onExit;
+
+  // Constructor requiring score and callback functions
+  const GameOverScreen({
+    Key? key,
+    required this.score,
+    required this.onRetry,
+    required this.onExit,
+  }) : super(key: key);
