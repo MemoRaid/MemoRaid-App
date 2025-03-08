@@ -140,3 +140,227 @@ class _StartScreenState extends State<StartScreen>
       );
     }
   }
+
+  @override
+  void dispose() {
+    // Clean up resources when widget is removed
+    _controller.dispose();
+    _animationTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Get screen dimensions for responsive layout
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Background gradient (dark blue to black) for deep sea effect
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF0D3445),
+                  const Color(0xFF0A2A38),
+                  const Color(0xFF061A25),
+                ],
+              ),
+            ),
+          ),
+
+          // Animated wave background that updates with time
+          ValueListenableBuilder(
+            valueListenable: _timeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: WaveBackgroundPainter(_waveLayers, time),
+              );
+            },
+          ),
+
+          // Light spots overlay for additional visual effect
+          CustomPaint(
+            size: Size(size.width, size.height),
+            painter: LightSpotsPainter(),
+          ),
+
+          // Main content container
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo section with animations
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _logoOpacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _logoScaleAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      // Logo icon with glowing effect
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return RadialGradient(
+                            center: Alignment.center,
+                            radius: 0.5,
+                            colors: [
+                              const Color(0xFF4ECDC4),
+                              const Color(0xFF4ECDC4).withOpacity(0.3),
+                            ],
+                          ).createShader(bounds);
+                        },
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                                blurRadius: 30,
+                                spreadRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: CustomPaint(
+                            painter: CircuitPainter(),
+                            child: const Center(
+                              child: Icon(
+                                Icons.route,
+                                size: 60,
+                                color: Color(0xFF4ECDC4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Game title with gradient text effect
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return const LinearGradient(
+                            colors: [Color(0xFF4ECDC4), Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ).createShader(bounds);
+                        },
+                        child: const Text(
+                          'PATH QUEST',
+                          style: TextStyle(
+                            fontSize: 46,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 3.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // Start game button with animations
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _buttonOpacityAnimation.value,
+                      child: Transform.scale(
+                        scale: _buttonScaleAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: GlowingActionButton(
+                    onPressed: () {
+                      // Provide haptic feedback when button is pressed
+                      HapticFeedback.mediumImpact();
+                      // Navigate to level selection with fade transition
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 800),
+                          pageBuilder: (_, animation, __) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: const LevelSelectionScreen(),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    text: 'START GAME',
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Game tagline/quote with animations
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _scoreOpacityAnimation.value,
+                      child: Transform.translate(
+                        offset: Offset(
+                          0,
+                          20 * (1 - _scoreOpacityAnimation.value),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white.withOpacity(0.1),
+                      border: Border.all(
+                        color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const ui.Color.fromARGB(255, 25, 66, 64),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'Every dot tells a story—remember it well!',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                        color: ui.Color.fromARGB(255, 198, 215, 214),
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
