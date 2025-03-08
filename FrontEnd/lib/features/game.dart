@@ -1694,3 +1694,259 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
           ),
 
+// Animated background particles using CustomPaint
+          ValueListenableBuilder(
+            valueListenable: _backgroundTimeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: GameBackgroundPainter(
+                  time: time,
+                  particles: _backgroundParticles,
+                ),
+              );
+            },
+          ),
+
+          Column(
+            children: [
+              // Space for the AppBar and status area
+              SizedBox(height: MediaQuery.of(context).padding.top + 70),
+
+              // Lives/Hearts display container
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: const Color(0xFF4ECDC4).withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  // Generate hearts based on the number of lives
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      maxLives,
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 300),
+                          opacity: index < lives ? 1.0 : 0.3,
+                          child: Icon(
+                            Icons.favorite,
+                            color: index < lives ? Colors.red : Colors.grey,
+                            size: 28,
+                            shadows: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Game status text container - changes appearance based on game state
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                decoration: BoxDecoration(
+                  // Color changes depending on game state
+                  color: showingSequence
+                      ? const Color(0xFF4ECDC4)
+                      : (awaitingInput ? Colors.green : Colors.grey.shade700),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: const Offset(0, 3),
+                      blurRadius: 5,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
+                width: double.infinity,
+                child: Text(
+                  gameStatusText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(1, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Main game area with dots
+              Expanded(
+                child: Stack(
+                  children: [
+                    // Dynamic positioning of game dots
+                    for (final dot in dots)
+                      Positioned(
+                        left: dot.position.dx,
+                        top: dot.position.dy,
+                        child: GestureDetector(
+                          // Handle tap events on dots
+                          onTap: () => _handleDotTap(dot.id),
+                          child: AnimatedContainer(
+                            // Animation for highlighting the dots
+                            duration: const Duration(milliseconds: 150),
+                            width:
+                                dot.isHighlighted ? dot.size * 1.3 : dot.size,
+                            height:
+                                dot.isHighlighted ? dot.size * 1.3 : dot.size,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              // Gradient effect for the dots
+                              gradient: RadialGradient(
+                                colors: [
+                                  dot.isHighlighted
+                                      ? Colors.orange
+                                      : const Color(0xFF4ECDC4),
+                                  dot.isHighlighted
+                                      ? Colors.orange.shade700
+                                      : Colors.blue.shade700,
+                                ],
+                                center: const Alignment(-0.3, -0.3),
+                                focal: const Alignment(-0.5, -0.5),
+                                focalRadius: 0.2,
+                              ),
+                              // Glow effect for the dots
+                              boxShadow: [
+                                BoxShadow(
+                                  color: dot.isHighlighted
+                                      ? Colors.orange.withOpacity(0.8)
+                                      : const Color(
+                                          0xFF4ECDC4,
+                                        ).withOpacity(0.4),
+                                  blurRadius: dot.isHighlighted ? 20 : 10,
+                                  spreadRadius: dot.isHighlighted ? 5 : 1,
+                                ),
+                              ],
+                            ),
+                            // Dot number display
+                            child: Center(
+                              child: AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 150),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: dot.isHighlighted ? 24 : 16,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      offset: const Offset(1, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Text('${dot.id + 1}'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Countdown overlay that appears before the game starts
+                    if (countdownNumber != null)
+                      Positioned.fill(
+                        child: BackdropFilter(
+                          // Apply blur effect to the background
+                          filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                          child: Container(
+                            color: Colors.black.withOpacity(0.5),
+                            child: Center(
+                              child: AnimatedScale(
+                                // Animation for the countdown number
+                                scale: countdownNumber == 0 ? 1.5 : 1.0,
+                                duration: const Duration(milliseconds: 300),
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    // Different colors for GO! vs numbers
+                                    color: countdownNumber == 0
+                                        ? Colors.green.withOpacity(0.3)
+                                        : Colors.blue.withOpacity(0.3),
+                                    border: Border.all(
+                                      color: countdownNumber == 0
+                                          ? Colors.green
+                                          : Colors.blue,
+                                      width: 3,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: (countdownNumber == 0
+                                                ? Colors.green
+                                                : Colors.blue)
+                                            .withOpacity(0.5),
+                                        blurRadius: 20,
+                                        spreadRadius: 5,
+                                      ),
+                                    ],
+                                  ),
+                                  // Display GO! when countdown reaches zero
+                                  child: Text(
+                                    countdownNumber == 0
+                                        ? "GO!"
+                                        : countdownNumber.toString(),
+                                    style: TextStyle(
+                                      fontSize: 80,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.5),
+                                          offset: const Offset(2, 2),
+                                          blurRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
