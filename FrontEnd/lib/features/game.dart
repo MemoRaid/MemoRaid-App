@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game_data.dart';
 
+//------------------------------------------------------------------------------
+// GAME SCREENS
+//------------------------------------------------------------------------------
+
 // START SCREEN
 // This widget represents the initial screen of the Path Quest game
 class StartScreen extends StatefulWidget {
@@ -966,6 +970,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   Duration dotMovementDuration = const Duration(milliseconds: 1500);
   String gameStatusText = 'Get ready...';
 
+  // Timer related variables
+  Timer? _gameTimer;
+  late int _timeLimit; // Time limit in seconds
+  late int _remainingTime; // Time remaining in seconds
+  bool _timeExpired = false;
+
   // Animation controllers and animations for dot movement
   late List<AnimationController> moveControllers;
   late List<Animation<Offset>> moveAnimations;
@@ -1038,6 +1048,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     sequenceLength = widget.level.sequenceLength;
     dotsMove = widget.level.dotsMove;
     shuffleAndStop = widget.level.shuffleAndStop;
+
+    // Set time limit based on level difficulty
+    // Base time + additional time for each dot in the sequence
+    _timeLimit = 10 + (sequenceLength * 2);
+    _remainingTime = _timeLimit;
+    _timeExpired = false;
 
     // Adjust movement speed based on level configuration
     dotMovementDuration = Duration(
@@ -1474,10 +1490,34 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           awaitingInput = true;
           gameStatusText = 'Your turn!';
 
+          // Start the game timer when player's turn begins
+          _startGameTimer();
+
           // Start dot movement if enabled and not shuffle-and-stop mode
           if (dotsMove && !shuffleAndStop) {
             for (var controller in moveControllers) {
               controller.forward();
+            }
+          }
+        });
+      }
+    });
+  }
+
+  /// Start the game timer that counts down
+  void _startGameTimer() {
+    _gameTimer?.cancel();
+    _gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_remainingTime > 0) {
+            _remainingTime--;
+          } else {
+            _timeExpired = true;
+            _gameTimer?.cancel();
+            // Only end the game if awaiting input (not during sequence display)
+            if (awaitingInput && !gameOver) {
+              _handleGameOver();
             }
           }
         });
@@ -1587,6 +1627,9 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       awaitingInput = false;
     });
 
+    // Cancel the game timer
+    _gameTimer?.cancel();
+
     // Save high score
     _saveLevelHighScore(score);
 
@@ -1597,6 +1640,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         pageBuilder:
             (_, __, ___) => GameOverScreen(
               score: score,
+              timeExpired: _timeExpired, // Pass the reason for game over
               onRetry: () {
                 Navigator.of(context).pop();
                 setState(() {
@@ -1885,66 +1929,130 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
+                    // Timer positioned in top right corner below status area
+                    if (awaitingInput && !gameOver)
+                      Positioned(
+                        top: 10, // Positioned below the status box
+                        right: 16, // Right aligned
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color:
+                                  _remainingTime < 6
+                                      ? Colors.red
+                                      : const Color(
+                                        0xFF4ECDC4,
+                                      ).withOpacity(0.5),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.timer,
+                                color:
+                                    _remainingTime < 6
+                                        ? Colors.red
+                                        : const Color(0xFF4ECDC4),
+                                size: 22,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$_remainingTime s',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      _remainingTime < 6
+                                          ? Colors.red
+                                          : Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                     // Countdown overlay that appears before the game starts
                     if (countdownNumber != null)
                       Positioned.fill(
                         child: BackdropFilter(
-                          // Apply blur effect to the background
-                          filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                          // Apply a subtle blur effect to the background
+                          filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                           child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
                             color: Colors.black.withOpacity(0.5),
-                            child: Center(
-                              child: AnimatedScale(
-                                // Animation for the countdown number
-                                scale: countdownNumber == 0 ? 1.5 : 1.0,
-                                duration: const Duration(milliseconds: 300),
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    // Different colors for GO! vs numbers
-                                    color:
-                                        countdownNumber == 0
-                                            ? Colors.green.withOpacity(0.3)
-                                            : Colors.blue.withOpacity(0.3),
-                                    border: Border.all(
-                                      color:
-                                          countdownNumber == 0
-                                              ? Colors.green
-                                              : Colors.blue,
-                                      width: 3,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (countdownNumber == 0
-                                                ? Colors.green
-                                                : Colors.blue)
-                                            .withOpacity(0.5),
-                                        blurRadius: 20,
-                                        spreadRadius: 5,
-                                      ),
-                                    ],
+                            // Ensure proper centering with Alignment
+                            alignment: Alignment.center,
+                            child: AnimatedScale(
+                              duration: const Duration(milliseconds: 600),
+                              scale: 1.0,
+                              curve: Curves.elasticOut,
+                              child: Container(
+                                width: 130,
+                                height: 130,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      countdownNumber == 0
+                                          ? Colors.green.withOpacity(0.7)
+                                          : const Color.fromARGB(
+                                            255,
+                                            0,
+                                            87,
+                                            193,
+                                          ).withOpacity(0.7),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
                                   ),
-                                  // Display GO! when countdown reaches zero
+                                ),
+                                // Added alignment for inner content
+                                alignment: Alignment.center,
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: ScaleTransition(
+                                        scale: animation,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
                                   child: Text(
                                     countdownNumber == 0
                                         ? "GO!"
                                         : countdownNumber.toString(),
+                                    key: ValueKey(countdownNumber),
                                     style: TextStyle(
-                                      fontSize: 80,
+                                      fontSize: countdownNumber == 0 ? 50 : 60,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black.withOpacity(0.5),
-                                          offset: const Offset(2, 2),
-                                          blurRadius: 5,
-                                        ),
-                                      ],
                                     ),
                                   ),
                                 ),
                               ),
+                              onEnd: () {
+                                if (mounted && countdownNumber != null) {
+                                  HapticFeedback.mediumImpact();
+                                }
+                              },
                             ),
                           ),
                         ),
@@ -1964,6 +2072,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Clean up resources when the widget is removed
     _backgroundAnimationTimer?.cancel();
     _backgroundTimeNotifier.dispose();
+    _gameTimer?.cancel();
 
     // Dispose all animation controllers to prevent memory leaks
     for (var controller in moveControllers) {
@@ -2110,7 +2219,9 @@ class GameResultsScreen extends StatelessWidget {
                   Icons.lock_open,
                   const Color(0xFF4ECDC4), // Teal color
                 ),
-              const SizedBox(height: 32), // Continue button to return to menu
+              const SizedBox(height: 32),
+
+              // Continue button to return to menu
               ElevatedButton(
                 onPressed: onContinue,
                 style: ElevatedButton.styleFrom(
@@ -2240,6 +2351,8 @@ class GameResultsScreen extends StatelessWidget {
 class GameOverScreen extends StatelessWidget {
   // Player's final score to display
   final int score;
+  // Whether the game ended due to timer expiring
+  final bool timeExpired;
   // Callback function for when player chooses to retry
   final VoidCallback onRetry;
   // Callback function for when player chooses to exit to menu
@@ -2249,6 +2362,7 @@ class GameOverScreen extends StatelessWidget {
   const GameOverScreen({
     Key? key,
     required this.score,
+    this.timeExpired = false,
     required this.onRetry,
     required this.onExit,
   }) : super(key: key);
@@ -2292,8 +2406,8 @@ class GameOverScreen extends StatelessWidget {
                   color: Colors.black.withOpacity(0.3),
                   border: Border.all(color: Colors.red, width: 2),
                 ),
-                child: const Icon(
-                  Icons.close_rounded,
+                child: Icon(
+                  timeExpired ? Icons.timer_off : Icons.close_rounded,
                   size: 40,
                   color: Colors.red,
                 ),
@@ -2307,6 +2421,17 @@ class GameOverScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 16), // Vertical spacing
+              // Reason for game over
+              Text(
+                timeExpired ? 'Time\'s Up!' : 'Wrong Pattern!',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.red,
+                  letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 24), // Vertical spacing
@@ -2327,12 +2452,14 @@ class GameOverScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16), // Vertical spacing
               // Encouraging message for the player
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
-                  'Keep trying! You\'ll get better with practice.',
+                  timeExpired
+                      ? 'Try to complete the pattern faster next time!'
+                      : 'Keep trying! You\'ll get better with practice.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                  style: const TextStyle(fontSize: 16, color: Colors.white70),
                 ),
               ),
               const SizedBox(height: 24), // Vertical spacing
@@ -2385,6 +2512,7 @@ class GameOverScreen extends StatelessWidget {
     );
   }
 }
+
 //------------------------------------------------------------------------------
 // CUSTOM PAINTERS (VISUAL EFFECTS)
 //------------------------------------------------------------------------------
@@ -2409,7 +2537,8 @@ class WaveBackgroundPainter extends CustomPainter {
       final baseY = size.height - waveHeight;
 
       for (double x = 0; x <= size.width; x += 5) {
-        final y = baseY +
+        final y =
+            baseY +
             sin(x * layer.frequency + layer.phase + time * layer.speed) *
                 layer.amplitude;
         path.lineTo(x, y);
@@ -2419,17 +2548,18 @@ class WaveBackgroundPainter extends CustomPainter {
       path.lineTo(0, size.height);
       path.close();
 
-      final paint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            layer.color.withOpacity(0.6),
-            layer.color.withOpacity(0.3),
-            layer.color.withOpacity(0.1),
-          ],
-        ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
-        ..style = PaintingStyle.fill;
+      final paint =
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                layer.color.withOpacity(0.6),
+                layer.color.withOpacity(0.3),
+                layer.color.withOpacity(0.1),
+              ],
+            ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
+            ..style = PaintingStyle.fill;
 
       canvas.drawPath(path, paint);
     }
@@ -2468,22 +2598,23 @@ class LightSpotsPainter extends CustomPainter {
       final pulseRate = 0.5 + (_positions[i].dx * 0.001);
       final dynamicOpacity = _opacities[i] * (0.7 + sin(now * pulseRate) * 0.3);
 
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-          stops: const [0.0, 1.0],
-        ).createShader(
-          Rect.fromCircle(
-            center: Offset(
-              _positions[i].dx % size.width,
-              _positions[i].dy % size.height,
-            ),
-            radius: _sizes[i] * 4,
-          ),
-        );
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+              stops: const [0.0, 1.0],
+            ).createShader(
+              Rect.fromCircle(
+                center: Offset(
+                  _positions[i].dx % size.width,
+                  _positions[i].dy % size.height,
+                ),
+                radius: _sizes[i] * 4,
+              ),
+            );
 
       canvas.drawCircle(
         Offset(_positions[i].dx % size.width, _positions[i].dy % size.height),
@@ -2516,13 +2647,14 @@ class CircuitPainter extends CustomPainter {
       final x2 = centerX + cos(angle2) * radius * 0.9;
       final y2 = centerY + sin(angle2) * radius * 0.9;
 
-      final paint = Paint()
-        ..color = const Color(
-          0xFF4ECDC4,
-        ).withOpacity(0.4 + random.nextDouble() * 0.3)
-        ..strokeWidth = 1 + random.nextDouble() * 1.5
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
+      final paint =
+          Paint()
+            ..color = const Color(
+              0xFF4ECDC4,
+            ).withOpacity(0.4 + random.nextDouble() * 0.3)
+            ..strokeWidth = 1 + random.nextDouble() * 1.5
+            ..strokeCap = StrokeCap.round
+            ..style = PaintingStyle.stroke;
 
       final now = DateTime.now().millisecondsSinceEpoch / 1000;
       final pulseRate = 0.5 + i * 0.1;
@@ -2540,25 +2672,27 @@ class CircuitPainter extends CustomPainter {
 
       canvas.drawPath(path, paint);
 
-      final nodePaint = Paint()
-        ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
-        ..style = PaintingStyle.fill;
+      final nodePaint =
+          Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+            ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x1, y1), 1.5, nodePaint);
       canvas.drawCircle(Offset(x2, y2), 2.0, nodePaint);
     }
 
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFF4ECDC4).withOpacity(0.8),
-          const Color(0xFF4ECDC4).withOpacity(0),
-        ],
-      ).createShader(
-        Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
-      );
+    final ringPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..shader = RadialGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(0.8),
+              const Color(0xFF4ECDC4).withOpacity(0),
+            ],
+          ).createShader(
+            Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+          );
 
     canvas.drawCircle(Offset(centerX, centerY), radius * 0.85, ringPaint);
   }
@@ -2597,32 +2731,34 @@ class NetworkBackgroundPainter extends CustomPainter {
       if (distance <= connection.maxDistance) {
         final opacity = 1.0 - (distance / connection.maxDistance);
 
-        final paint = Paint()
-          ..shader = LinearGradient(
-            colors: [
-              const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
-              const Color(0xFF0D3445).withOpacity(opacity * 0.3),
-            ],
-          ).createShader(
-            Rect.fromPoints(startNode.position, endNode.position),
-          )
-          ..strokeWidth = connection.thickness * opacity
-          ..strokeCap = StrokeCap.round;
+        final paint =
+            Paint()
+              ..shader = LinearGradient(
+                colors: [
+                  const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
+                  const Color(0xFF0D3445).withOpacity(opacity * 0.3),
+                ],
+              ).createShader(
+                Rect.fromPoints(startNode.position, endNode.position),
+              )
+              ..strokeWidth = connection.thickness * opacity
+              ..strokeCap = StrokeCap.round;
 
         canvas.drawLine(startNode.position, endNode.position, paint);
       }
     }
 
     for (final node in nodes) {
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(node.opacity),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-        ).createShader(
-          Rect.fromCircle(center: node.position, radius: node.size * 4),
-        );
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(node.opacity),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+            ).createShader(
+              Rect.fromCircle(center: node.position, radius: node.size * 4),
+            );
 
       canvas.drawCircle(node.position, node.size, paint);
     }
@@ -2651,22 +2787,24 @@ class LightRaysPainter extends CustomPainter {
       final endX = origin.dx + cos(angle) * rayLength;
       final endY = origin.dy + sin(angle) * rayLength;
 
-      final rayPath = Path()
-        ..moveTo(origin.dx, origin.dy)
-        ..lineTo(endX, endY)
-        ..lineTo(endX + width * 0.15, endY)
-        ..lineTo(origin.dx, origin.dy)
-        ..close();
+      final rayPath =
+          Path()
+            ..moveTo(origin.dx, origin.dy)
+            ..lineTo(endX, endY)
+            ..lineTo(endX + width * 0.15, endY)
+            ..lineTo(origin.dx, origin.dy)
+            ..close();
 
-      final rayPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF135777).withOpacity(0.3),
-            const Color(0xFF135777).withOpacity(0),
-          ],
-        ).createShader(Rect.fromPoints(origin, Offset(endX, endY)));
+      final rayPaint =
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                const Color(0xFF135777).withOpacity(0.3),
+                const Color(0xFF135777).withOpacity(0),
+              ],
+            ).createShader(Rect.fromPoints(origin, Offset(endX, endY)));
 
       canvas.drawPath(rayPath, rayPaint);
     }
@@ -2687,17 +2825,72 @@ class SubtleWavesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final width = size.width;
     final height = size.height;
-, height);
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 20,
+      frequency: 0.015,
+      phase: time * 0.2,
+      yPosition: height * 0.75,
+      color: const Color(0xFF4ECDC4).withOpacity(0.1),
+    );
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 15,
+      frequency: 0.02,
+      phase: time * -0.15,
+      yPosition: height * 0.6,
+      color: const Color(0xFF135777).withOpacity(0.07),
+    );
+
+    _drawWave(
+      canvas: canvas,
+      width: width,
+      height: height,
+      amplitude: 30,
+      frequency: 0.01,
+      phase: time * 0.1,
+      yPosition: height * 0.9,
+      color: const Color(0xFF0D3445).withOpacity(0.05),
+    );
+  }
+
+  void _drawWave({
+    required Canvas canvas,
+    required double width,
+    required double height,
+    required double amplitude,
+    required double frequency,
+    required double phase,
+    required double yPosition,
+    required Color color,
+  }) {
+    final path = Path();
+
+    path.moveTo(0, height);
+
+    for (double x = 0; x <= width; x += 5) {
+      final y = yPosition + sin(x * frequency + phase) * amplitude;
+      path.lineTo(x, y);
+    }
+
+    path.lineTo(width, height);
     path.lineTo(0, height);
     path.close();
 
-    final paint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [color, color.withOpacity(0)],
-      ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
-      ..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [color, color.withOpacity(0)],
+          ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
+          ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, paint);
   }
@@ -2738,11 +2931,12 @@ class HexagonalPatternPainter extends CustomPainter {
     }
 
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
-    final paint = Paint()
-      ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final paint =
+        Paint()
+          ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
 
     for (int i = 0; i < 12; i++) {
       final angle1 = (2 * pi * i / 12);
@@ -2769,9 +2963,10 @@ class HexagonalPatternPainter extends CustomPainter {
       path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
       canvas.drawPath(path, paint);
 
-      final nodePaint = Paint()
-        ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
-        ..style = PaintingStyle.fill;
+      final nodePaint =
+          Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
+            ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x1, y1), 2, nodePaint);
       canvas.drawCircle(Offset(x2, y2), 2, nodePaint);
@@ -2801,10 +2996,11 @@ class HexagonalPatternPainter extends CustomPainter {
 
     path.close();
 
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
 
     canvas.drawPath(path, paint);
   }
@@ -2824,7 +3020,6 @@ class LevelSelectBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _drawFlowingLines(canvas, size);
-    _drawWave(canvas, size);
     _drawGlowingParticles(canvas, size);
   }
 
@@ -2846,44 +3041,14 @@ class LevelSelectBackgroundPainter extends CustomPainter {
         path.lineTo(x, y + sin(x * frequency + phase) * amplitude);
       }
 
-      final paint = Paint()
-        ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = lineWidth;
+      final paint =
+          Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = lineWidth;
 
       canvas.drawPath(path, paint);
     }
-  }
-
-  void _drawWave(Canvas canvas, Size size) {
-    final path = Path();
-
-    final baseY = size.height * 0.9;
-    path.moveTo(0, baseY);
-
-    for (double x = 0; x <= size.width; x += 5) {
-      final dx1 = sin(x * 0.01 + time * 0.2) * 15;
-      final dx2 = sin(x * 0.02 + time * 0.1) * 10;
-      path.lineTo(x, baseY + dx1 + dx2);
-    }
-
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    final paint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          const Color(0xFF4ECDC4).withOpacity(0.2),
-          const Color(0xFF4ECDC4).withOpacity(0),
-        ],
-      ).createShader(
-        Rect.fromLTWH(0, baseY, size.width, size.height - baseY),
-      );
-
-    canvas.drawPath(path, paint);
   }
 
   void _drawGlowingParticles(Canvas canvas, Size size) {
@@ -2895,15 +3060,16 @@ class LevelSelectBackgroundPainter extends CustomPainter {
 
       final radius = 1.5 + sin(time * 0.8 + i) * 1.0;
 
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(0.6),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-        ).createShader(
-          Rect.fromCircle(center: Offset(x, y), radius: radius * 4),
-        );
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(0.6),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+            ).createShader(
+              Rect.fromCircle(center: Offset(x, y), radius: radius * 4),
+            );
 
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
@@ -2923,10 +3089,11 @@ class CircuitPatternPainter extends CustomPainter {
     final random = Random(12345);
     final lineCount = 6;
 
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0
-      ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
 
     for (int i = 0; i < lineCount; i++) {
       final path = Path();
@@ -2984,10 +3151,11 @@ class GameBackgroundPainter extends CustomPainter {
     final horizontalSpacing = size.width / lineCount;
     final verticalSpacing = size.height / lineCount;
 
-    final paint = Paint()
-      ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
+    final paint =
+        Paint()
+          ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.5;
 
     for (int i = 1; i < lineCount; i++) {
       final x = horizontalSpacing * i;
@@ -3002,21 +3170,23 @@ class GameBackgroundPainter extends CustomPainter {
 
   void _drawParticles(Canvas canvas, Size size) {
     for (final particle in particles) {
-      final pulsingOpacity = particle.opacity *
+      final pulsingOpacity =
+          particle.opacity *
           (0.7 + sin(time + particle.position.dx * 0.01) * 0.3);
 
-      final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
-            const Color(0xFF4ECDC4).withOpacity(0),
-          ],
-        ).createShader(
-          Rect.fromCircle(
-            center: particle.position,
-            radius: particle.size * 6,
-          ),
-        );
+      final paint =
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
+                const Color(0xFF4ECDC4).withOpacity(0),
+              ],
+            ).createShader(
+              Rect.fromCircle(
+                center: particle.position,
+                radius: particle.size * 6,
+              ),
+            );
 
       canvas.drawCircle(particle.position, particle.size, paint);
     }
@@ -3028,10 +3198,11 @@ class GameBackgroundPainter extends CustomPainter {
         if (distance < 100) {
           final opacity = (1 - distance / 100) * 0.1;
 
-          final paint = Paint()
-            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
-            ..strokeWidth = 0.5
-            ..style = PaintingStyle.stroke;
+          final paint =
+              Paint()
+                ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+                ..strokeWidth = 0.5
+                ..style = PaintingStyle.stroke;
 
           canvas.drawLine(particles[i].position, particles[j].position, paint);
         }
@@ -3044,18 +3215,19 @@ class GameBackgroundPainter extends CustomPainter {
     final glowRadius = size.width * 0.8;
     final glowOpacity = 0.05 + sin(time * 0.5) * 0.02;
 
-    final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFF4ECDC4).withOpacity(glowOpacity),
-          Colors.transparent,
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width / 2, centerY),
-          radius: glowRadius,
-        ),
-      );
+    final paint =
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(glowOpacity),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width / 2, centerY),
+              radius: glowRadius,
+            ),
+          );
 
     canvas.drawCircle(Offset(size.width / 2, centerY), glowRadius, paint);
   }
@@ -3065,6 +3237,7 @@ class GameBackgroundPainter extends CustomPainter {
     return oldDelegate.time != time;
   }
 }
+
 //------------------------------------------------------------------------------
 // UI COMPONENTS
 //------------------------------------------------------------------------------
