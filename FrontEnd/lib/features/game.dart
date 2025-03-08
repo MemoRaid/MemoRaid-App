@@ -2047,4 +2047,66 @@ class GameResultsScreen extends StatelessWidget {
                       ? const Color(0xFFFFD700)
                       : const Color(0xFF4ECDC4),
                 ),
+              ),              const SizedBox(height: 16),
+              // Main title - changes based on achievement type
+              Text(
+                achievement.isSpecialAchievement
+                    ? 'Congratulations!'
+                    : 'Level Complete',
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.1,
+                ),
               ),
+              const SizedBox(height: 8),
+              // Level number display
+              Text(
+                'Level $level Completed',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Color(0xFF4ECDC4),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Score breakdown section
+              // Base score (without bonuses)
+              _buildScoreRow('Base Score', score - timeBonus - perfectBonus),
+              // Time bonus points
+              _buildScoreRow('Time Bonus', timeBonus),
+              // Only show perfect bonus if it exists
+              if (perfectBonus > 0)
+                _buildScoreRow('Perfect Clear Bonus', perfectBonus),
+
+              // Divider before total score
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                height: 2,
+                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+              ),
+
+              // Total/final score with enhanced styling
+              _buildScoreRow('Final Score', score, isTotal: true),
+              const SizedBox(height: 24),
+
+              // Conditional achievement displays
+              // New high score achievement
+              if (achievement.isNewHighScore)
+                _buildAchievementRow(
+                  'New High Score!',
+                  'Previous: ${achievement.previousHighScore}',
+                  Icons.star,
+                  const Color(0xFFFFD700), // Gold color
+                ),
+              // New level unlocked achievement
+              if (achievement.isNewLevelUnlocked)
+                _buildAchievementRow(
+                  'New Level Unlocked!',
+                  'Keep going for more challenges',
+                  Icons.lock_open,
+                  const Color(0xFF4ECDC4), // Teal color
+                ),
+              const SizedBox(height: 32),
