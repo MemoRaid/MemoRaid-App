@@ -2385,3 +2385,683 @@ class GameOverScreen extends StatelessWidget {
     );
   }
 }
+//------------------------------------------------------------------------------
+// CUSTOM PAINTERS (VISUAL EFFECTS)
+//------------------------------------------------------------------------------
+
+/// Creates animated wave background with multiple layers of waves
+/// Each wave has configurable height, color, speed and amplitude
+class WaveBackgroundPainter extends CustomPainter {
+  final List<WaveLayer> layers;
+  final double time;
+  static const double fixedWaveHeight = 350.0;
+
+  WaveBackgroundPainter(this.layers, this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final layer in layers) {
+      final path = Path();
+
+      path.moveTo(0, size.height);
+
+      final waveHeight = fixedWaveHeight * layer.heightFactor;
+      final baseY = size.height - waveHeight;
+
+      for (double x = 0; x <= size.width; x += 5) {
+        final y = baseY +
+            sin(x * layer.frequency + layer.phase + time * layer.speed) *
+                layer.amplitude;
+        path.lineTo(x, y);
+      }
+
+      path.lineTo(size.width, size.height);
+      path.lineTo(0, size.height);
+      path.close();
+
+      final paint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            layer.color.withOpacity(0.6),
+            layer.color.withOpacity(0.3),
+            layer.color.withOpacity(0.1),
+          ],
+        ).createShader(Rect.fromLTWH(0, baseY, size.width, waveHeight))
+        ..style = PaintingStyle.fill;
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant WaveBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+/// Creates decorative glowing light spots that pulse at different rates
+/// Creates an ethereal, magical atmosphere with randomly positioned spots
+class LightSpotsPainter extends CustomPainter {
+  static const int spotCount = 50;
+  final List<Offset> _positions = [];
+  final List<double> _sizes = [];
+  final List<double> _opacities = [];
+
+  LightSpotsPainter() {
+    final random = Random();
+    for (int i = 0; i < spotCount; i++) {
+      _positions.add(
+        Offset(random.nextDouble() * 1000, random.nextDouble() * 1000),
+      );
+      _sizes.add(1 + random.nextDouble() * 4);
+      _opacities.add(0.1 + random.nextDouble() * 0.5);
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+
+    for (int i = 0; i < spotCount; i++) {
+      final pulseRate = 0.5 + (_positions[i].dx * 0.001);
+      final dynamicOpacity = _opacities[i] * (0.7 + sin(now * pulseRate) * 0.3);
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(dynamicOpacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+          stops: const [0.0, 1.0],
+        ).createShader(
+          Rect.fromCircle(
+            center: Offset(
+              _positions[i].dx % size.width,
+              _positions[i].dy % size.height,
+            ),
+            radius: _sizes[i] * 4,
+          ),
+        );
+
+      canvas.drawCircle(
+        Offset(_positions[i].dx % size.width, _positions[i].dy % size.height),
+        _sizes[i],
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+/// Creates a circuit-like pattern with nodes and connections
+/// Used for the app logo background with glowing effect
+class CircuitPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = min(size.width, size.height) / 2;
+    final random = Random(12345);
+
+    for (int i = 0; i < 24; i++) {
+      final angle1 = random.nextDouble() * pi * 2;
+      final angle2 = random.nextDouble() * pi * 2;
+
+      final x1 = centerX + cos(angle1) * radius * 0.7;
+      final y1 = centerY + sin(angle1) * radius * 0.7;
+      final x2 = centerX + cos(angle2) * radius * 0.9;
+      final y2 = centerY + sin(angle2) * radius * 0.9;
+
+      final paint = Paint()
+        ..color = const Color(
+          0xFF4ECDC4,
+        ).withOpacity(0.4 + random.nextDouble() * 0.3)
+        ..strokeWidth = 1 + random.nextDouble() * 1.5
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke;
+
+      final now = DateTime.now().millisecondsSinceEpoch / 1000;
+      final pulseRate = 0.5 + i * 0.1;
+      final opacity = 0.3 + sin(now * pulseRate) * 0.2;
+
+      final path = Path();
+      path.moveTo(x1, y1);
+
+      final midX = (x1 + x2) / 2;
+      final midY = (y1 + y2) / 2;
+      final ctrlX = midX + (random.nextDouble() - 0.5) * radius * 0.3;
+      final ctrlY = midY + (random.nextDouble() - 0.5) * radius * 0.3;
+
+      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
+
+      canvas.drawPath(path, paint);
+
+      final nodePaint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x1, y1), 1.5, nodePaint);
+      canvas.drawCircle(Offset(x2, y2), 2.0, nodePaint);
+    }
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(0.8),
+          const Color(0xFF4ECDC4).withOpacity(0),
+        ],
+      ).createShader(
+        Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+      );
+
+    canvas.drawCircle(Offset(centerX, centerY), radius * 0.85, ringPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+/// Creates an interconnected network of nodes with dynamic connections
+/// Nodes move and connections appear/disappear based on proximity
+class NetworkBackgroundPainter extends CustomPainter {
+  final List<ParticleNode> nodes;
+  final List<Connection> connections;
+  final double time;
+  final Size size;
+
+  NetworkBackgroundPainter({
+    required this.nodes,
+    required this.connections,
+    required this.time,
+    required this.size,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final node in nodes) {
+      node.update(time, size);
+    }
+
+    for (final connection in connections) {
+      final startNode = nodes[connection.startNodeIndex];
+      final endNode = nodes[connection.endNodeIndex];
+
+      final distance = (startNode.position - endNode.position).distance;
+
+      if (distance <= connection.maxDistance) {
+        final opacity = 1.0 - (distance / connection.maxDistance);
+
+        final paint = Paint()
+          ..shader = LinearGradient(
+            colors: [
+              const Color(0xFF4ECDC4).withOpacity(opacity * 0.5),
+              const Color(0xFF0D3445).withOpacity(opacity * 0.3),
+            ],
+          ).createShader(
+            Rect.fromPoints(startNode.position, endNode.position),
+          )
+          ..strokeWidth = connection.thickness * opacity
+          ..strokeCap = StrokeCap.round;
+
+        canvas.drawLine(startNode.position, endNode.position, paint);
+      }
+    }
+
+    for (final node in nodes) {
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(node.opacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(center: node.position, radius: node.size * 4),
+        );
+
+      canvas.drawCircle(node.position, node.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant NetworkBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+/// Creates light rays emanating from a point above the screen
+/// Generates a dramatic lighting effect with angular rays
+class LightRaysPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+
+    final origin = Offset(width * 0.5, height * -0.2);
+
+    for (int i = 0; i < 8; i++) {
+      final angle = (pi * i / 8) + (pi / 16);
+      final rayLength = height * 1.5;
+
+      final endX = origin.dx + cos(angle) * rayLength;
+      final endY = origin.dy + sin(angle) * rayLength;
+
+      final rayPath = Path()
+        ..moveTo(origin.dx, origin.dy)
+        ..lineTo(endX, endY)
+        ..lineTo(endX + width * 0.15, endY)
+        ..lineTo(origin.dx, origin.dy)
+        ..close();
+
+      final rayPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF135777).withOpacity(0.3),
+            const Color(0xFF135777).withOpacity(0),
+          ],
+        ).createShader(Rect.fromPoints(origin, Offset(endX, endY)));
+
+      canvas.drawPath(rayPath, rayPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Creates subtle animated wave effects that move across the screen
+/// Multiple layers with different speeds, amplitudes and colors
+class SubtleWavesPainter extends CustomPainter {
+  final double time;
+
+  SubtleWavesPainter(this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+, height);
+    path.lineTo(0, height);
+    path.close();
+
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color, color.withOpacity(0)],
+      ).createShader(Rect.fromLTWH(0, yPosition - amplitude, width, height))
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant SubtleWavesPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+/// Creates a hexagonal grid pattern with connecting lines
+/// Includes pulsing glow effects and random connectivity
+class HexagonalPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = min(size.width, size.height) / 2;
+    final random = Random(12345);
+
+    for (int ring = 0; ring < 2; ring++) {
+      final ringRadius = radius * (0.65 + ring * 0.3);
+      final hexCount = 6 + ring * 2;
+
+      for (int i = 0; i < hexCount; i++) {
+        final angle = (2 * pi * i / hexCount);
+        final x = centerX + cos(angle) * ringRadius;
+        final y = centerY + sin(angle) * ringRadius;
+
+        _drawHexagon(
+          canvas,
+          x,
+          y,
+          5 + random.nextDouble() * 5,
+          const Color(0xFF4ECDC4).withOpacity(0.2 + random.nextDouble() * 0.2),
+        );
+      }
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+    final paint = Paint()
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.4)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 12; i++) {
+      final angle1 = (2 * pi * i / 12);
+      final angle2 = angle1 + pi / 6 + random.nextDouble() * (pi / 3);
+
+      final r1 = radius * 0.7;
+      final r2 = radius * 0.9;
+
+      final x1 = centerX + cos(angle1) * r1;
+      final y1 = centerY + sin(angle1) * r1;
+
+      final x2 = centerX + cos(angle2) * r2;
+      final y2 = centerY + sin(angle2) * r2;
+
+      final glow = (sin(now + i) + 1) / 2;
+      paint.color = const Color(0xFF4ECDC4).withOpacity(0.3 + glow * 0.3);
+
+      final path = Path();
+      path.moveTo(x1, y1);
+
+      final ctrlX = (x1 + x2) / 2 + (random.nextDouble() - 0.5) * 20;
+      final ctrlY = (y1 + y2) / 2 + (random.nextDouble() - 0.5) * 20;
+
+      path.quadraticBezierTo(ctrlX, ctrlY, x2, y2);
+      canvas.drawPath(path, paint);
+
+      final nodePaint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(0.5 + glow * 0.5)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x1, y1), 2, nodePaint);
+      canvas.drawCircle(Offset(x2, y2), 2, nodePaint);
+    }
+  }
+
+  void _drawHexagon(
+    Canvas canvas,
+    double x,
+    double y,
+    double size,
+    Color color,
+  ) {
+    final path = Path();
+
+    for (int i = 0; i < 6; i++) {
+      final angle = (pi / 3) * i;
+      final xPoint = x + cos(angle) * size;
+      final yPoint = y + sin(angle) * size;
+
+      if (i == 0) {
+        path.moveTo(xPoint, yPoint);
+      } else {
+        path.lineTo(xPoint, yPoint);
+      }
+    }
+
+    path.close();
+
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+/// Creates the background for the level selection screen
+/// Combines flowing lines, waves, and glowing particles
+class LevelSelectBackgroundPainter extends CustomPainter {
+  final double time;
+  final Random _random = Random(42);
+
+  LevelSelectBackgroundPainter(this.time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _drawFlowingLines(canvas, size);
+    _drawWave(canvas, size);
+    _drawGlowingParticles(canvas, size);
+  }
+
+  void _drawFlowingLines(Canvas canvas, Size size) {
+    final lineCount = 10;
+    final lineWidth = 1.0;
+
+    for (int i = 0; i < lineCount; i++) {
+      final y = (size.height / (lineCount + 1)) * (i + 1);
+      final path = Path();
+
+      path.moveTo(0, y);
+
+      final amplitude = 20.0 + _random.nextDouble() * 20;
+      final frequency = 0.01 + _random.nextDouble() * 0.01;
+      final phase = time * (0.1 + _random.nextDouble() * 0.2) + i;
+
+      for (double x = 0; x <= size.width; x += 5) {
+        path.lineTo(x, y + sin(x * frequency + phase) * amplitude);
+      }
+
+      final paint = Paint()
+        ..color = const Color(0xFF4ECDC4).withOpacity(0.07 + (i % 3) * 0.02)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = lineWidth;
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  void _drawWave(Canvas canvas, Size size) {
+    final path = Path();
+
+    final baseY = size.height * 0.9;
+    path.moveTo(0, baseY);
+
+    for (double x = 0; x <= size.width; x += 5) {
+      final dx1 = sin(x * 0.01 + time * 0.2) * 15;
+      final dx2 = sin(x * 0.02 + time * 0.1) * 10;
+      path.lineTo(x, baseY + dx1 + dx2);
+    }
+
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(0.2),
+          const Color(0xFF4ECDC4).withOpacity(0),
+        ],
+      ).createShader(
+        Rect.fromLTWH(0, baseY, size.width, size.height - baseY),
+      );
+
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawGlowingParticles(Canvas canvas, Size size) {
+    const particleCount = 30;
+
+    for (int i = 0; i < particleCount; i++) {
+      final x = ((time * (0.1 + i * 0.01)) % 2) * size.width;
+      final y = ((i * 37) % size.height) + sin(time + i) * 20;
+
+      final radius = 1.5 + sin(time * 0.8 + i) * 1.0;
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(0.6),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(center: Offset(x, y), radius: radius * 4),
+        );
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant LevelSelectBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
+
+/// Creates a circuit pattern with branching paths and nodes
+/// Used as decorative elements for UI components
+class CircuitPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(12345);
+    final lineCount = 6;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.2);
+
+    for (int i = 0; i < lineCount; i++) {
+      final path = Path();
+
+      final startX = random.nextDouble() * size.width;
+      final startY = random.nextDouble() * size.height;
+
+      path.moveTo(startX, startY);
+
+      for (int j = 0; j < 2; j++) {
+        final endX = random.nextDouble() * size.width;
+        final endY = random.nextDouble() * size.height;
+
+        final controlX1 = startX + (endX - startX) * random.nextDouble();
+        final controlY1 = startY + (endY - startY) * random.nextDouble();
+
+        path.quadraticBezierTo(controlX1, controlY1, endX, endY);
+
+        canvas.drawCircle(
+          Offset(endX, endY),
+          1.5,
+          Paint()..color = const Color(0xFF4ECDC4).withOpacity(0.3),
+        );
+      }
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Creates the game screen background with grid, particles and glow effects
+/// Particles connect when they're in proximity to each other
+class GameBackgroundPainter extends CustomPainter {
+  final double time;
+  final List<ParticleDot> particles;
+
+  GameBackgroundPainter({required this.time, required this.particles});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      particle.update(time, size);
+    }
+
+    _drawGrid(canvas, size);
+    _drawParticles(canvas, size);
+    _drawBottomGlow(canvas, size);
+  }
+
+  void _drawGrid(Canvas canvas, Size size) {
+    final lineCount = 10;
+    final horizontalSpacing = size.width / lineCount;
+    final verticalSpacing = size.height / lineCount;
+
+    final paint = Paint()
+      ..color = const Color(0xFF4ECDC4).withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    for (int i = 1; i < lineCount; i++) {
+      final x = horizontalSpacing * i;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    for (int i = 1; i < lineCount; i++) {
+      final y = verticalSpacing * i;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  void _drawParticles(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      final pulsingOpacity = particle.opacity *
+          (0.7 + sin(time + particle.position.dx * 0.01) * 0.3);
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFF4ECDC4).withOpacity(pulsingOpacity),
+            const Color(0xFF4ECDC4).withOpacity(0),
+          ],
+        ).createShader(
+          Rect.fromCircle(
+            center: particle.position,
+            radius: particle.size * 6,
+          ),
+        );
+
+      canvas.drawCircle(particle.position, particle.size, paint);
+    }
+
+    for (int i = 0; i < particles.length; i++) {
+      for (int j = i + 1; j < particles.length; j++) {
+        final distance =
+            (particles[i].position - particles[j].position).distance;
+        if (distance < 100) {
+          final opacity = (1 - distance / 100) * 0.1;
+
+          final paint = Paint()
+            ..color = const Color(0xFF4ECDC4).withOpacity(opacity)
+            ..strokeWidth = 0.5
+            ..style = PaintingStyle.stroke;
+
+          canvas.drawLine(particles[i].position, particles[j].position, paint);
+        }
+      }
+    }
+  }
+
+  void _drawBottomGlow(Canvas canvas, Size size) {
+    final centerY = size.height * 0.9;
+    final glowRadius = size.width * 0.8;
+    final glowOpacity = 0.05 + sin(time * 0.5) * 0.02;
+
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF4ECDC4).withOpacity(glowOpacity),
+          Colors.transparent,
+        ],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(size.width / 2, centerY),
+          radius: glowRadius,
+        ),
+      );
+
+    canvas.drawCircle(Offset(size.width / 2, centerY), glowRadius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant GameBackgroundPainter oldDelegate) {
+    return oldDelegate.time != time;
+  }
+}
