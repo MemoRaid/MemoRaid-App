@@ -1228,4 +1228,221 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
+ /// Find a position for a dot that doesn't overlap with other dots
+  /// Uses collision detection to prevent dots from overlapping
+  Offset _findNonOverlappingPosition(
+    int dotIndex,
+    double safeWidth,
+    double safeTop,
+    double safeBottom,
+    double dotSize,
+  ) {
+    const maxAttempts = 50;
+    int attempts = 0;
+
+    // Try to find non-overlapping position
+    while (attempts < maxAttempts) {
+      final xPos = random.nextDouble() * safeWidth;
+      final yPos = safeTop + random.nextDouble() * (safeBottom - safeTop);
+      final testPosition = Offset(xPos, yPos);
+
+      bool overlaps = false;
+
+      // Check if position overlaps with existing dots
+      for (int i = 0; i < dots.length; i++) {
+        if (i == dotIndex) continue;
+
+        final currentDistance = (testPosition - dots[i].position).distance;
+        final minDistance = dotSize * 1.5; // Minimum distance between dots
+
+        // Also check against target positions to avoid future collisions
+        final targetDistance =
+            targetPositions.isNotEmpty && i < targetPositions.length
+                ? (testPosition - targetPositions[i]).distance
+                : double.infinity;
+
+        if (currentDistance < minDistance || targetDistance < minDistance) {
+          overlaps = true;
+          break;
+        }
+      }
+
+      // Check if movement paths intersect to avoid crossing paths
+      if (!overlaps) {
+        for (int i = 0; i < dots.length; i++) {
+          if (i == dotIndex || i >= targetPositions.length) continue;
+
+          if (_pathsIntersect(dots[dotIndex].position, testPosition,
+              dots[i].position, targetPositions[i])) {
+            overlaps = true;
+            break;
+          }
+        }
+      }
+
+      if (!overlaps) {
+        return testPosition;
+      }
+
+      attempts++;
+    }
+
+    // If no non-overlapping position found, find the best possible position
+    double maxMinDistance = 0;
+    Offset bestPosition = Offset(
+      random.nextDouble() * safeWidth,
+      safeTop + random.nextDouble() * (safeBottom - safeTop),
+    );
+
+    // Try a few more times to find the best possible position
+    for (int attempt = 0; attempt < 20; attempt++) {
+      final testX = random.nextDouble() * safeWidth;
+      final testY = safeTop + random.nextDouble() * (safeBottom - safeTop);
+      final testPos = Offset(testX, testY);
+
+      double minDistanceToOtherDot = double.infinity;
+      for (int i = 0; i < dots.length; i++) {
+        if (i == dotIndex) continue;
+        final dist = (testPos - dots[i].position).distance;
+        minDistanceToOtherDot = min(minDistanceToOtherDot, dist);
+      }
+
+      if (minDistanceToOtherDot > maxMinDistance) {
+        maxMinDistance = minDistanceToOtherDot;
+        bestPosition = testPos;
+      }
+    }
+
+    return bestPosition;
+  }
+
+  /// Check if two line segments (paths) intersect
+  /// Used to prevent dot movement paths from crossing
+  bool _pathsIntersect(Offset a, Offset b, Offset c, Offset d) {
+    // Quick bounding box check to avoid expensive calculations
+    if (max(a.dx, b.dx) < min(c.dx, d.dx) ||
+        max(c.dx, d.dx) < min(a.dx, b.dx) ||
+        max(a.dy, b.dy) < min(c.dy, d.dy) ||
+        max(c.dy, d.dy) < min(a.dy, b.dy)) {
+      return false;
+    }
+
+    // Calculate vectors for segment intersection check
+    final abX = b.dx - a.dx;
+    final abY = b.dy - a.dy;
+    final acX = c.dx - a.dx;
+    final acY = c.dy - a.dy;
+    final adX = d.dx - a.dx;
+    final adY = d.dy - a.dy;
+
+    // Check if point c and d are on different sides of line ab
+    final cross1 = abX * acY - abY * acX;
+    final cross2 = abX * adY - abY * adX;
+
+    if (cross1 * cross2 > 0) return false;
+
+    // Check if point a and b are on different sides of line cd
+    final cdX = d.dx - c.dx;
+    final cdY = d.dy - c.dy;
+    final caX = a.dx - c.dx;
+    final caY = a.dy - c.dy;
+    final cbX = b.dx - c.dx;
+    final cbY = b.dy - c.dy;
+
+    final cross3 = cdX * caY - cdY * caX;
+    final cross4 = cdX * cbY - cdY * cbX;
+
+    return cross3 * cross4 <= 0;
+  }
+
+  /// Display the sequence for the player to memorize
+  void _showSequence() {
+    if (sequence.isEmpty) return;
+
+    setState(() {
+      showingSequence = true;
+      awaitingInput = false;
+      gameStatusText = 'Watch carefully...';
+    });
+
+    // Show each dot in the sequence one by one
+    Future.forEach(List.generate(sequence.length, (index) => index), (
+      index,
+    ) async {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          // Reset all dots
+          for (int i = 0; i < dots.length; i++) {
+            dots[i] = dots[i].copyWith(isHighlighted: false, isActive: false);
+          }
+
+          // Highlight the current dot in the sequence
+          final dotIndex = sequence[index];
+          dots[dotIndex] = dots[dotIndex].copyWith(
+            isHighlighted: true,
+            isActive: true,
+          );
+        });
+      }
+
+      // Blink the dot twice
+      for (int i = 0; i < 2; i++) {
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (mounted) {
+          setState(() {
+            final dotIndex = sequence[index];
+            dots[dotIndex] = dots[dotIndex].copyWith(
+              isHighlighted: !dots[dotIndex].isHighlighted,
+            );
+          });
+        }
+      }
+
+      await Future.delayed(sequenceDisplayDuration);
+
+      // Reset dot highlight
+      if (mounted) {
+        setState(() {
+          final dotIndex = sequence[index];
+          dots[dotIndex] = dots[dotIndex].copyWith(
+            isHighlighted: false,
+            isActive: false,
+          );
+        });
+      }
+    }).then((_) {
+      if (mounted) {
+        // If dots should shuffle and stop, start shuffle phase
+        if (shuffleAndStop && dotsMove) {
+          _startShufflePhase();
+        } else {
+          _startCountdown();
+        }
+      }
+    });
+  }
+
+  /// Start shuffling dots before player input
+  void _startShufflePhase() {
+    setState(() {
+      gameStatusText = 'Dots are shuffling...';
+    });
+
+    // Start all movement animations
+    for (var controller in moveControllers) {
+      controller.forward();
+    }
+
+    // Stop movements after shuffle duration
+    Future.delayed(shuffleDuration, () {
+      if (mounted) {
+        for (var controller in moveControllers) {
+          controller.stop();
+        }
+
+        _startCountdown();
+      }
+    });
+  }
 
