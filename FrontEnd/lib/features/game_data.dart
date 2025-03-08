@@ -81,3 +81,39 @@ final List<GameLevel> gameLevels = [
     movementSpeed: 0.9,
   ),
 ];
+
+/// Represents a single interactive dot in the game
+/// Dots can be tapped, highlighted, and moved
+class Dot {
+  final int id; // Unique identifier for the dot
+  final Offset position; // Position on screen
+  final double size; // Diameter of the dot
+  final bool isActive; // Whether dot is interactable
+  final bool isHighlighted; // Whether dot is currently highlighted in sequence
+
+  Dot({
+    required this.id,
+    required this.position,
+    required this.size,
+    required this.isActive,
+    required this.isHighlighted,
+  });
+
+  /// Creates a new Dot with updated properties
+  /// Useful for updating position or state without recreating the entire object
+  Dot copyWith({
+    int? id,
+    Offset? position,
+    double? size,
+    bool? isActive,
+    bool? isHighlighted,
+  }) {
+    return Dot(
+      id: id ?? this.id,
+      position: position ?? this.position,
+      size: size ?? this.size,
+      isActive: isActive ?? this.isActive,
+      isHighlighted: isHighlighted ?? this.isHighlighted,
+    );
+  }
+}
