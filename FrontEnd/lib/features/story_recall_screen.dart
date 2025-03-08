@@ -374,7 +374,7 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
             child: GestureDetector(
               onTap: () => _selectStory(index),
               child: Container(
-                height: 100,
+                // Remove fixed height and allow container to size to its content
                 decoration: BoxDecoration(
                   color: Color(0xFF0D3445),
                   borderRadius: BorderRadius.circular(16),
@@ -387,6 +387,8 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                   ],
                 ),
                 child: Row(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Align from top
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.only(
@@ -402,63 +404,70 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                     ),
                     SizedBox(width: 16),
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            story['title'],
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        child: Column(
+                          mainAxisSize:
+                              MainAxisSize.min, // Use minimum space needed
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              story['title'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            story['author'],
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 14,
+                            SizedBox(height: 4),
+                            Text(
+                              story['author'],
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                color: Colors.white.withOpacity(0.7),
-                                size: 16,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                story['duration'],
-                                style: TextStyle(
+                            SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
                                   color: Colors.white.withOpacity(0.7),
-                                  fontSize: 14,
+                                  size: 16,
                                 ),
-                              ),
-                              SizedBox(width: 16),
-                              Icon(
-                                Icons.question_answer,
-                                color: Colors.white.withOpacity(0.7),
-                                size: 16,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                "${story['questions'].length} questions",
-                                style: TextStyle(
+                                SizedBox(width: 4),
+                                Text(
+                                  story['duration'],
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Icon(
+                                  Icons.question_answer,
                                   color: Colors.white.withOpacity(0.7),
-                                  fontSize: 14,
+                                  size: 16,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                SizedBox(width: 4),
+                                Text(
+                                  "${story['questions'].length} questions",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(12),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                      height: 100, // Match height with image
                       decoration: BoxDecoration(
                         color: Color(0xFF4E6077),
                         borderRadius: BorderRadius.only(
@@ -466,10 +475,12 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                           bottomRight: Radius.circular(16),
                         ),
                       ),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 20,
+                      child: Center(
+                        child: Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],
