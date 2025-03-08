@@ -374,3 +374,63 @@ class LevelSelectionScreen extends StatefulWidget {
   @override
   State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
 }
+class _LevelSelectionScreenState extends State<LevelSelectionScreen>
+    with SingleTickerProviderStateMixin {
+  // Tracks the highest level unlocked by the player
+  int unlockedLevel = 1;
+
+  // Used for animating background elements based on time
+  final ValueNotifier<double> _timeNotifier = ValueNotifier(0);
+  Timer? _animationTimer;
+
+  // Tracks which level is currently being hovered by the user
+  int? _hoveredLevel;
+
+  // Animation controllers for entrance animations
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load the player's progress from persistent storage
+    _loadUnlockedLevel();
+
+    // Initialize animation controller for fade-in animations
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    // Create fade-in animation with easing
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    // Set up a timer to continuously update the background animation
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      _timeNotifier.value += 0.016; // Approximately 60 FPS
+    });
+
+    // Start the entrance animation
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources to prevent memory leaks
+    _controller.dispose();
+    _animationTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
+  }
+
+  // Loads the player's unlocked level from persistent storage
+  Future<void> _loadUnlockedLevel() async {
+    final savedUnlockedLevel = await GameDataManager.getUnlockedLevel();
+
+    setState(() {
+      unlockedLevel = savedUnlockedLevel;
+    });
+  }
