@@ -809,3 +809,78 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
       ),
     );
   }
+
+   // Shows a confirmation dialog before resetting all game progress
+  void _showResetConfirmation() {
+    // Provide haptic feedback for better UX
+    HapticFeedback.mediumImpact();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0D3445),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: const Color(0xFF4ECDC4).withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        title: const Text(
+          'Reset All Progress?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Warning icon
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.warning_rounded,
+                color: Colors.orange,
+                size: 50,
+              ),
+            ),
+            const SizedBox(height: 15),
+            const Text(
+              'This will reset all level unlocks and high scores. This action cannot be undone.',
+              style: TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+          ],
+        ),
+        actions: [
+          // Cancel button
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.white70),
+            child: const Text('Cancel'),
+          ),
+          // Confirm reset button
+          ElevatedButton(
+            onPressed: () {
+              _resetAllProgress();
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE63946),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+  }
