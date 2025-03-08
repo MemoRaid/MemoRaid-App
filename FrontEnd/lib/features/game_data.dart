@@ -80,6 +80,50 @@ final List<GameLevel> gameLevels = [
     shuffleAndStop: true,
     movementSpeed: 0.9,
   ),
+  // Continuous movement levels (10-15)
+  // Dots keep moving even during sequence playback and entry
+  const GameLevel(
+    levelNumber: 10,
+    dotCount: 5,
+    sequenceLength: 4,
+    dotsMove: true,
+    movementSpeed: 0.6,
+  ),
+  const GameLevel(
+    levelNumber: 11,
+    dotCount: 5,
+    sequenceLength: 5,
+    dotsMove: true,
+    movementSpeed: 0.6,
+  ),
+  const GameLevel(
+    levelNumber: 12,
+    dotCount: 6,
+    sequenceLength: 5,
+    dotsMove: true,
+    movementSpeed: 0.7,
+  ),
+  const GameLevel(
+    levelNumber: 13,
+    dotCount: 6,
+    sequenceLength: 6,
+    dotsMove: true,
+    movementSpeed: 0.8,
+  ),
+  const GameLevel(
+    levelNumber: 14,
+    dotCount: 7,
+    sequenceLength: 6,
+    dotsMove: true,
+    movementSpeed: 0.9,
+  ),
+  const GameLevel(
+    levelNumber: 15,
+    dotCount: 7,
+    sequenceLength: 7,
+    dotsMove: true,
+    movementSpeed: 1.0,
+  ),
 ];
 
 /// Represents a single interactive dot in the game
