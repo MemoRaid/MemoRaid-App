@@ -434,3 +434,378 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
       unlockedLevel = savedUnlockedLevel;
     });
   }
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      // Allow the background to extend behind the app bar
+      extendBodyBehindAppBar: true,
+
+      // Transparent app bar to maintain the themed background
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Select Level',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+
+      // Reset progress button with fade-in animation
+      floatingActionButton: FadeTransition(
+        opacity: _fadeAnimation,
+        child: FloatingActionButton(
+          onPressed: _showResetConfirmation,
+          backgroundColor: const Color(0xFFE63946),
+          foregroundColor: Colors.white,
+          elevation: 6,
+          tooltip: 'Reset All Progress',
+          child: const Icon(Icons.refresh),
+        ),
+      ),
+
+      body: Stack(
+        children: [
+          // Dark blue gradient background
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0D3445),
+                  Color(0xFF042f46),
+                  Color(0xFF021e2b),
+                ],
+              ),
+            ),
+          ),
+
+          // Animated background with custom painter
+          // This likely draws particle effects or patterns that animate over time
+          ValueListenableBuilder(
+            valueListenable: _timeNotifier,
+            builder: (context, time, child) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: LevelSelectBackgroundPainter(time),
+              );
+            },
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Game instructions with entrance animation (fade + slide)
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.0, -0.2),
+                        end: Offset.zero,
+                      ).animate(_controller),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Color(0xFF4ECDC4),
+                              size: 24,
+                            ),
+                            SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                "Watch the sequence, remember the order, and tap the dots in the right order. Stay sharp!",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Grid of level selection buttons with fade-in animation
+                  Expanded(
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3, // 3 levels per row
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: gameLevels.length,
+                        itemBuilder: (context, index) {
+                          final level = gameLevels[index];
+                          final isUnlocked = level.levelNumber <= unlockedLevel;
+                          final isHovered = _hoveredLevel == level.levelNumber;
+
+                          // Fetch and display the high score for this level
+                          return FutureBuilder<int>(
+                            future: _getLevelHighScore(level.levelNumber),
+                            builder: (context, snapshot) {
+                              final highScore = snapshot.data ?? 0;
+
+                              // Animated scale effect when hovering over a level
+                              return AnimatedScale(
+                                duration: const Duration(milliseconds: 200),
+                                scale: isHovered ? 1.05 : 1.0,
+                                child: GestureDetector(
+                                  // Only allow playing unlocked levels
+                                  onTap: isUnlocked
+                                      ? () {
+                                          // Haptic feedback for better UX
+                                          HapticFeedback.mediumImpact();
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => GameScreen(
+                                                level: level,
+                                              ),
+                                            ),
+                                          ).then((_) {
+                                            // Refresh unlocked level data when returning
+                                            _loadUnlockedLevel();
+                                          });
+                                        }
+                                      : null,
+                                  // Track hover state for visual feedback
+                                  onTapDown: (_) {
+                                    setState(() {
+                                      _hoveredLevel = level.levelNumber;
+                                    });
+                                  },
+                                  onTapUp: (_) {
+                                    setState(() {
+                                      _hoveredLevel = null;
+                                    });
+                                  },
+                                  onTapCancel: () {
+                                    setState(() {
+                                      _hoveredLevel = null;
+                                    });
+                                  },
+                                  // Level selection tile with different styling based on unlock status
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      // Different gradients for unlocked vs locked levels
+                                      gradient: isUnlocked
+                                          ? LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                const Color(0xFF125673),
+                                                const Color(0xFF0D3445),
+                                              ],
+                                            )
+                                          : LinearGradient(
+                                              colors: [
+                                                Colors.grey.shade800,
+                                                Colors.grey.shade900,
+                                              ],
+                                            ),
+                                      borderRadius: BorderRadius.circular(15),
+                                      // Enhanced shadow effect when hovering
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isUnlocked
+                                              ? const Color(
+                                                  0xFF4ECDC4,
+                                                ).withOpacity(0.3)
+                                              : Colors.black38,
+                                          blurRadius: isHovered ? 12 : 5,
+                                          spreadRadius: isHovered ? 2 : 0,
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: isUnlocked
+                                            ? const Color(
+                                                0xFF4ECDC4,
+                                              ).withOpacity(0.5)
+                                            : Colors.transparent,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Circuit pattern background for unlocked levels
+                                        if (isUnlocked)
+                                          CustomPaint(
+                                            painter: CircuitPatternPainter(),
+                                            size: Size.infinite,
+                                          ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            // Level number in a circle
+                                            AnimatedContainer(
+                                              duration: const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              // Slightly larger when hovered
+                                              width: isHovered && isUnlocked
+                                                  ? 60
+                                                  : 55,
+                                              height: isHovered && isUnlocked
+                                                  ? 60
+                                                  : 55,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: isUnlocked
+                                                    ? const Color(
+                                                        0xFF4ECDC4,
+                                                      ).withOpacity(0.2)
+                                                    : Colors.grey.shade700
+                                                        .withOpacity(0.2),
+                                                border: Border.all(
+                                                  color: isUnlocked
+                                                      ? const Color(
+                                                          0xFF4ECDC4,
+                                                        )
+                                                      : Colors.grey.shade600,
+                                                  width: 1.5,
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  '${level.levelNumber}',
+                                                  style: TextStyle(
+                                                    fontSize: 26,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: isUnlocked
+                                                        ? const Color(
+                                                            0xFF4ECDC4,
+                                                          )
+                                                        : Colors.grey.shade400,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            // Display level type (moving vs static dots)
+                                            if (isUnlocked)
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    level.dotsMove
+                                                        ? Icons.moving
+                                                        : Icons.grid_on,
+                                                    color: const Color(
+                                                      0xFF4ECDC4,
+                                                    ).withOpacity(0.7),
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 5),
+                                                  Text(
+                                                    level.dotsMove
+                                                        ? "Moving"
+                                                        : "Static",
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.white70,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            // Show high score if available
+                                            if (isUnlocked && highScore > 0)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4.0,
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.emoji_events,
+                                                      color: Color(0xFFFFD700),
+                                                      size: 14,
+                                                    ),
+                                                    const SizedBox(width: 2),
+                                                    Text(
+                                                      '$highScore',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white70,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        // Lock overlay for locked levels
+                                        if (!isUnlocked)
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(
+                                                0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            child: const Center(
+                                              child: Icon(
+                                                Icons.lock,
+                                                color: Colors.white70,
+                                                size: 30,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
