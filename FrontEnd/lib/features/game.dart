@@ -3065,3 +3065,121 @@ class GameBackgroundPainter extends CustomPainter {
     return oldDelegate.time != time;
   }
 }
+//------------------------------------------------------------------------------
+// UI COMPONENTS
+//------------------------------------------------------------------------------
+
+/// An animated button with visual effects used for primary actions in the game
+class GlowingActionButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final String text;
+
+  const GlowingActionButton({
+    super.key,
+    required this.onPressed,
+    required this.text,
+  });
+
+  @override
+  State<GlowingActionButton> createState() => _GlowingActionButtonState();
+}
+
+class _GlowingActionButtonState extends State<GlowingActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _pulseAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.05), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
+    ]).animate(_pulseController);
+
+    _pulseController.repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onPressed();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _isPressed ? 0.95 : _pulseAnimation.value,
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 2,
+                left: 32,
+                right: 32,
+                bottom: 4,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF4ECDC4),
+                    const Color(0xFF4ECDC4).withOpacity(0.8),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                    blurRadius: _pulseAnimation.value * 15,
+                    spreadRadius: _pulseAnimation.value * 4,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 150),
+                style: TextStyle(
+                  color: _isPressed ? Colors.white70 : Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.play_arrow, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(widget.text),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
