@@ -1481,3 +1481,216 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
+ /// Handle player tapping a dot
+  void _handleDotTap(int dotId) {
+    if (!awaitingInput || gameOver) return;
+
+    final expectedDotId = sequence[currentIndex];
+
+    // Check if tapped the correct dot
+    if (dotId == expectedDotId) {
+      setState(() {
+        dots[dotId] = dots[dotId].copyWith(isHighlighted: true);
+        score += 10;
+        currentIndex++;
+      });
+
+      // Visual feedback for correct tap
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          setState(() {
+            dots[dotId] = dots[dotId].copyWith(isHighlighted: false);
+          });
+        }
+      });
+
+      // Check if level complete
+      if (currentIndex >= sequence.length) {
+        _handleLevelComplete();
+      }
+    } else {
+      // Wrong dot tapped
+      setState(() {
+        lives--;
+        score = max(0, score - 5);
+      });
+
+      _showErrorAnimation();
+
+      // Check if game over
+      if (lives <= 0) {
+        _handleGameOver();
+      }
+    }
+  }
+
+  /// Handle level completion
+  void _handleLevelComplete() {
+    // Stop dot movement
+    if (dotsMove) {
+      for (var controller in moveControllers) {
+        controller.stop();
+      }
+    }
+
+    // Calculate time bonus
+    final endTime = DateTime.now().millisecondsSinceEpoch;
+    final timeElapsed = (endTime - startTime) / 1000;
+    int timeBonus = max(
+      0,
+      100 - (timeElapsed.toInt() * 2),
+    );
+
+    // Perfect play bonus
+    final perfectBonus = lives >= maxLives ? 50 : 0;
+
+    setState(() {
+      score += timeBonus;
+      score += perfectBonus;
+      awaitingInput = false;
+    });
+
+    // Check for level achievement and show results screen
+    _checkLevelAchievement().then((achievement) {
+      if (!mounted) return;
+
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          opaque: false,
+          pageBuilder: (_, __, ___) => GameResultsScreen(
+            level: level,
+            score: score,
+            timeBonus: timeBonus,
+            perfectBonus: perfectBonus,
+            achievement: achievement,
+            onContinue: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  /// Check if player earned any achievements for this level
+  Future<LevelAchievement> _checkLevelAchievement() async {
+    return GameDataManager.checkLevelAchievement(level, score);
+  }
+
+  /// Handle game over
+  void _handleGameOver() {
+    setState(() {
+      gameOver = true;
+      awaitingInput = false;
+    });
+
+    // Save high score
+    _saveLevelHighScore(score);
+
+    // Show game over screen
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => GameOverScreen(
+          score: score,
+          onRetry: () {
+            Navigator.of(context).pop();
+            setState(() {
+              _initializeGame();
+              _generateLevel();
+            });
+          },
+          onExit: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Save high score for level
+  Future<void> _saveLevelHighScore(int score) async {
+    GameDataManager.saveLevelHighScore(level, score);
+  }
+
+  /// Show red flash animation for error
+  void _showErrorAnimation() {
+    OverlayEntry entry = OverlayEntry(
+      builder: (context) => Positioned.fill(
+        child: Container(
+          color: Colors.red.withAlpha(76),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(entry);
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      entry.remove();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      // Allow the background to extend behind the app bar
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          'Level $level',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          // Score display container in the app bar
+          Container(
+            margin: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D3445).withOpacity(0.7),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                'Score: $score',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4ECDC4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // Gradient background container
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF0D3445),
+                  Color(0xFF042538),
+                  Color(0xFF021824),
+                ],
+              ),
+            ),
+          ),
+
