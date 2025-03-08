@@ -1446,3 +1446,38 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
+
+ /// Start countdown before player input
+  void _startCountdown() {
+    setState(() {
+      countdownNumber = 3;
+      gameStatusText = 'Get ready...';
+    });
+
+    // Countdown from 3 to 0
+    Future.forEach([2, 1, 0], (number) async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        setState(() {
+          countdownNumber = number;
+        });
+      }
+    }).then((_) {
+      if (mounted) {
+        setState(() {
+          countdownNumber = null;
+          showingSequence = false;
+          awaitingInput = true;
+          gameStatusText = 'Your turn!';
+
+          // Start dot movement if enabled and not shuffle-and-stop mode
+          if (dotsMove && !shuffleAndStop) {
+            for (var controller in moveControllers) {
+              controller.forward();
+            }
+          }
+        });
+      }
+    });
+  }
+
