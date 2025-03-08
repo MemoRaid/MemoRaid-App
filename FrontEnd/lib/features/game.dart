@@ -2109,4 +2109,31 @@ class GameResultsScreen extends StatelessWidget {
                   Icons.lock_open,
                   const Color(0xFF4ECDC4), // Teal color
                 ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 32), // Continue button to return to menu
+              ElevatedButton(
+                onPressed: onContinue,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4ECDC4), // Teal button
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 6, // Button shadow for depth
+                ),
+                child: const Text(
+                  'Menu',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
