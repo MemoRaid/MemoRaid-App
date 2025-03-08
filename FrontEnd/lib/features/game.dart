@@ -938,6 +938,7 @@ class GameScreen extends StatefulWidget {
   @override
   GameScreenState createState() => GameScreenState();
 }
+
 class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Game configuration constants
   static const int maxLives = 3;
@@ -1052,7 +1053,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     startTime = DateTime.now().millisecondsSinceEpoch;
   }
 
-   /// Generate level layout with randomly positioned dots
+  /// Generate level layout with randomly positioned dots
   void _generateLevel() {
     if (!mounted) return;
 
@@ -1130,7 +1131,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
- /// Setup animations for dot movement
+  /// Setup animations for dot movement
   void _setupMovementAnimations() {
     if (dots.isEmpty) return;
 
@@ -1228,7 +1229,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
- /// Find a position for a dot that doesn't overlap with other dots
+  /// Find a position for a dot that doesn't overlap with other dots
   /// Uses collision detection to prevent dots from overlapping
   Offset _findNonOverlappingPosition(
     int dotIndex,
@@ -1272,8 +1273,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         for (int i = 0; i < dots.length; i++) {
           if (i == dotIndex || i >= targetPositions.length) continue;
 
-          if (_pathsIntersect(dots[dotIndex].position, testPosition,
-              dots[i].position, targetPositions[i])) {
+          if (_pathsIntersect(
+            dots[dotIndex].position,
+            testPosition,
+            dots[i].position,
+            targetPositions[i],
+          )) {
             overlaps = true;
             break;
           }
@@ -1446,8 +1451,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
-
- /// Start countdown before player input
+  /// Start countdown before player input
   void _startCountdown() {
     setState(() {
       countdownNumber = 3;
@@ -1481,7 +1485,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
- /// Handle player tapping a dot
+  /// Handle player tapping a dot
   void _handleDotTap(int dotId) {
     if (!awaitingInput || gameOver) return;
 
@@ -1536,10 +1540,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Calculate time bonus
     final endTime = DateTime.now().millisecondsSinceEpoch;
     final timeElapsed = (endTime - startTime) / 1000;
-    int timeBonus = max(
-      0,
-      100 - (timeElapsed.toInt() * 2),
-    );
+    int timeBonus = max(0, 100 - (timeElapsed.toInt() * 2));
 
     // Perfect play bonus
     final perfectBonus = lives >= maxLives ? 50 : 0;
@@ -1557,17 +1558,18 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       Navigator.of(context).push(
         PageRouteBuilder(
           opaque: false,
-          pageBuilder: (_, __, ___) => GameResultsScreen(
-            level: level,
-            score: score,
-            timeBonus: timeBonus,
-            perfectBonus: perfectBonus,
-            achievement: achievement,
-            onContinue: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-          ),
+          pageBuilder:
+              (_, __, ___) => GameResultsScreen(
+                level: level,
+                score: score,
+                timeBonus: timeBonus,
+                perfectBonus: perfectBonus,
+                achievement: achievement,
+                onContinue: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+              ),
         ),
       );
     });
@@ -1592,20 +1594,21 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
-        pageBuilder: (_, __, ___) => GameOverScreen(
-          score: score,
-          onRetry: () {
-            Navigator.of(context).pop();
-            setState(() {
-              _initializeGame();
-              _generateLevel();
-            });
-          },
-          onExit: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          },
-        ),
+        pageBuilder:
+            (_, __, ___) => GameOverScreen(
+              score: score,
+              onRetry: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _initializeGame();
+                  _generateLevel();
+                });
+              },
+              onExit: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
       ),
     );
   }
@@ -1618,11 +1621,10 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   /// Show red flash animation for error
   void _showErrorAnimation() {
     OverlayEntry entry = OverlayEntry(
-      builder: (context) => Positioned.fill(
-        child: Container(
-          color: Colors.red.withAlpha(76),
-        ),
-      ),
+      builder:
+          (context) => Positioned.fill(
+            child: Container(color: Colors.red.withAlpha(76)),
+          ),
     );
 
     Overlay.of(context).insert(entry);
@@ -1694,7 +1696,7 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
           ),
 
-// Animated background particles using CustomPaint
+          // Animated background particles using CustomPaint
           ValueListenableBuilder(
             valueListenable: _backgroundTimeNotifier,
             builder: (context, time, child) {
@@ -1772,9 +1774,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 decoration: BoxDecoration(
                   // Color changes depending on game state
-                  color: showingSequence
-                      ? const Color(0xFF4ECDC4)
-                      : (awaitingInput ? Colors.green : Colors.grey.shade700),
+                  color:
+                      showingSequence
+                          ? const Color(0xFF4ECDC4)
+                          : (awaitingInput
+                              ? Colors.green
+                              : Colors.grey.shade700),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
@@ -1846,11 +1851,12 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               // Glow effect for the dots
                               boxShadow: [
                                 BoxShadow(
-                                  color: dot.isHighlighted
-                                      ? Colors.orange.withOpacity(0.8)
-                                      : const Color(
-                                          0xFF4ECDC4,
-                                        ).withOpacity(0.4),
+                                  color:
+                                      dot.isHighlighted
+                                          ? Colors.orange.withOpacity(0.8)
+                                          : const Color(
+                                            0xFF4ECDC4,
+                                          ).withOpacity(0.4),
                                   blurRadius: dot.isHighlighted ? 20 : 10,
                                   spreadRadius: dot.isHighlighted ? 5 : 1,
                                 ),
@@ -1897,13 +1903,15 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     // Different colors for GO! vs numbers
-                                    color: countdownNumber == 0
-                                        ? Colors.green.withOpacity(0.3)
-                                        : Colors.blue.withOpacity(0.3),
+                                    color:
+                                        countdownNumber == 0
+                                            ? Colors.green.withOpacity(0.3)
+                                            : Colors.blue.withOpacity(0.3),
                                     border: Border.all(
-                                      color: countdownNumber == 0
-                                          ? Colors.green
-                                          : Colors.blue,
+                                      color:
+                                          countdownNumber == 0
+                                              ? Colors.green
+                                              : Colors.blue,
                                       width: 3,
                                     ),
                                     boxShadow: [
@@ -1950,3 +1958,17 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    // Clean up resources when the widget is removed
+    _backgroundAnimationTimer?.cancel();
+    _backgroundTimeNotifier.dispose();
+
+    // Dispose all animation controllers to prevent memory leaks
+    for (var controller in moveControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+}
