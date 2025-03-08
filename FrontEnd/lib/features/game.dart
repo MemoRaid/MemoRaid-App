@@ -2252,3 +2252,136 @@ class GameOverScreen extends StatelessWidget {
     required this.onRetry,
     required this.onExit,
   }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Semi-transparent black background
+      backgroundColor: Colors.black54,
+      body: Center(
+        child: Container(
+          // Modal takes up 85% of screen width
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          // Styling for the modal container
+          decoration: BoxDecoration(
+            // Dark blue background
+            color: const Color(0xFF0D3445),
+            // Rounded corners
+            borderRadius: BorderRadius.circular(20),
+            // Red glow effect
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withOpacity(0.2),
+                blurRadius: 15,
+                spreadRadius: 5,
+              ),
+            ],
+            // Red border
+            border: Border.all(color: Colors.red.withOpacity(0.3), width: 2),
+          ),
+          child: Column(
+            // Only take up needed vertical space
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // X icon in a circular container
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.3),
+                  border: Border.all(color: Colors.red, width: 2),
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  size: 40,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(height: 16), // Vertical spacing
+              // Game Over title text
+              const Text(
+                'Game Over',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 24), // Vertical spacing
+              // Final Score label
+              const Text(
+                'Final Score',
+                style: TextStyle(fontSize: 18, color: Colors.white70),
+              ),
+              const SizedBox(height: 8), // Vertical spacing
+              // Score value display
+              Text(
+                '$score',
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16), // Vertical spacing
+              // Encouraging message for the player
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  'Keep trying! You\'ll get better with practice.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                ),
+              ),
+              const SizedBox(height: 24), // Vertical spacing
+              // Button row with Menu and Try Again options
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Menu button
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: onExit, // Exit callback
+                      icon: const Icon(Icons.menu),
+                      label: const Text('Menu'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueGrey,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 16,
+                  ), // Horizontal spacing between buttons
+                  // Try Again button
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: onRetry, // Retry callback
+                      icon: const Icon(Icons.replay),
+                      label: const Text('Try Again'),
+                      style: ElevatedButton.styleFrom(
+                        // Teal-colored button
+                        backgroundColor: const Color(0xFF4ECDC4),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
