@@ -1051,3 +1051,82 @@ class GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     gameOver = false;
     startTime = DateTime.now().millisecondsSinceEpoch;
   }
+
+   /// Generate level layout with randomly positioned dots
+  void _generateLevel() {
+    if (!mounted) return;
+
+    dots.clear();
+    sequence.clear();
+    currentIndex = 0;
+
+    // Get screen dimensions for dot placement
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height * 0.7;
+    final safeAreaInsets = MediaQuery.of(context).padding;
+
+    final dotSize = 60.0;
+    final safeWidth = screenWidth - dotSize;
+    final safeTop = 100.0 + safeAreaInsets.top;
+    final safeBottom = screenHeight - dotSize;
+
+    final maxAttempts = 100;
+
+    // Create dots with non-overlapping positions
+    for (int i = 0; i < dotCount; i++) {
+      bool validPosition = false;
+      int attempts = 0;
+      double xPos = 0;
+      double yPos = 0;
+
+      // Try to find non-overlapping position
+      while (!validPosition && attempts < maxAttempts) {
+        attempts++;
+        xPos = random.nextDouble() * safeWidth;
+        yPos = safeTop + random.nextDouble() * (safeBottom - safeTop);
+
+        validPosition = true;
+
+        // Check if this position overlaps with existing dots
+        for (var existingDot in dots) {
+          final distance = (Offset(xPos, yPos) - existingDot.position).distance;
+          final minDistance = dotSize * 1.2;
+
+          if (distance < minDistance) {
+            validPosition = false;
+            break;
+          }
+        }
+      }
+
+      dots.add(
+        Dot(
+          id: i,
+          position: Offset(xPos, yPos),
+          size: dotSize,
+          isActive: false,
+          isHighlighted: false,
+        ),
+      );
+    }
+
+    // Generate random sequence if dots were successfully created
+    if (dots.isNotEmpty) {
+      List<int> indices = List.generate(dotCount, (index) => index);
+      indices.shuffle(random);
+      sequence = indices.take(sequenceLength).toList();
+
+      // Set up animations if dots should move
+      if (dotsMove) {
+        _setupMovementAnimations();
+      }
+
+      // Show sequence after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _showSequence();
+        }
+      });
+    }
+  }
+
