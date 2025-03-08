@@ -134,3 +134,119 @@ class LevelAchievement {
   /// Helper to determine if any special achievement was earned
   bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
 }
+
+/// Defines a layer for creating wave animations in the background
+/// Multiple layers with different parameters create complex wave effects
+class WaveLayer {
+  final Color color; // Color of this wave layer
+  final double speed; // How fast the wave moves
+  final double amplitude; // Height of the wave
+  final double frequency; // How compressed/spread out the wave is
+  final double phase; // Starting position of the wave
+  final double heightFactor; // Vertical positioning factor
+
+  WaveLayer({
+    required this.color,
+    required this.speed,
+    required this.amplitude,
+    required this.frequency,
+    required this.phase,
+    required this.heightFactor,
+  });
+}
+
+/// Represents a single node in the particle background effect
+/// Used to create flowing background animations
+class ParticleNode {
+  Offset position; // Current position
+  final double size; // Size of the particle
+  final double speed; // Movement speed
+  double angle; // Direction of movement
+  final double opacity; // Transparency value
+
+  ParticleNode({
+    required this.position,
+    required this.size,
+    required this.speed,
+    required this.angle,
+    required this.opacity,
+  });
+
+  /// Updates the particle position based on time and ensures it wraps around screen
+  void update(double time, Size screenSize) {
+    // Move particle based on angle and speed
+    position = Offset(
+      position.dx + cos(angle) * speed,
+      position.dy + sin(angle) * speed,
+    );
+
+    // Wrap particles around screen edges to create infinite effect
+    if (position.dx < -50)
+      position = Offset(screenSize.width + 50, position.dy);
+    if (position.dx > screenSize.width + 50)
+      position = Offset(-50, position.dy);
+    if (position.dy < -50)
+      position = Offset(position.dx, screenSize.height + 50);
+    if (position.dy > screenSize.height + 50)
+      position = Offset(position.dx, -50);
+
+    // Slightly vary angle over time for more organic movement
+    angle += (sin(time * 0.5) * 0.03);
+  }
+}
+
+/// Defines a connection between particle nodes
+/// Used to create web-like effects in the background
+class Connection {
+  final int startNodeIndex; // Index of first connected node
+  final int endNodeIndex; // Index of second connected node
+  final double maxDistance; // Maximum distance before connection disappears
+  final double thickness; // Line thickness
+
+  Connection({
+    required this.startNodeIndex,
+    required this.endNodeIndex,
+    required this.maxDistance,
+    required this.thickness,
+  });
+}
+
+/// Similar to ParticleNode but specifically for dot-shaped particles
+/// Used for specialized visual effects
+class ParticleDot {
+  Offset position; // Current position
+  final double size; // Size of the dot
+  final double opacity; // Transparency
+  final double speed; // Movement speed
+  double angle; // Direction of movement
+
+  ParticleDot({
+    required this.position,
+    required this.size,
+    required this.opacity,
+    required this.speed,
+    required this.angle,
+  });
+
+  /// Updates particle position and ensures screen wrapping
+  void update(double time, Size screenSize) {
+    // Move particle based on angle and speed
+    position = Offset(
+      position.dx + cos(angle) * speed,
+      position.dy + sin(angle) * speed,
+    );
+
+    // Wrap around screen edges
+    if (position.dx < -50)
+      position = Offset(screenSize.width + 50, position.dy);
+    if (position.dx > screenSize.width + 50)
+      position = Offset(-50, position.dy);
+    if (position.dy < -50)
+      position = Offset(position.dx, screenSize.height + 50);
+    if (position.dy > screenSize.height + 50)
+      position = Offset(position.dx, -50);
+
+    // Slightly change angle over time for organic movement
+    angle += sin(time * 0.3) * 0.02;
+  }
+}
