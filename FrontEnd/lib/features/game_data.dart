@@ -117,3 +117,20 @@ class Dot {
     );
   }
 }
+
+/// Tracks achievements upon completing a level
+/// Used to display appropriate feedback and rewards to the player
+class LevelAchievement {
+  final bool isNewHighScore; // Whether player beat their previous score
+  final bool isNewLevelUnlocked; // Whether this unlocked a new level
+  final int previousHighScore; // Previous best score for comparison
+
+  LevelAchievement({
+    required this.isNewHighScore,
+    required this.isNewLevelUnlocked,
+    required this.previousHighScore,
+  });
+
+  /// Helper to determine if any special achievement was earned
+  bool get isSpecialAchievement => isNewHighScore || isNewLevelUnlocked;
+}
