@@ -91,6 +91,33 @@ const ContributorForm = ({ onSubmit, userId }) => {
                 margin="normal"
               />
             </Box>
+            <Box sx={{ mb: 2 }}>
+              <FormControl 
+                fullWidth 
+                error={touched.relationshipType && Boolean(errors.relationshipType)}
+                margin="normal"
+              >
+                <InputLabel id="relationship-type-label">Relationship Type</InputLabel>
+                <Select
+                  labelId="relationship-type-label"
+                  id="relationshipType"
+                  name="relationshipType"
+                  value={values.relationshipType}
+                  onChange={handleChange}
+                  label="Relationship Type"
+                >
+                  {relationshipTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {touched.relationshipType && errors.relationshipType && (
+                  <FormHelperText>{errors.relationshipType}</FormHelperText>
+                )}
+              </FormControl>
+            </Box>
+
 
 
 
