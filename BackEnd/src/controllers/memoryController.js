@@ -153,6 +153,68 @@ exports.createMemory = async (req, res) => {
         error: error.message 
       });
     }
-  };
+};
+
+// Get memories for a user
+exports.getUserMemories = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get all contributors for this user
+      const { data: contributors, error: contributorsError } = await supabase
+        .from('memory_contributors')
+        .select('id')
+        .eq('user_id', userId);
+      
+      if (contributorsError) {
+        return res.status(500).json({ 
+          message: 'Error fetching contributors', 
+          error: contributorsError.message 
+        });
+      }
+      
+      if (!contributors.length) {
+        return res.status(200).json({ memories: [] });
+      }
+      
+      // Get all memories from these contributors
+      const contributorIds = contributors.map(c => c.id);
+      
+      const { data: memories, error: memoriesError } = await supabase
+        .from('memories')
+        .select(`
+          id,
+          photo_url,
+          description,
+          event_date,
+          created_at,
+          contributor_id,
+          memory_contributors (
+            name,
+            relationship_type
+          )
+        `)
+        .in('contributor_id', contributorIds)
+        .order('created_at', { ascending: false });
+      
+      if (memoriesError) {
+        return res.status(500).json({ 
+          message: 'Error fetching memories', 
+          error: memoriesError.message 
+        });
+      }
+      
+      res.status(200).json({
+        memories
+      });
+    } catch (error) {
+      console.error('Get memories error:', error);
+      res.status(500).json({ 
+        message: 'Server error fetching memories', 
+        error: error.message 
+      });
+    }
+};
+  
   
   
