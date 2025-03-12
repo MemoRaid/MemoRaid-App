@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+/*const supabase = require('../config/supabase');
 const gemini = require('../config/gemini');
 
 // Generate questions for a memory
@@ -360,4 +360,4 @@ exports.getUserProgress = async (req, res) => {
   
   
   
-  
+*/
