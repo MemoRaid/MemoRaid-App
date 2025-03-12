@@ -117,6 +117,22 @@ const ContributorForm = ({ onSubmit, userId }) => {
                 )}
               </FormControl>
             </Box>
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                id="relationshipYears"
+                name="relationshipYears"
+                label="Years Known"
+                type="number"
+                value={values.relationshipYears}
+                onChange={handleChange}
+                error={touched.relationshipYears && Boolean(errors.relationshipYears)}
+                helperText={touched.relationshipYears && errors.relationshipYears}
+                margin="normal"
+                InputProps={{ inputProps: { min: 1 } }}
+              />
+            </Box>
+
 
 
 
