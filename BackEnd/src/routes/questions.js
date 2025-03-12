@@ -1,10 +1,10 @@
-const express = require('express');
+/*const express = require('express');
 const router = express.Router();
 const questionController = require('../controllers/questionController');
 const auth = require('../middleware/auth');
 
-// Generate questions for a memory
-router.post('/generate/:memoryId', auth, questionController.generateQuestions);
+// Commented out the question generating part
+// router.post('/generate/:memoryId', auth, questionController.generateQuestions);
 
 // Get questions for a memory
 router.get('/memory/:memoryId', auth, questionController.getMemoryQuestions);
@@ -18,4 +18,13 @@ router.post('/answer/:questionId', auth, questionController.submitAnswer);
 // Get user's progress and statistics
 router.get('/progress', auth, questionController.getUserProgress);
 
+// Example route with a callback function
+router.post('/add', (req, res) => {
+  // Your logic here
+  res.status(200).json({ message: 'Question added successfully' });
+});
+
 module.exports = router;
+
+*/
+
