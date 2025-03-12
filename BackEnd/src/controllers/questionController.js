@@ -290,6 +290,73 @@ exports.submitAnswer = async (req, res) => {
       });
     }
 };
+
+// Get user's progress and statistics
+exports.getUserProgress = async (req, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get total correct answers
+      const { count: correctCount, error: correctError } = await supabase
+        .from('user_answers')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_correct', true);
+      
+      if (correctError) {
+        return res.status(500).json({ 
+          message: 'Error fetching correct answers', 
+          error: correctError.message 
+        });
+      }
+      
+      // Get total answers
+      const { count: totalCount, error: totalError } = await supabase
+        .from('user_answers')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+      
+      if (totalError) {
+        return res.status(500).json({ 
+          message: 'Error fetching total answers', 
+          error: totalError.message 
+        });
+      }
+      
+      // Get total points
+      const { data: rewards, error: rewardsError } = await supabase
+        .from('user_rewards')
+        .select('points')
+        .eq('user_id', userId);
+      
+      if (rewardsError) {
+        return res.status(500).json({ 
+          message: 'Error fetching rewards', 
+          error: rewardsError.message 
+        });
+      }
+      
+      const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
+      
+      const accuracyRate = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
+      
+      res.status(200).json({
+        progress: {
+          correctAnswers: correctCount,
+          totalAnswers: totalCount,
+          accuracyRate: `${accuracyRate}%`,
+          totalPoints: totalPoints
+        }
+      });
+    } catch (error) {
+      console.error('Get user progress error:', error);
+      res.status(500).json({ 
+        message: 'Server error fetching user progress', 
+        error: error.message 
+      });
+    }
+};
+  
   
   
   
