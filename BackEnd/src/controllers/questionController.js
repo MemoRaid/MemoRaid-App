@@ -203,7 +203,94 @@ exports.getDailyQuestions = async (req, res) => {
         error: error.message 
       });
     }
-  };
+};
+
+// Submit user's answer to a question
+exports.submitAnswer = async (req, res) => {
+    try {
+      const { questionId } = req.params;
+      const { answer } = req.body;
+      const userId = req.user.id;
+      
+      if (!answer) {
+        return res.status(400).json({ message: 'Answer is required' });
+      }
+      
+      // Get the question to check against correct answer
+      const { data: question, error: questionError } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('id', questionId)
+        .single();
+      
+      if (questionError) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+      
+      // Simple check if answer is correct
+      // In a real app, you'd use AI for more sophisticated answer checking
+      const correctKeywords = question.correct_answer.toLowerCase().split(' ');
+      const userKeywords = answer.toLowerCase().split(' ');
+      
+      // Check if answer contains key words from correct answer
+      // This is a very simple algorithm - in production you'd use better comparison
+      const matchCount = correctKeywords.filter(word => 
+        userKeywords.some(userWord => userWord.includes(word) || word.includes(userWord))
+      ).length;
+      
+      const accuracy = matchCount / correctKeywords.length;
+      const isCorrect = accuracy >= 0.5; // Consider it correct if 50% of keywords match
+      
+      // Save the user's answer
+      const { data: savedAnswer, error: saveError } = await supabase
+        .from('user_answers')
+        .insert([
+          {
+            user_id: userId,
+            question_id: questionId,
+            answer,
+            is_correct: isCorrect
+          }
+        ])
+        .select();
+      
+      if (saveError) {
+        return res.status(500).json({ 
+          message: 'Error saving answer', 
+          error: saveError.message 
+        });
+      }
+      
+      // If correct, award points
+      if (isCorrect) {
+        await supabase
+          .from('user_rewards')
+          .insert([
+            {
+              user_id: userId,
+              points: question.points,
+              reward_type: 'question_correct'
+            }
+          ]);
+      }
+      
+      res.status(200).json({
+        message: isCorrect ? 'Correct answer!' : 'Incorrect answer',
+        result: {
+          isCorrect,
+          points: isCorrect ? question.points : 0,
+          correctAnswer: question.correct_answer
+        }
+      });
+    } catch (error) {
+      console.error('Submit answer error:', error);
+      res.status(500).json({ 
+        message: 'Server error submitting answer', 
+        error: error.message 
+      });
+    }
+};
+  
   
   
   
