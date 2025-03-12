@@ -99,4 +99,60 @@ exports.uploadPhoto = async (req, res) => {
     }
 };
 
+// Create a memory
+exports.createMemory = async (req, res) => {
+    try {
+      const { contributorId, photoUrl, description, eventDate } = req.body;
+      
+      // Validate input
+      if (!contributorId || !photoUrl || !description) {
+        return res.status(400).json({ 
+          message: 'Contributor ID, photo URL, and description are required' 
+        });
+      }
+      
+      // Check if contributor exists
+      const { data: contributor, error: contributorError } = await supabase
+        .from('memory_contributors')
+        .select('id')
+        .eq('id', contributorId)
+        .single();
+      
+      if (contributorError) {
+        return res.status(404).json({ message: 'Contributor not found' });
+      }
+      
+      // Create memory
+      const { data: memory, error } = await supabase
+        .from('memories')
+        .insert([
+          { 
+            contributor_id: contributorId,
+            photo_url: photoUrl,
+            description,
+            event_date: eventDate || null
+          }
+        ])
+        .select();
+      
+      if (error) {
+        return res.status(500).json({ 
+          message: 'Error creating memory', 
+          error: error.message 
+        });
+      }
+      
+      res.status(201).json({
+        message: 'Memory created successfully',
+        memory: memory[0]
+      });
+    } catch (error) {
+      console.error('Create memory error:', error);
+      res.status(500).json({ 
+        message: 'Server error creating memory', 
+        error: error.message 
+      });
+    }
+  };
+  
   
