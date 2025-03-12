@@ -132,6 +132,15 @@ const ContributorForm = ({ onSubmit, userId }) => {
                 InputProps={{ inputProps: { min: 1 } }}
               />
             </Box>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isSubmitting}
+              sx={{ mt: 2 }}
+            >
+              Continue to Add Memories
+            </Button>
 
 
 
