@@ -78,6 +78,20 @@ const ContributorForm = ({ onSubmit, userId }) => {
                 margin="normal"
               />
             </Box>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                id="email"
+                name="email"
+                label="Email Address"
+                value={values.email}
+                onChange={handleChange}
+                error={touched.email && Boolean(errors.email)}
+                helperText={touched.email && errors.email}
+                margin="normal"
+              />
+            </Box>
+
 
 
           </Form>
