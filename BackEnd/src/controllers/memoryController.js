@@ -50,5 +50,53 @@ exports.createContributor = async (req, res) => {
         error: error.message 
       });
     }
-  };
+};
+  
+// Upload a photo
+exports.uploadPhoto = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      // Generate unique file name
+      const fileExtension = req.file.originalname.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExtension}`;
+      
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('memory-photos')
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+          cacheControl: '3600'
+        });
+      
+      if (error) {
+        console.error('Storage error:', error);
+        return res.status(500).json({ 
+          message: 'Error uploading photo', 
+          error: error.message 
+        });
+      }
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('memory-photos')
+        .getPublicUrl(fileName);
+  
+      console.log('Generated public URL:', publicUrl);
+  
+      res.status(200).json({
+        message: 'Photo uploaded successfully',
+        photoUrl: publicUrl
+      });
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      res.status(500).json({ 
+        message: 'Server error uploading photo', 
+        error: error.message 
+      });
+    }
+};
+
   
