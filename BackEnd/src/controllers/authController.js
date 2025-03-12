@@ -347,3 +347,32 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+// Generate share link for memory contributors
+exports.generateShareLink = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+    
+    // Create a token specifically for sharing
+    const shareToken = jwt.sign(
+      { userId, purpose: 'memory-share' },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' } // Longer expiry for share links
+    );
+    
+    // Get base URL from environment variable or use a default
+    const baseUrl = process.env.BASE_URL || 'https://da31-175-157-248-67.ngrok-free.app';
+    
+    res.status(200).json({
+      message: 'Share link generated successfully',
+      token: shareToken,
+      baseUrl: baseUrl
+    });
+  } catch (error) {
+    console.error('Share link generation error:', error);
+    res.status(500).json({
+      message: 'Server error generating share link',
+      error: error.message
+    });
+  }
+};
+
