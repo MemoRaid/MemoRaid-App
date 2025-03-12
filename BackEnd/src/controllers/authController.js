@@ -275,4 +275,48 @@ exports.googleSignIn = async (req, res) => {
   }
 };
 
+// Verify share token
+exports.verifyShareToken = async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
+    }
+    
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Check if this is a share token
+    if (decoded.purpose !== 'memory-share') {
+      return res.status(401).json({ message: 'Invalid token purpose' });
+    }
+    
+    // Get user details
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('id', decoded.userId)
+      .single();
+    
+    if (error) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json({
+      message: 'Token verified successfully',
+      user
+    });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+    
+    console.error('Token verification error:', error);
+    res.status(500).json({ 
+      message: 'Server error verifying token', 
+      error: error.message 
+    });
+  }
+};
 
