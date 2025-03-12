@@ -65,6 +65,20 @@ const ContributorForm = ({ onSubmit, userId }) => {
       >
         {({ errors, touched, values, handleChange, isSubmitting }) => (
           <Form> 
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                id="name"
+                name="name"
+                label="Your Name"
+                value={values.name}
+                onChange={handleChange}
+                error={touched.name && Boolean(errors.name)}
+                helperText={touched.name && errors.name}
+                margin="normal"
+              />
+            </Box>
+
 
           </Form>
         )}
