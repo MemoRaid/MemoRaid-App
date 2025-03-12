@@ -15,6 +15,7 @@ import 'features/privacy_policy_screen.dart';
 import 'features/terms_of_service_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
+      builder: (context, themeProvider, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'MemoRaid',
