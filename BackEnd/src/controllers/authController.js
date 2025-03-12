@@ -176,4 +176,103 @@ exports.login = async (req, res) => {
   }
 };
 
+// Google Sign In
+exports.googleSignIn = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    
+    if (!idToken) {
+      return res.status(400).json({ message: 'ID token is required' });
+    }
+    
+    // Verify the Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+    
+    // Check if user exists
+    let { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+    
+    if (userError && userError.code !== 'PGRST116') {
+      return res.status(500).json({ 
+        message: 'Error checking user', 
+        error: userError.message 
+      });
+    }
+    
+    // If user doesn't exist, create a new one
+    if (!user) {
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert([
+          { 
+            name, 
+            email,
+            photo_url: picture || null
+          }
+        ])
+        .select();
+      
+      if (createError) {
+        return res.status(500).json({ 
+          message: 'Error creating user', 
+          error: createError.message 
+        });
+      }
+      
+      // Store auth info separately
+      const { error: authError } = await supabase
+        .from('user_auth')
+        .insert([
+          {
+            user_id: newUser[0].id,
+            provider: 'google'
+          }
+        ]);
+      
+      if (authError) {
+        // If auth fails, clean up the user
+        await supabase.from('users').delete().eq('id', newUser[0].id);
+        return res.status(500).json({ 
+          message: 'Error creating authentication', 
+          error: authError.message 
+        });
+      }
+      
+      user = newUser[0];
+    }
+    
+    // Create JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    res.status(200).json({
+      message: 'Google sign-in successful',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    res.status(500).json({ 
+      message: 'Server error during Google sign-in', 
+      error: error.message 
+    });
+  }
+};
+
 
