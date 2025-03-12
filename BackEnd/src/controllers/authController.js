@@ -376,3 +376,60 @@ exports.generateShareLink = async (req, res) => {
   }
 };
 
+// Request email verification code
+exports.requestEmailVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    
+    // Generate a 6-digit verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // For testing, just console log the code (in production, you'd send an email)
+    console.log(`Verification code for ${email}: ${verificationCode}`);
+    
+    // Store verification code in your database
+    // For simplicity, we'll store in a users_verification table
+    // This assumes you have a users_verification table
+    
+    // Check if a previous verification code exists
+    const { data: existingCodes, error: selectError } = await supabase
+      .from('users_verification')
+      .select('*')
+      .eq('email', email);
+      
+    if (selectError) throw selectError;
+    
+    if (existingCodes && existingCodes.length > 0) {
+      // Update existing code
+      const { error } = await supabase
+        .from('users_verification')
+        .update({ code: verificationCode, created_at: new Date() })
+        .eq('email', email);
+        
+      if (error) throw error;
+    } else {
+      // Insert new code
+      const { error } = await supabase
+        .from('users_verification')
+        .insert({ email, code: verificationCode });
+        
+      if (error) throw error;
+    }
+    
+    res.status(200).json({ 
+      message: 'Verification code sent successfully',
+      // Include code in response ONLY FOR TESTING
+      code: verificationCode 
+    });
+  } catch (error) {
+    console.error('Email verification request error:', error);
+    res.status(500).json({
+      message: 'Error sending verification code',
+      error: error.message
+    });
+  }
+};
