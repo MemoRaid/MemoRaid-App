@@ -30,6 +30,15 @@ const UploadBox = styled(Box)(({ theme }) => ({
   minHeight: 200,
 }));
 
+// Styled component for the preview image
+const PreviewImage = styled('img')({
+  maxWidth: '100%',
+  maxHeight: 300,
+  objectFit: 'contain',
+  marginTop: 16,
+  marginBottom: 16,
+});
+
 
 
 export default PhotoUpload;
