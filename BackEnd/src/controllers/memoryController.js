@@ -215,6 +215,46 @@ exports.getUserMemories = async (req, res) => {
       });
     }
 };
+
+// Get a single memory
+exports.getMemory = async (req, res) => {
+    try {
+      const { memoryId } = req.params;
+      
+      const { data: memory, error } = await supabase
+        .from('memories')
+        .select(`
+          id,
+          photo_url,
+          description,
+          event_date,
+          created_at,
+          contributor_id,
+          memory_contributors (
+            name,
+            relationship_type,
+            user_id
+          )
+        `)
+        .eq('id', memoryId)
+        .single();
+      
+      if (error) {
+        return res.status(404).json({ message: 'Memory not found' });
+      }
+      
+      res.status(200).json({
+        memory
+      });
+    } catch (error) {
+      console.error('Get memory error:', error);
+      res.status(500).json({ 
+        message: 'Server error fetching memory', 
+        error: error.message 
+      });
+    }
+};
+  
   
   
   
