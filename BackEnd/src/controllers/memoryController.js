@@ -255,6 +255,57 @@ exports.getMemory = async (req, res) => {
     }
 };
   
+// Delete a memory
+exports.deleteMemory = async (req, res) => {
+    try {
+      const { memoryId } = req.params;
+      
+      // Check if memory exists and belongs to a contributor of the current user
+      const { data: memory, error: memoryError } = await supabase
+        .from('memories')
+        .select(`
+          id,
+          contributor_id,
+          memory_contributors (
+            user_id
+          )
+        `)
+        .eq('id', memoryId)
+        .single();
+      
+      if (memoryError) {
+        return res.status(404).json({ message: 'Memory not found' });
+      }
+      
+      // Check if the current user is authorized to delete this memory
+      if (memory.memory_contributors.user_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized to delete this memory' });
+      }
+      
+      // Delete the memory
+      const { error: deleteError } = await supabase
+        .from('memories')
+        .delete()
+        .eq('id', memoryId);
+      
+      if (deleteError) {
+        return res.status(500).json({ 
+          message: 'Error deleting memory', 
+          error: deleteError.message 
+        });
+      }
+      
+      res.status(200).json({
+        message: 'Memory deleted successfully'
+      });
+    } catch (error) {
+      console.error('Delete memory error:', error);
+      res.status(500).json({ 
+        message: 'Server error deleting memory', 
+        error: error.message 
+      });
+    }
+  };
   
   
   
