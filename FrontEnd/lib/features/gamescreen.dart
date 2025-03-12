@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
-import 'memory_match_game.dart';
+import 'game.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -56,7 +56,7 @@ class GameScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const MemoryMatchGame()),
+                                builder: (context) => const StartScreen()),
                           );
                         },
                       ),
