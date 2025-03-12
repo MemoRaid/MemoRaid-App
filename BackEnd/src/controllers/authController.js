@@ -433,3 +433,72 @@ exports.requestEmailVerification = async (req, res) => {
     });
   }
 };
+
+// Verify email with code
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and verification code are required' });
+    }
+    
+    // Verify the code against database
+    const { data, error } = await supabase
+      .from('users_verification')
+      .select('*')
+      .eq('email', email)
+      .eq('code', code)
+      .single();
+      
+    if (error || !data) {
+      return res.status(400).json({ message: 'Invalid verification code' });
+    }
+    
+    // Check if code is expired (optional - for example, 10 minutes expiry)
+    const codeTimestamp = new Date(data.created_at).getTime();
+    const currentTime = new Date().getTime();
+    const tenMinutesInMs = 10 * 60 * 1000;
+    
+    if (currentTime - codeTimestamp > tenMinutesInMs) {
+      return res.status(400).json({ message: 'Verification code expired' });
+    }
+    
+    // Mark user as verified in your database
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ email_verified: true })
+      .eq('email', email);
+      
+    if (updateError) throw updateError;
+    
+    // Generate auth token for the user
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+      
+    if (userError) throw userError;
+    
+    // Create JWT token
+    const token = jwt.sign(
+      { id: userData.id, email: userData.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully',
+      token,
+      user: userData
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({
+      message: 'Error verifying email',
+      error: error.message
+    });
+  }
+};
