@@ -1,18 +1,18 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const dotenv = require('dotenv');
+const path = require('path');
+const fs = require('fs');
 
-dotenv.config();
+// Load service account
+const serviceAccountPath = path.join(__dirname, '..', '..', 'credentials', 'gemini-service-account.json');
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
-// Check for API key
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error('GEMINI_API_KEY is required in .env file');
-}
-
-// Initialize the Gemini API
-const genAI = new GoogleGenerativeAI(apiKey);
+// Initialize the Gemini API with service account
+const genAI = new GoogleGenerativeAI({
+  projectId: serviceAccount.project_id,
+  credentials: serviceAccount
+});
 
 // Get the model
-const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 module.exports = model;
