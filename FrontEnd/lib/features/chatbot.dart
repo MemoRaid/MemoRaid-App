@@ -51,17 +51,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
       _chat = _model!.startChat(history: [
         Content.text(
-            'You are Mr. MemoRaid, a friendly and knowledgeable memory training assistant. '
-            'Your purpose is to help users improve their memory through techniques, '
-            'exercises, and encouragement. Keep responses focused on memory improvement '
-            'and cognitive enhancement. Be friendly and concise. Use emojis occasionally.'),
+            'You are MemoRaid Assistant, a specialized AI designed to help people with amnesia and memory loss. '
+            'Your purpose is to provide support, information, and techniques specifically for amnesia rehabilitation and memory recovery. '
+            'Focus on topics like: cognitive rehabilitation exercises, memory recovery techniques, coping strategies for amnesia, '
+            'helping patients reconnect with their past, supporting caregivers of amnesia patients, and explaining the science of memory loss and recovery. '
+            'Be compassionate, patient, and encouraging. Use clear, simple language and occasionally add emoji for warmth. '
+            'Avoid general memory improvement advice that isn\'t specific to amnesia rehabilitation. '
+            'If asked about topics unrelated to amnesia rehabilitation or memory recovery, gently redirect to how you can help with memory rehabilitation.'),
       ]);
 
       setState(() {
         messages.add({
           "sender": "ai",
           "text":
-              "Hello! I'm Mr. MemoRaid, your memory training assistant. 🧠 How can I help you improve your memory today?",
+              "Hello! 👋 I'm MemoRaid Assistant, here to help with amnesia rehabilitation and memory recovery. Whether you're recovering from memory loss yourself or supporting someone who is, I can suggest rehabilitation techniques, memory exercises, and coping strategies. How can I assist you today?",
           "time": DateTime.now().toString(),
         });
         _isInitializing = false;
@@ -105,8 +108,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
         _chat = _model!.startChat(history: [
           Content.text(
-              'You are Mr. MemoRaid, a friendly and knowledgeable memory training assistant. '
-              'Keep responses focused on memory improvement and be concise.'),
+              'You are MemoRaid Assistant, specialized in amnesia rehabilitation and memory recovery. '
+              'Keep focused on helping people recover lost memories and cope with amnesia.'),
         ]);
 
         // Test the model with a simple greeting
@@ -119,7 +122,7 @@ class _ChatScreenState extends State<ChatScreen> {
             messages.add({
               "sender": "ai",
               "text":
-                  "Hello! I'm Mr. MemoRaid, your memory training assistant. 🧠 How can I help you improve your memory today?",
+                  "Hello! 👋 I'm MemoRaid Assistant, here to help with amnesia rehabilitation and memory recovery. How can I assist you today?",
               "time": DateTime.now().toString(),
             });
             _isInitializing = false;
@@ -213,7 +216,7 @@ class _ChatScreenState extends State<ChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Mr. MemoRaid",
+                  "MemoRaid Assistant",
                   style: TextStyle(
                     color: Color(0xFF0D3445),
                     fontSize: 16,
@@ -221,7 +224,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 Text(
-                  _isInitializing ? "Connecting..." : "AI Memory Assistant",
+                  _isInitializing
+                      ? "Connecting..."
+                      : "Amnesia Rehabilitation Support",
                   style: TextStyle(
                     color: Color(0xFF0D3445).withOpacity(0.7),
                     fontSize: 12,
@@ -248,7 +253,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     messages.add({
                       "sender": "ai",
                       "text":
-                          "Hello! I'm Mr. MemoRaid, your memory training assistant. 🧠 How can I help you improve your memory today?",
+                          "Hello! 👋 I'm MemoRaid Assistant, here to help with amnesia rehabilitation and memory recovery. How can I assist you today?",
                       "time": DateTime.now().toString(),
                     });
                   });
@@ -284,11 +289,19 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           SizedBox(height: 24),
           Text(
-            "Connecting to Mr. MemoRaid...",
+            "Connecting to MemoRaid Assistant...",
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "Your amnesia rehabilitation companion",
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 14,
             ),
           ),
         ],
@@ -490,7 +503,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: "Type your message...",
+                        hintText: "Ask about amnesia rehabilitation...",
                         hintStyle: TextStyle(color: Colors.grey[500]),
                         border: InputBorder.none,
                         contentPadding:
