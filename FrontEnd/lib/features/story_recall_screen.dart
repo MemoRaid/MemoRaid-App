@@ -16,8 +16,8 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
   bool _readingStory = false;
   bool _showQuestions = false;
   int _currentQuestionIndex = 0;
-  Timer? _readingTimer;
-  int _remainingReadTime = 60; // seconds
+  Timer? _questionTimer;
+  int _remainingQuestionTime = 30; // seconds per question
   int _score = 0;
   List<bool?> _questionResults = [];
 
@@ -230,7 +230,7 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _readingTimer?.cancel();
+    _questionTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -241,23 +241,46 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
       _readingStory = true;
       _showQuestions = false;
       _currentQuestionIndex = 0;
-      _remainingReadTime = 60; // Reset timer
       _score = 0;
       _questionResults = List.filled(_stories[index]['questions'].length, null);
     });
-    _startReadingTimer();
   }
 
-  void _startReadingTimer() {
-    _readingTimer?.cancel();
-    _readingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+  void _startQuestions() {
+    setState(() {
+      _readingStory = false;
+      _showQuestions = true;
+      _remainingQuestionTime = 30; // Reset timer for new question
+    });
+    _startQuestionTimer();
+  }
+
+  void _startQuestionTimer() {
+    _questionTimer?.cancel();
+    _questionTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
-        if (_remainingReadTime > 0) {
-          _remainingReadTime--;
+        if (_remainingQuestionTime > 0) {
+          _remainingQuestionTime--;
         } else {
-          _readingTimer?.cancel();
-          _showQuestions = true;
-          _readingStory = false;
+          // Time's up - move to next question
+          _questionTimer?.cancel();
+
+          // Record as incorrect answer if time runs out
+          if (_questionResults[_currentQuestionIndex] == null) {
+            _questionResults[_currentQuestionIndex] = false;
+          }
+
+          // Move to next question or results
+          if (_currentQuestionIndex <
+              _stories[_selectedStoryIndex]['questions'].length - 1) {
+            _currentQuestionIndex++;
+            _remainingQuestionTime = 30; // Reset timer
+            _startQuestionTimer(); // Start timer for new question
+          } else {
+            // All questions answered or timed out
+            _tabController.animateTo(1); // Switch to results tab
+            _questionTimer?.cancel();
+          }
         }
       });
     });
@@ -278,8 +301,12 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
     // Wait a moment to show feedback before moving to next question
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
+        _questionTimer?.cancel(); // Cancel current timer
+
         if (_currentQuestionIndex < questions.length - 1) {
           _currentQuestionIndex++;
+          _remainingQuestionTime = 30; // Reset timer for new question
+          _startQuestionTimer(); // Start timer for new question
         } else {
           // All questions answered
           _tabController.animateTo(1); // Switch to results tab
@@ -294,7 +321,7 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
       _readingStory = false;
       _showQuestions = false;
       _currentQuestionIndex = 0;
-      _readingTimer?.cancel();
+      _questionTimer?.cancel();
     });
   }
 
@@ -374,7 +401,7 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
             child: GestureDetector(
               onTap: () => _selectStory(index),
               child: Container(
-                // Remove fixed height and allow container to size to its content
+                height: 120, // Fixed height for all story items
                 decoration: BoxDecoration(
                   color: Color(0xFF0D3445),
                   borderRadius: BorderRadius.circular(16),
@@ -387,8 +414,6 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                   ],
                 ),
                 child: Row(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start, // Align from top
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.only(
@@ -398,7 +423,7 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                       child: Image.asset(
                         story['coverImage'],
                         width: 100,
-                        height: 100,
+                        height: 120,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -407,8 +432,6 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12.0),
                         child: Column(
-                          mainAxisSize:
-                              MainAxisSize.min, // Use minimum space needed
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -419,6 +442,8 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 4),
                             Text(
@@ -467,7 +492,8 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
                     Container(
                       padding:
                           EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                      height: 100, // Match height with image
+                      height: 120, // Match container height
+                      width: 44,
                       decoration: BoxDecoration(
                         color: Color(0xFF4E6077),
                         borderRadius: BorderRadius.only(
@@ -506,55 +532,21 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
       ),
       child: Column(
         children: [
-          // Timer bar
-          Container(
-            width: double.infinity,
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: _remainingReadTime / 60,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF0D3445),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Time remaining: $_remainingReadTime seconds",
-                  style: TextStyle(
-                    color: Color(0xFF0D3445),
-                    fontWeight: FontWeight.bold,
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: _startQuestions,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF0D3445),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    _readingTimer?.cancel();
-                    setState(() {
-                      _showQuestions = true;
-                      _readingStory = false;
-                    });
-                  },
-                  child: Text(
-                    "I'm Ready",
-                    style: TextStyle(
-                      color: Color(0xFF0D3445),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+                child: Text("Start Questions"),
+              ),
             ),
           ),
           // Story content
@@ -617,6 +609,44 @@ class _StoryRecallScreenState extends State<StoryRecallScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Timer bar
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: _remainingQuestionTime / 30,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _remainingQuestionTime > 10
+                            ? Color(0xFF0D3445)
+                            : Colors.red,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              Text(
+                "$_remainingQuestionTime s",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: _remainingQuestionTime > 10
+                      ? Color(0xFF0D3445)
+                      : Colors.red,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+
           // Progress indicator
           Row(
             children: List.generate(
