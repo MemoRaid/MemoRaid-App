@@ -132,6 +132,49 @@ class HomeScreen extends StatelessWidget {
 
               SizedBox(height: height * 0.03),
 
+              // Add somewhere in your home screen UI:
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: InkWell(
+                  onTap: () => Navigator.pushNamed(context, '/memory_game'),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.extension,
+                          size: 40,
+                          color: Color(0xFF0D3445),
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          "Memory Match Exercise",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFF0D3445),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "Rehabilitate visual memory with this matching exercise",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
               // Footer Message
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: width * 0.05),

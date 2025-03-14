@@ -23,7 +23,7 @@ dependencies:
   flutter_spinkit: ^5.2.0
   http: ^1.1.0
   google_generative_ai: ^0.2.0
-  
+
 
 dev_dependencies:
   flutter_test:
@@ -51,5 +51,3 @@ flutter:
     - lib/assets/images/story.png
     - lib/assets/images/memoraid.png
     - lib/assets/images/kushen.png
-
-    # Add your image asset here
