@@ -24,6 +24,8 @@ dependencies:
   http: ^1.1.0
   google_generative_ai: ^0.2.0
   confetti: ^0.6.0
+  just_audio: ^0.9.35
+  audio_session: ^0.1.16
 
 
 dev_dependencies:
