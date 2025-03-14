@@ -78,4 +78,22 @@ class _GameScreenState extends State<GameScreen> {
     score = 0;
     _resetScenario();
   }
+
+  void _resetScenario() {
+    // Convert string steps to TaskStep objects
+    List<TaskStep> stepObjects = scenarios[currentScenarioIndex]
+        .steps
+        .asMap()
+        .entries
+        .map((entry) => TaskStep(
+            id: entry.key, text: entry.value, correctPosition: entry.key))
+        .toList();
+
+    jumbledSteps = Shuffler.shuffleSteps(stepObjects);
+    orderedSteps = [];
+    isCorrect = false;
+    showHint = false;
+    feedback = "";
+    attempts = 0;
+  }
 }
