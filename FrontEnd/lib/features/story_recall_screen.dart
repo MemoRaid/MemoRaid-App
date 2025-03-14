@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-// Remove unused import
-// import 'dart:math';
+import 'dart:math' as math;
+import 'package:audio_session/audio_session.dart';
+import '../services/audio_service.dart';
 
-// Fix private type in public API
 class StoryRecallScreen extends StatefulWidget {
   const StoryRecallScreen({super.key});
-
   @override
-  // Change to public type name
   StoryRecallScreenState createState() => StoryRecallScreenState();
 }
 
-// Rename class to remove underscore
 class StoryRecallScreenState extends State<StoryRecallScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
@@ -24,8 +21,11 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
   int _remainingQuestionTime = 30; // seconds per question
   int _score = 0;
   List<bool?> _questionResults = [];
-
   late AnimationController _animationController;
+  late AudioService _audioService;
+  bool _isPlaying = false;
+  Duration _currentPosition = Duration.zero;
+  Duration _totalDuration = Duration.zero;
 
   final List<Map<String, dynamic>> _stories = [
     {
@@ -54,7 +54,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
         {
           'question': 'At what time did Miguel arrive at the reunion?',
           'options': ['11:30 AM', '1:45 PM', '2:15 PM', '3:00 PM'],
-          'correctIndex': 2
+          'correctIndex': 2,
         },
         {
           'question': 'What type of dog did Isabella have?',
@@ -538,6 +538,18 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
+    // Initialize audio service
+    _audioService = AudioService();
+    _audioService.positionStream.listen((position) {
+      setState(() {
+        _currentPosition = position;
+      });
+    });
+    _audioService.playingStream.listen((playing) {
+      setState(() {
+        _isPlaying = playing;
+      });
+    });
     // Initialize with empty list since no story is selected yet
     _questionResults = [];
   }
@@ -547,6 +559,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     _tabController.dispose();
     _questionTimer?.cancel();
     _animationController.dispose();
+    _audioService.dispose();
     super.dispose();
   }
 
@@ -560,6 +573,30 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
       // Initialize question results with the correct length for the selected story
       _questionResults = List.filled(_stories[index]['questions'].length, null);
     });
+
+    // Load audio for the selected story
+    _audioService.loadStoryAudio(_stories[index]['title']).then((_) async {
+      final duration = await _audioService.duration;
+      if (duration != null) {
+        setState(() {
+          _totalDuration = duration;
+        });
+      }
+    });
+  }
+
+  void _togglePlayPause() {
+    if (_isPlaying) {
+      _audioService.pause();
+    } else {
+      _audioService.play();
+    }
+  }
+
+  void _seekToPosition(double value) {
+    final position =
+        Duration(milliseconds: (value * _totalDuration.inMilliseconds).round());
+    _audioService.seek(position);
   }
 
   void _startQuestions() {
@@ -618,7 +655,6 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
         _questionTimer?.cancel(); // Cancel current timer
-
         if (_currentQuestionIndex < questions.length - 1) {
           _currentQuestionIndex++;
           _remainingQuestionTime = 30; // Reset timer for new question
@@ -726,7 +762,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                       color: Colors.black12,
                       blurRadius: 8,
                       offset: Offset(0, 4),
-                    )
+                    ),
                   ],
                 ),
                 child: Row(
@@ -841,34 +877,157 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.white,
-            Color(0xFF0D3445).withAlpha(77)
-          ], // 0.3 opacity = 77 alpha
+          colors: [Colors.white, Color(0xFF0D3445).withAlpha(77)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: _startQuestions,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF0D3445),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+          // Spotify-like audio player
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+            color: Color(0xFF0D3445),
+            child: Column(
+              children: [
+                // Cover image
+                Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      )
+                    ],
+                    image: DecorationImage(
+                      image: AssetImage(story['coverImage']),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                child: Text("Start Questions"),
-              ),
+                SizedBox(height: 20),
+                // Story title and author info
+                Text(
+                  story['title'],
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "by ${story['author']}",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 24),
+                // Spotify-style progress bar
+                SliderTheme(
+                  data: SliderThemeData(
+                    trackHeight: 4,
+                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                    overlayShape: RoundSliderOverlayShape(overlayRadius: 14),
+                    activeTrackColor: Colors.white,
+                    inactiveTrackColor: Colors.white.withOpacity(0.3),
+                    thumbColor: Colors.white,
+                  ),
+                  child: Slider(
+                    value: _totalDuration.inMilliseconds > 0
+                        ? _currentPosition.inMilliseconds /
+                            _totalDuration.inMilliseconds
+                        : 0.0,
+                    onChanged: _seekToPosition,
+                  ),
+                ),
+                // Time indicators and play controls
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _formatDuration(_currentPosition),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        _formatDuration(_totalDuration),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12),
+                // Play/Pause button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.skip_previous),
+                      color: Colors.white,
+                      iconSize: 36,
+                      onPressed: () {
+                        // Rewind 10 seconds
+                        final newPosition = Duration(
+                          milliseconds: math.max(
+                              0, _currentPosition.inMilliseconds - 10000),
+                        );
+                        _audioService.seek(newPosition);
+                      },
+                    ),
+                    SizedBox(width: 16),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          _isPlaying ? Icons.pause : Icons.play_arrow,
+                          size: 32,
+                        ),
+                        color: Color(0xFF0D3445),
+                        onPressed: _togglePlayPause,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    IconButton(
+                      icon: Icon(Icons.skip_next),
+                      color: Colors.white,
+                      iconSize: 36,
+                      onPressed: () {
+                        // Skip forward 10 seconds
+                        final newPosition = Duration(
+                          milliseconds: math.min(
+                            _totalDuration.inMilliseconds,
+                            _currentPosition.inMilliseconds + 10000,
+                          ),
+                        );
+                        _audioService.seek(newPosition);
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          // Story content
+          // Story text content
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(16),
@@ -876,26 +1035,18 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    story['title'],
+                    "Story Text",
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF0D3445),
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "by ${story['author']}",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF0D3445).withOpacity(0.7),
-                    ),
-                  ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 12),
                   Text(
                     story['text'],
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       height: 1.5,
                       color: Color(0xFF0D3445),
                     ),
@@ -904,9 +1055,39 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
               ),
             ),
           ),
+          // Start Questions button (moved to bottom)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _startQuestions,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF0D3445),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Text(
+                  "Start Questions",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  // Helper method to format duration to mm:ss
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 
   Widget _buildQuestionsView() {
@@ -966,7 +1147,6 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
             ],
           ),
           SizedBox(height: 16),
-
           // Progress indicator
           Row(
             children: List.generate(
@@ -986,7 +1166,6 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
             ),
           ),
           SizedBox(height: 24),
-
           // Question number
           Text(
             "QUESTION ${_currentQuestionIndex + 1} OF ${questions.length}",
@@ -997,8 +1176,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
             ),
           ),
           SizedBox(height: 8),
-
-          // Question
+          // Question display
           Text(
             currentQuestion['question']?.toString() ?? 'Question',
             style: TextStyle(
@@ -1008,7 +1186,6 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
             ),
           ),
           SizedBox(height: 24),
-
           // Options
           Expanded(
             child: ListView.builder(
