@@ -6,4 +6,12 @@ class Shuffler {
     final random = Random();
     final List<TaskStep> shuffled = List.from(steps);
   }
-}
+
+  for (int i = shuffled.length - 1; i > 0; i--) {
+    final int n = random.nextInt(i + 1);
+    final TaskStep temp = shuffled[i];
+    shuffled[i] = shuffled[n];
+    shuffled[n] = temp;
+  }
+  return shuffled;
+} 
