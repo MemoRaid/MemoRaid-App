@@ -11,3 +11,7 @@ class ResultsScreen extends StatefulWidget {
     required this.score,
     required this.totalScenarios,
   });
+
+  @override
+  _ResultsScreenState createState() => _ResultsScreenState();
+}
