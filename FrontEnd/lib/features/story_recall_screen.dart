@@ -518,7 +518,6 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
             '45 kilometers',
             '59 kilometers'
           ],
-          'correctIndex': 1
         },
         {
           'question':
