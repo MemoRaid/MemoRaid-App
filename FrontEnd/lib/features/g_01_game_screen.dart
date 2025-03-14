@@ -105,4 +105,13 @@ class _GameScreenState extends State<GameScreen> {
       orderedSteps.add(step);
     });
   }
+
+  void _removeStep(TaskStep step) {
+    if (isCorrect) return;
+
+    setState(() {
+      orderedSteps.removeWhere((s) => s.id == step.id);
+      jumbledSteps.add(step);
+    });
+  }
 }
