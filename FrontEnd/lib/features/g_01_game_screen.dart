@@ -164,4 +164,317 @@ class _GameScreenState extends State<GameScreen> {
       showHint = !showHint;
     });
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Daily Tasks Sequencer'),
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Score display
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Score: $score',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 16),
+
+            // Current scenario info
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    scenarios[currentScenarioIndex].title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.indigo.shade700,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    scenarios[currentScenarioIndex].description,
+                    style: TextStyle(
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 16),
+
+            // Ordered steps section
+            Text(
+              'Your Sequence:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 8),
+            Expanded(
+              flex: 2,
+              child: Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: orderedSteps.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Select steps from below to arrange them in order',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: orderedSteps.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final step = orderedSteps[index];
+                          return Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.indigo.shade100),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: Colors.indigo.shade600,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(child: Text(step.text)),
+                                IconButton(
+                                  icon: Icon(Icons.remove_circle_outline,
+                                      color: Colors.red),
+                                  onPressed: () => _removeStep(step),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ),
+
+            SizedBox(height: 16),
+
+            // Available steps section
+            Text(
+              'Available Steps:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 8),
+            Expanded(
+              flex: 2,
+              child: Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: jumbledSteps.isEmpty
+                    ? Center(
+                        child: Text(
+                          'All steps have been used',
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: jumbledSteps.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final step = jumbledSteps[index];
+                          return GestureDetector(
+                            onTap: () => _selectStep(step),
+                            child: Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: Text(step.text),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ),
+
+            SizedBox(height: 16),
+
+            // Feedback section
+            if (feedback.isNotEmpty)
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color:
+                      isCorrect ? Colors.green.shade100 : Colors.amber.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  feedback,
+                  style: TextStyle(
+                    color: isCorrect
+                        ? Colors.green.shade800
+                        : Colors.amber.shade800,
+                  ),
+                ),
+              ),
+
+            // Hint section
+            if (showHint)
+              Container(
+                padding: EdgeInsets.all(12),
+                margin: EdgeInsets.only(top: 12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hint:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'The first step should be: "${scenarios[currentScenarioIndex].steps[0]}"',
+                      style: TextStyle(color: Colors.blue.shade800),
+                    ),
+                    if (orderedSteps.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'After "${orderedSteps.last.text}", you should consider what logically comes next.',
+                          style: TextStyle(color: Colors.blue.shade800),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+            SizedBox(height: 16),
+
+            // Control buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: orderedSteps.length ==
+                              scenarios[currentScenarioIndex].steps.length &&
+                          !isCorrect
+                      ? _checkAnswer
+                      : null,
+                  icon: Icon(Icons.check_circle),
+                  label: Text('Check Answer'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _toggleHint,
+                  icon: Icon(Icons.lightbulb_outline),
+                  label: Text(showHint ? 'Hide Hint' : 'Show Hint'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+                if (isCorrect)
+                  ElevatedButton.icon(
+                    onPressed: _nextScenario,
+                    icon: Icon(Icons.arrow_forward),
+                    label: Text('Next'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                if (!isCorrect)
+                  ElevatedButton.icon(
+                    onPressed: _resetScenario,
+                    icon: Icon(Icons.refresh),
+                    label: Text('Reset'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
