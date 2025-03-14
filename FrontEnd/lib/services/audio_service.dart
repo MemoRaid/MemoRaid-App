@@ -1,6 +1,5 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
-import 'dart:async';
 
 class AudioService {
   final AudioPlayer _player = AudioPlayer();
