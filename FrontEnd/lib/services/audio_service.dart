@@ -54,9 +54,4 @@ class AudioService {
 
   bool get isPlaying => _player.playing;
 
-  void dispose() {
-    _player.dispose();
-    _positionSubject.close();
-    _stateSubject.close();
-  }
-}
+  
