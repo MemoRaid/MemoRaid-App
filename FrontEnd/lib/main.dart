@@ -13,8 +13,11 @@ import 'features/password_security_screen.dart';
 import 'features/notifications_screen.dart';
 import 'features/privacy_policy_screen.dart';
 import 'features/terms_of_service_screen.dart';
+import 'config/api_config.dart'; // Import the API config
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await APIConfig.listModels();
   runApp(
     MultiProvider(
       providers: [
