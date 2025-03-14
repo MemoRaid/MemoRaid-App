@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/homescreen01.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
 import 'game.dart';
+import 'g_01_home_screen.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -66,6 +68,11 @@ class GameScreen extends StatelessWidget {
                         title: "Puzzle Solver",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HomeScreen03()),
+                          );
                           // Navigate to Puzzle Solver Game
                         },
                       ),

@@ -89,7 +89,7 @@ class _GameScreenState extends State<GameScreen> {
             id: entry.key, text: entry.value, correctPosition: entry.key))
         .toList();
 
-    jumbledSteps = Shuffler.shuffleSteps(stepObjects);
+    jumbledSteps = Shuffler.ShuffleSteps(stepObjects);
     orderedSteps = [];
     isCorrect = false;
     showHint = false;
