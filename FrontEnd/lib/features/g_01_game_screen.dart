@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/scenario.dart';
-import '../models/task_step.dart';
-import '../utils/shuffler.dart';
+import '../features/g_01_scenario.dart';
+import '../features/g_01_task_step.dart';
+import '../features/g_01_shuffler.dart';
 import 'results_screen.dart';
 
 class GameScreen extends StatefulWidget {
