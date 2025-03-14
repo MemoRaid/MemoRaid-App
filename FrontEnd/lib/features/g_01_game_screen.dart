@@ -114,4 +114,28 @@ class _GameScreenState extends State<GameScreen> {
       jumbledSteps.add(step);
     });
   }
+
+  void _checkAnswer() {
+    setState(() {
+      attempts++;
+
+      // Check if steps are in correct order
+      bool correct = true;
+      for (int i = 0; i < orderedSteps.length; i++) {
+        if (orderedSteps[i].correctPosition != i) {
+          correct = false;
+          break;
+        }
+      }
+
+      isCorrect = correct;
+
+      if (correct) {
+        score += 10 - (attempts > 5 ? 5 : attempts);
+        feedback = "Great job! You've arranged the steps correctly!";
+      } else {
+        feedback = "Not quite right. Try again or use a hint!";
+      }
+    });
+  }
 }
