@@ -138,4 +138,24 @@ class _GameScreenState extends State<GameScreen> {
       }
     });
   }
+
+  void _nextScenario() {
+    setState(() {
+      if (currentScenarioIndex + 1 < scenarios.length) {
+        currentScenarioIndex++;
+        _resetScenario();
+      } else {
+        // All scenarios completed, navigate to ResultsScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultsScreen(
+              score: score,
+              totalScenarios: scenarios.length,
+            ),
+          ),
+        );
+      }
+    });
+  }
 }
