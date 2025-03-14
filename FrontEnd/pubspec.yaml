@@ -20,10 +20,12 @@ dependencies:
   provider: ^6.0.0
   intl: ^0.18.0
   shared_preferences: ^2.0.0
-  flutter_spinkit: ^5.2.0 # Add this line
-  http: ^1.1.0 # Add this line
-  google_generative_ai: ^0.2.0 # Add this line
-  lottie: ^2.7.0 # Add this line
+  flutter_spinkit: ^5.2.0
+  http: ^1.1.0
+  google_generative_ai: ^0.2.0
+  lottie: ^2.7.0
+  flame: ^1.8.2 # Added for memory games
+  confetti: ^0.7.0 # Added for celebration effects
 
 dev_dependencies:
   flutter_test:
@@ -51,5 +53,3 @@ flutter:
     - lib/assets/images/story.png
     - lib/assets/images/memoraid.png
     - lib/assets/images/kushen.png
-
-    # Add your image asset here
