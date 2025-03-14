@@ -15,3 +15,20 @@ class ResultsScreen extends StatefulWidget {
   @override
   _ResultsScreenState createState() => _ResultsScreenState();
 }
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  late ConfettiController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(duration: Duration(seconds: 5));
+    _confettiController.play();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+}
