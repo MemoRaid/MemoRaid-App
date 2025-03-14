@@ -96,4 +96,13 @@ class _GameScreenState extends State<GameScreen> {
     feedback = "";
     attempts = 0;
   }
+
+  void _selectStep(TaskStep step) {
+    if (isCorrect) return;
+
+    setState(() {
+      jumbledSteps.removeWhere((s) => s.id == step.id);
+      orderedSteps.add(step);
+    });
+  }
 }
