@@ -3,6 +3,7 @@ import 'package:my_flutter_app/features/breath.dart';
 import 'bottomnavbar.dart';
 import 'gamescreen.dart';
 import 'note.dart';
+import 'story_recall_screen.dart';
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -85,7 +86,11 @@ class HomeScreen2 extends StatelessWidget {
                         title: "Story\nRecall Activity",
                         icon: Icons.auto_stories,
                         image: 'lib/assets/images/story.png',
-                        onTap: () {/* Navigate to Story screen */},
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const StoryRecallScreen()),
+                        ),
                       ),
                     ),
                     SizedBox(width: 15),
