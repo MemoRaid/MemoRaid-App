@@ -238,6 +238,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
+        // Set the icon theme to ensure back button is white
+        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -250,7 +252,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.emoji_events, size: 18),
+                    Icon(
+                      Icons.emoji_events,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     SizedBox(width: 4),
                     Text(
                       '$score',
