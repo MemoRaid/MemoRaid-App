@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'g_01_game_screen.dart';
 
-class HomeScreen03 extends StatelessWidget {
-  const HomeScreen03({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -111,13 +111,13 @@ class HomeScreen03 extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: primaryColor,
+                          color: primaryColor, // Explicitly set text color
                         ),
                       ),
                       SizedBox(width: 8),
                       Icon(
                         Icons.play_arrow_rounded,
-                        color: primaryColor,
+                        color: primaryColor, // Explicitly set icon color
                       ),
                     ],
                   ),

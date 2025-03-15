@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/scenario.dart';
+import '../features/g_01_scenario.dart';
 
 class ScenarioCard extends StatelessWidget {
   final Scenario scenario;
