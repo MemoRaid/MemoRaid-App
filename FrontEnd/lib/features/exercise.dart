@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'exercises/hand_coordination.dart';
+import 'exercises/brain_boosting_yoga.dart';
 
 class ExerciseScreen extends StatelessWidget {
   const ExerciseScreen({super.key});
@@ -6,6 +8,17 @@ class ExerciseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Memory Boosting Exercises",
+          style: TextStyle(
+            color: Color(0xFF0D3445),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Container(
         width: double.infinity,
         clipBehavior: Clip.antiAlias,
@@ -36,6 +49,19 @@ class ExerciseScreen extends StatelessWidget {
                   // Status bar space
                   SizedBox(height: 12),
 
+                  // Description text
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      "Improve your memory with physical exercises designed to enhance cognitive abilities and brain function.",
+                      style: TextStyle(
+                        color: Color(0xFF0D3445),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+
                   // Main content
                   Expanded(
                     child: SingleChildScrollView(
@@ -52,21 +78,59 @@ class ExerciseScreen extends StatelessWidget {
                             childAspectRatio: 155 / 205,
                             children: [
                               _buildExerciseCard(
-                                title: 'Exercise 01',
-                                rating: 4.6,
+                                context: context,
+                                title: 'Hand Coordination',
+                                description:
+                                    'Finger exercises that boost neural connections',
+                                rating: 4.8,
+                                icon: Icons.pan_tool_outlined,
                                 isHighlighted: true,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          HandCoordinationExercise()),
+                                ),
                               ),
                               _buildExerciseCard(
-                                title: 'Exercise 02',
+                                context: context,
+                                title: 'Brain-Boosting Yoga',
+                                description:
+                                    'Yoga poses that enhance memory and focus',
                                 rating: 4.6,
+                                icon: Icons.self_improvement,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          BrainBoostingYogaExercise()),
+                                ),
                               ),
                               _buildExerciseCard(
-                                title: 'Exercise 03',
-                                rating: 4.6,
+                                context: context,
+                                title: 'Cross-Body Movement',
+                                description:
+                                    'Exercises for hemispheric integration',
+                                rating: 4.7,
+                                icon: Icons.accessibility_new,
+                                onTap: () {
+                                  // Show coming soon dialog when clicked
+                                  _showComingSoonDialog(
+                                      context, 'Cross-Body Movement');
+                                },
                               ),
                               _buildExerciseCard(
-                                title: 'Exercise 04',
-                                rating: 4.6,
+                                context: context,
+                                title: 'Deep Breathing',
+                                description:
+                                    'Techniques to oxygenate the brain',
+                                rating: 4.5,
+                                icon: Icons.air,
+                                onTap: () {
+                                  // Show coming soon dialog when clicked
+                                  _showComingSoonDialog(
+                                      context, 'Deep Breathing');
+                                },
                               ),
                             ],
                           ),
@@ -110,121 +174,161 @@ class ExerciseScreen extends StatelessWidget {
     );
   }
 
+  void _showComingSoonDialog(BuildContext context, String exerciseName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Coming Soon'),
+          content: Text(
+              '$exerciseName exercises will be available in the next update!'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildExerciseCard({
+    required BuildContext context,
     required String title,
+    required String description,
     required double rating,
+    required IconData icon,
+    required VoidCallback onTap,
     bool isHighlighted = false,
   }) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: ShapeDecoration(
-        color: isHighlighted ? Color(0xFFFCFFFC) : Color(0xFFF4F7FB),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            width: 1,
-            color: Colors.white.withOpacity(isHighlighted ? 1 : 0.5),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: ShapeDecoration(
+          color: isHighlighted ? Color(0xFFFCFFFC) : Color(0xFFF4F7FB),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: 1,
+              color: Colors.white.withOpacity(isHighlighted ? 1 : 0.5),
+            ),
+            borderRadius: BorderRadius.circular(22),
           ),
-          borderRadius: BorderRadius.circular(22),
+          shadows: [
+            BoxShadow(
+              color: Color(0x333B4056),
+              blurRadius: 40,
+              offset: Offset(0, 20),
+            ),
+          ],
         ),
-        shadows: [
-          BoxShadow(
-            color: Color(0x333B4056),
-            blurRadius: 40,
-            offset: Offset(0, 20),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Exercise image
-          Positioned(
-            left: 0,
-            top: 0,
-            right: 0,
-            child: Container(
-              height: 120,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage("https://placehold.co/155x120"),
-                  fit: BoxFit.cover,
+        child: Stack(
+          children: [
+            // Exercise image/icon
+            Positioned(
+              left: 0,
+              top: 0,
+              right: 0,
+              child: Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Color(0xFF0D3445).withOpacity(0.1),
                 ),
-              ),
-            ),
-          ),
-
-          // Bookmark button
-          Positioned(
-            right: 8,
-            top: 8,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: ShapeDecoration(
-                color: Colors.black.withOpacity(0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Icon(
-                Icons.bookmark_border,
-                size: 14,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-          // Title and rating
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Color(0xFF0D3445),
-                      fontSize: 16,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w700,
-                      height: 0.81,
-                      letterSpacing: 0.07,
-                    ),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    size: 60,
+                    color: Color(0xFF0D3445),
                   ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      ...List.generate(
-                        5,
-                        (index) => Padding(
-                          padding: EdgeInsets.only(right: 2),
-                          child: Icon(
-                            Icons.star,
-                            size: 14,
-                            color: Color(0xFF0D3445),
+                ),
+              ),
+            ),
+
+            // Bookmark button
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: ShapeDecoration(
+                  color: Colors.black.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Icon(
+                  Icons.bookmark_border,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
+            // Title and rating
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Color(0xFF0D3445),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: Color(0xFF0D3445).withOpacity(0.7),
+                        fontSize: 10,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        ...List.generate(
+                          5,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(right: 2),
+                            child: Icon(
+                              index < rating.floor()
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              size: 12,
+                              color: Color(0xFF0D3445),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        rating.toString(),
-                        style: TextStyle(
-                          color: Color(0xFF0D3445),
-                          fontSize: 12,
-                          fontFamily: 'M PLUS 1',
-                          fontWeight: FontWeight.w500,
+                        SizedBox(width: 4),
+                        Text(
+                          rating.toString(),
+                          style: TextStyle(
+                            color: Color(0xFF0D3445),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
