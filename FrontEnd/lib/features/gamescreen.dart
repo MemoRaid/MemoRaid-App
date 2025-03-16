@@ -3,6 +3,7 @@ import 'package:my_flutter_app/features/homescreen01.dart';
 import 'bottomnavbar.dart'; // Import the custom bottom navbar
 import 'game.dart';
 import 'g_01_home_screen.dart';
+import 'spot_difference_game.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -82,7 +83,12 @@ class GameScreen extends StatelessWidget {
                         title: "Reaction Test",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
-                          // Navigate to Reaction Test Game
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const SpotDifferenceGame()),
+                          );
                         },
                       ),
                       const SizedBox(height: 24),
