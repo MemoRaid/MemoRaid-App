@@ -3,13 +3,6 @@ import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:speech_to_text/speech_to_text.dart';
-import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
-import 'package:camera/camera.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
-import 'package:permission_handler/permission_handler.dart';
 
 class Task {
   final String id;
@@ -21,11 +14,6 @@ class Task {
   final TaskImportance importance;
   final List<bool> repeatDays; // [Mon-Sun]
   final DateTime createdAt;
-  final String? photoMemoryPath;
-  final String? voiceNotePath;
-  final Position? locationReminder;
-  final String? verificationPhoto;
-  final MoodState? completionMood;
 
   Task({
     required this.id,
@@ -37,11 +25,6 @@ class Task {
     this.importance = TaskImportance.normal,
     required this.repeatDays,
     required this.createdAt,
-    this.photoMemoryPath,
-    this.voiceNotePath,
-    this.locationReminder,
-    this.verificationPhoto,
-    this.completionMood,
   });
 
   Map<String, dynamic> toJson() => {
@@ -55,59 +38,28 @@ class Task {
         'importance': importance.toString(),
         'repeatDays': repeatDays,
         'createdAt': createdAt.toIso8601String(),
-        'photoMemoryPath': photoMemoryPath,
-        'voiceNotePath': voiceNotePath,
-        'locationReminder': locationReminder != null
-            ? {
-                'latitude': locationReminder!.latitude,
-                'longitude': locationReminder!.longitude
-              }
-            : null,
-        'verificationPhoto': verificationPhoto,
-        'completionMood': completionMood?.toString(),
       };
 
-  static Task fromJson(Map<String, dynamic> json) {
-    Position? locationReminder;
-    if (json['locationReminder'] != null) {
-      try {
-        locationReminder = Position.fromMap(json['locationReminder']);
-      } catch (e) {
-        print('Error parsing location: $e');
-      }
-    }
-
-    return Task(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      scheduleTime: TimeOfDay(
-        hour: json['scheduleTimeHour'],
-        minute: json['scheduleTimeMinute'],
-      ),
-      isCompleted: json['isCompleted'],
-      category: TaskCategory.values.firstWhere(
-        (e) => e.toString() == json['category'],
-        orElse: () => TaskCategory.morningRoutine,
-      ),
-      importance: TaskImportance.values.firstWhere(
-        (e) => e.toString() == json['importance'],
-        orElse: () => TaskImportance.normal,
-      ),
-      repeatDays: List<bool>.from(json['repeatDays']),
-      createdAt: DateTime.parse(json['createdAt']),
-      photoMemoryPath: json['photoMemoryPath'],
-      voiceNotePath: json['voiceNotePath'],
-      locationReminder: locationReminder,
-      verificationPhoto: json['verificationPhoto'],
-      completionMood: json['completionMood'] != null
-          ? MoodState.values.firstWhere(
-              (e) => e.toString() == json['completionMood'],
-              orElse: () => MoodState.neutral,
-            )
-          : null,
-    );
-  }
+  static Task fromJson(Map<String, dynamic> json) => Task(
+        id: json['id'],
+        title: json['title'],
+        description: json['description'],
+        scheduleTime: TimeOfDay(
+          hour: json['scheduleTimeHour'],
+          minute: json['scheduleTimeMinute'],
+        ),
+        isCompleted: json['isCompleted'],
+        category: TaskCategory.values.firstWhere(
+          (e) => e.toString() == json['category'],
+          orElse: () => TaskCategory.morningRoutine,
+        ),
+        importance: TaskImportance.values.firstWhere(
+          (e) => e.toString() == json['importance'],
+          orElse: () => TaskImportance.normal,
+        ),
+        repeatDays: List<bool>.from(json['repeatDays']),
+        createdAt: DateTime.parse(json['createdAt']),
+      );
 }
 
 enum TaskCategory {
@@ -119,8 +71,6 @@ enum TaskCategory {
 }
 
 enum TaskImportance { high, normal, low }
-
-enum MoodState { happy, neutral, confused, distressed }
 
 class TaskService {
   static final List<Task> _tasks = [];
@@ -149,10 +99,8 @@ class TaskService {
   }
 
   static Future<void> updateTaskCompletion(String id, bool isCompleted) async {
-    try {
-      final taskIndex = _tasks.indexWhere((task) => task.id == id);
-      if (taskIndex == -1) throw Exception('Task not found');
-
+    final taskIndex = _tasks.indexWhere((task) => task.id == id);
+    if (taskIndex != -1) {
       final task = _tasks[taskIndex];
       _tasks[taskIndex] = Task(
         id: task.id,
@@ -164,64 +112,6 @@ class TaskService {
         repeatDays: task.repeatDays,
         createdAt: task.createdAt,
         isCompleted: isCompleted,
-        photoMemoryPath: task.photoMemoryPath,
-        voiceNotePath: task.voiceNotePath,
-        locationReminder: task.locationReminder,
-        verificationPhoto: task.verificationPhoto,
-        completionMood: task.completionMood,
-      );
-
-      await _saveTasks();
-    } catch (e) {
-      print('Error updating task completion: $e');
-      rethrow;
-    }
-  }
-
-  static Future<void> saveVerificationPhoto(
-      String taskId, String photoPath) async {
-    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
-    if (taskIndex != -1) {
-      final task = _tasks[taskIndex];
-      _tasks[taskIndex] = Task(
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        scheduleTime: task.scheduleTime,
-        category: task.category,
-        importance: task.importance,
-        repeatDays: task.repeatDays,
-        createdAt: task.createdAt,
-        isCompleted: task.isCompleted,
-        photoMemoryPath: task.photoMemoryPath,
-        voiceNotePath: task.voiceNotePath,
-        locationReminder: task.locationReminder,
-        verificationPhoto: photoPath,
-        completionMood: task.completionMood,
-      );
-      await _saveTasks();
-    }
-  }
-
-  static Future<void> updateTaskMood(String taskId, MoodState mood) async {
-    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
-    if (taskIndex != -1) {
-      final task = _tasks[taskIndex];
-      _tasks[taskIndex] = Task(
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        scheduleTime: task.scheduleTime,
-        category: task.category,
-        importance: task.importance,
-        repeatDays: task.repeatDays,
-        createdAt: task.createdAt,
-        isCompleted: task.isCompleted,
-        photoMemoryPath: task.photoMemoryPath,
-        voiceNotePath: task.voiceNotePath,
-        locationReminder: task.locationReminder,
-        verificationPhoto: task.verificationPhoto,
-        completionMood: mood,
       );
       await _saveTasks();
     }
@@ -241,11 +131,6 @@ class _TaskSchedulerScreenState extends State<TaskSchedulerScreen>
   List<Task> _tasks = []; // Change to non-final to allow updates
   DateTime _selectedDate = DateTime.now();
   AnimationController? _animationController;
-  final SpeechToText _speechToText = SpeechToText();
-  final FaceDetector _faceDetector =
-      FaceDetector(options: FaceDetectorOptions());
-  CameraController? _cameraController;
-  bool _isListening = false;
 
   @override
   void initState() {
@@ -255,11 +140,6 @@ class _TaskSchedulerScreenState extends State<TaskSchedulerScreen>
       duration: const Duration(milliseconds: 300),
     );
     _initializeAndLoadTasks();
-    _initializeSpeech();
-    _checkPermissions().then((_) {
-      _initializeCamera();
-    });
-    _requestLocationPermission();
   }
 
   Future<void> _initializeAndLoadTasks() async {
@@ -271,106 +151,6 @@ class _TaskSchedulerScreenState extends State<TaskSchedulerScreen>
     setState(() {
       _tasks = TaskService._tasks; // Access tasks from service
     });
-  }
-
-  Future<void> _initializeSpeech() async {
-    bool available = await _speechToText.initialize();
-    setState(() => _isListening = available);
-  }
-
-  Future<void> _initializeCamera() async {
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        throw Exception('No cameras available');
-      }
-
-      _cameraController = CameraController(cameras[0], ResolutionPreset.medium);
-      await _cameraController?.initialize();
-      if (mounted) setState(() {});
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error initializing camera: $e')),
-      );
-    }
-  }
-
-  Future<void> _requestLocationPermission() async {
-    await Geolocator.requestPermission();
-  }
-
-  Future<void> _verifyTaskWithFace(Task task) async {
-    try {
-      if (_cameraController == null) return;
-      if (!_cameraController!.value.isInitialized) return;
-
-      final image = await _cameraController!.takePicture();
-      final faces = await _faceDetector.processImage(
-        InputImage.fromFilePath(image.path),
-      );
-
-      if (faces.isNotEmpty) {
-        await TaskService.updateTaskCompletion(task.id, true);
-        await TaskService.saveVerificationPhoto(task.id, image.path);
-        _loadTasks();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No face detected. Please try again.')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying task: $e')),
-      );
-    }
-  }
-
-  Future<void> _startVoiceCommand() async {
-    if (!_isListening) return;
-
-    await _speechToText.listen(
-      onResult: (result) {
-        if (result.finalResult) {
-          _processVoiceCommand(result.recognizedWords);
-        }
-      },
-    );
-  }
-
-  void _processVoiceCommand(String command) {
-    if (command.contains('add task')) {
-      _showAddTaskSheet(context);
-    } else if (command.contains('complete')) {
-      final taskTitle = command.replaceAll('complete', '').trim();
-      final taskMatch = _tasks
-          .where((t) => t.title.toLowerCase().contains(taskTitle.toLowerCase()))
-          .toList();
-
-      if (taskMatch.isNotEmpty) {
-        TaskService.updateTaskCompletion(taskMatch.first.id, true);
-        _loadTasks();
-      }
-    }
-  }
-
-  Future<void> _checkPermissions() async {
-    final permissions = [
-      Permission.camera,
-      Permission.microphone,
-      Permission.location,
-    ];
-
-    for (var permission in permissions) {
-      if (await permission.status.isDenied) {
-        final status = await permission.request();
-        if (status.isDenied) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('${permission.toString()} permission required')),
-          );
-        }
-      }
-    }
   }
 
   @override
@@ -724,10 +504,6 @@ class _TaskSchedulerScreenState extends State<TaskSchedulerScreen>
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ),
-              if (task.locationReminder != null) _buildLocationReminder(task),
-              if (task.photoMemoryPath != null) _buildPhotoMemory(task),
-              _buildMoodTracker(task),
-              _buildEmergencyButton(),
             ],
           ),
         );
@@ -735,96 +511,9 @@ class _TaskSchedulerScreenState extends State<TaskSchedulerScreen>
     );
   }
 
-  Widget _buildLocationReminder(Task task) {
-    return ListTile(
-      leading: Icon(Icons.location_on),
-      title: Text('Location Reminder'),
-      subtitle: Text('Tap to view on map'),
-      onTap: () => _showLocationOnMap(task.locationReminder!),
-    );
-  }
-
-  Widget _buildPhotoMemory(Task task) {
-    return Container(
-      height: 150,
-      child: Image.file(
-        File(task.photoMemoryPath!),
-        fit: BoxFit.cover,
-      ),
-    );
-  }
-
-  Widget _buildMoodTracker(Task task) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: MoodState.values.map((mood) {
-        return IconButton(
-          icon: Icon(_getMoodIcon(mood)),
-          color: task.completionMood == mood ? Colors.blue : Colors.grey,
-          onPressed: () => TaskService.updateTaskMood(task.id, mood),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildEmergencyButton() {
-    return ElevatedButton.icon(
-      icon: Icon(Icons.emergency),
-      label: Text('Emergency Contact'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
-      ),
-      onPressed: _callEmergencyContact,
-    );
-  }
-
-  IconData _getMoodIcon(MoodState mood) {
-    switch (mood) {
-      case MoodState.happy:
-        return Icons.sentiment_very_satisfied;
-      case MoodState.neutral:
-        return Icons.sentiment_neutral;
-      case MoodState.confused:
-        return Icons.sentiment_dissatisfied;
-      case MoodState.distressed:
-        return Icons.sentiment_very_dissatisfied;
-    }
-  }
-
-  Future<void> _showLocationOnMap(Position position) async {
-    try {
-      final Uri url = Uri.parse(
-          'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}');
-      if (!await launchUrl(url)) {
-        throw Exception('Could not launch map');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error opening map: $e')),
-      );
-    }
-  }
-
-  Future<void> _callEmergencyContact() async {
-    try {
-      final Uri phoneUri = Uri.parse('tel:+1234567890');
-      if (!await launchUrl(phoneUri)) {
-        throw Exception('Could not launch phone call');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error making phone call: $e')),
-      );
-    }
-  }
-
   @override
   void dispose() {
     _animationController?.dispose();
-    _speechToText.stop();
-    _cameraController?.dispose();
-    _faceDetector.close();
     super.dispose();
   }
 
