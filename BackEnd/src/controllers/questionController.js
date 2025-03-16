@@ -207,6 +207,78 @@ exports.getDailyQuestions = async (req, res) => {
     });
   }
 };
+
+// Get daily questions for a user
+exports.getDailyQuestions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get a random memory for this user that has questions
+    const { data: memories, error: memoriesError } = await supabase
+      .from('memories')
+      .select(`
+        id,
+        photo_url,
+        description,
+        memory_contributors!inner (
+          id,
+          user_id
+        )
+      `)
+      .eq('memory_contributors.user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (memoriesError) {
+      return res.status(500).json({ 
+        message: 'Error fetching memories', 
+        error: memoriesError.message 
+      });
+    }
+    
+    if (!memories.length) {
+      return res.status(404).json({ message: 'No memories found for this user' });
+    }
+    
+    // Get a random memory from the list
+    const randomMemory = memories[Math.floor(Math.random() * memories.length)];
+    
+    // Get questions for this memory
+    const { data: questions, error: questionsError } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('memory_id', randomMemory.id)
+      .limit(5);
+    
+    if (questionsError) {
+      return res.status(500).json({ 
+        message: 'Error fetching questions', 
+        error: questionsError.message 
+      });
+    }
+    
+    // If no questions, generate them
+    if (!questions.length) {
+      // Call the generate questions function
+      // This would typically be a direct function call, but for API purposes we'll return a message
+      return res.status(200).json({
+        message: 'No questions available yet. Need to generate questions for this memory.',
+        memory: randomMemory,
+        needsQuestions: true
+      });
+    }
+    
+    res.status(200).json({
+      memory: randomMemory,
+      questions
+    });
+  } catch (error) {
+    console.error('Get daily questions error:', error);
+    res.status(500).json({ 
+      message: 'Server error fetching daily questions', 
+      error: error.message 
+    });
+  }
+};
 /*const supabase = require('../config/supabase');
 const gemini = require('../config/gemini');
 
