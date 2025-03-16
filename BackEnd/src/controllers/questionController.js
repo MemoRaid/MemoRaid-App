@@ -3,6 +3,63 @@ const gemini = require('../config/gemini');
 
 // Generate questions for a memory
 exports.generateQuestions = async (req, res) => {
+  try {
+    const { memoryId } = req.params;
+    
+    // Get the memory details
+    const { data: memory, error: memoryError } = await supabase
+      .from('memories')
+      .select(`
+        id,
+        photo_url,
+        description,
+        event_date,
+        contributor_id,
+        memory_contributors (
+          name,
+          relationship_type,
+          user_id
+        )
+      `)
+      .eq('id', memoryId)
+      .single();
+    
+    if (memoryError) {
+      return res.status(404).json({ message: 'Memory not found' });
+    }
+    
+    // Using Gemini AI to generate questions
+    const prompt = `
+      Generate 5 questions about this memory that would help someone with amnesia recall details:
+      
+      Description: ${memory.description}
+      Relationship: This memory is from a ${memory.memory_contributors.relationship_type} named ${memory.memory_contributors.name}
+      ${memory.event_date ? `Date: This happened on ${memory.event_date}` : ''}
+      
+      For each question:
+      1. Make it specific to the description provided
+      2. Include a correct answer based on the description
+      3. Assign a difficulty level (1-5)
+      4. Assign points (5-20 based on difficulty)
+      
+      Format the response as JSON with this structure for each question:
+      {
+        "question": "Question text here?",
+        "correct_answer": "Correct answer here",
+        "difficulty": 3,
+        "points": 15
+      }
+    `;
+
+
+
+
+
+/*const supabase = require('../config/supabase');
+const gemini = require('../config/gemini');
+
+// Generate questions for a memory
+exports.generateQuestions = async (req, res) => {
     try {
       const { memoryId } = req.params;
       
@@ -357,7 +414,7 @@ exports.getUserProgress = async (req, res) => {
     }
 };
   
+
   
-  
-  
+*/  
   
