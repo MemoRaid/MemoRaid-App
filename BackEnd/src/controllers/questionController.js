@@ -72,7 +72,39 @@ exports.generateQuestions = async (req, res) => {
     }
 
 
-
+     
+    // Save generated questions to database
+    const questionsToInsert = questionsData.map(q => ({
+      memory_id: memoryId,
+      question: q.question,
+      correct_answer: q.correct_answer,
+      points: q.points
+    }));
+    
+    const { data: questions, error: insertError } = await supabase
+      .from('questions')
+      .insert(questionsToInsert)
+      .select();
+    
+    if (insertError) {
+      return res.status(500).json({ 
+        message: 'Error saving generated questions', 
+        error: insertError.message 
+      });
+    }
+    
+    res.status(201).json({
+      message: 'Questions generated successfully',
+      questions
+    });
+  } catch (error) {
+    console.error('Generate questions error:', error);
+    res.status(500).json({ 
+      message: 'Server error generating questions', 
+      error: error.message 
+    });
+  }
+};
 
 
 /*const supabase = require('../config/supabase');
