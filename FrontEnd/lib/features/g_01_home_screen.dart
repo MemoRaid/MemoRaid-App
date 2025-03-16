@@ -11,6 +11,19 @@ class HomeScreen extends StatelessWidget {
     final Color primaryLightColor = Color(0xFF164C64);
 
     return Scaffold(
+      // Add app bar with back button
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            // Handle back navigation - typically exit the app
+            Navigator.maybePop(context);
+          },
+        ),
+      ),
+      extendBodyBehindAppBar: true, // Let the gradient extend behind app bar
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
