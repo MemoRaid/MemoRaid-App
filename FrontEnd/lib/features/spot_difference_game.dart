@@ -33,8 +33,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   // Sample image pairs
   final List<Map<String, dynamic>> levels = [
     {
-      'originalImage': 'assets/images/game/level1_original.png',
-      'modifiedImage': 'assets/images/game/level1_modified.png',
+      'originalImage': 'lib/assets/images/spot1.jpeg',
+      'modifiedImage': 'lib/assets/images/spot2.jpeg',
       'hotspots': [
         {'x': 100, 'y': 150, 'radius': 20},
         {'x': 250, 'y': 200, 'radius': 20},
@@ -364,8 +364,12 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             border: Border.all(
-                                              color: Colors.yellowAccent.withOpacity(
-                                                0.6 + (_pulseAnimation.value - 1.0) * 0.4,
+                                              color: Colors.yellowAccent
+                                                  .withOpacity(
+                                                0.6 +
+                                                    (_pulseAnimation.value -
+                                                            1.0) *
+                                                        0.4,
                                               ),
                                               width: 3,
                                             ),
@@ -373,6 +377,45 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                         );
                                       },
                                     ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                          // Divider - horizontal now
+                          Container(
+                            height: 4,
+                            color: accentColor.withOpacity(0.6),
+                          ),
+
+                          // Modified image
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                GestureDetector(
+                                  onTapDown: (details) =>
+                                      _checkDifference(details, false),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.white.withOpacity(0.1),
+                                          width: 1),
+                                    ),
+                                    child: Image.asset(
+                                      currentLevelData['modifiedImage'],
+                                      fit: BoxFit.contain, // Changed to contain
+                                      errorBuilder: (ctx, obj, trace) =>
+                                          Container(
+                                        color: baseColor.withOpacity(0.5),
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons
+                                                    .image_not_supported_outlined,
+                                                color: Colors.white70,
                                                 size: 48,
                                               ),
                                               const SizedBox(height: 12),
@@ -408,6 +451,35 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                     ),
                                   );
                                 }).toList(),
+
+                                // Add hint animation circle for this image too
+                                if (showingHintAnimation && hintHotspot != null)
+                                  Positioned(
+                                    left: hintHotspot!['x'] - 25,
+                                    top: hintHotspot!['y'] - 25,
+                                    child: AnimatedBuilder(
+                                      animation: _pulseAnimationController,
+                                      builder: (context, child) {
+                                        return Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.yellowAccent
+                                                  .withOpacity(
+                                                0.6 +
+                                                    (_pulseAnimation.value -
+                                                            1.0) *
+                                                        0.4,
+                                              ),
+                                              width: 3,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -817,6 +889,9 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       setState(() {
         score -= 5;
         if (score < 0) score = 0;
+
+        // Save hotspot for animation
+        hintHotspot = hotspot;
       });
 
       showDialog(
@@ -869,16 +944,109 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
           ),
           actions: [
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Show hint animation for 3 seconds
+                setState(() {
+                  showingHintAnimation = true;
+                });
+
+                _hintTimer?.cancel();
+                _hintTimer = Timer(const Duration(seconds: 3), () {
+                  if (mounted) {
+                    setState(() {
+                      showingHintAnimation = false;
+                      hintHotspot = null;
+                    });
+                  }
+                });
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: accentColor,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Got it'),
+              child: const Text('Show Hint'),
             ),
           ],
         ),
       );
     }
+  }
+
+  void _showTutorial() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: baseColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.lightBlueAccent, size: 28),
+            const SizedBox(width: 10),
+            const Text('How to Play', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '1. Find $totalDifferences differences between the two images',
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '2. Tap on any spot where you notice a difference',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '3. Be quick! You earn more points for finding differences faster',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '4. Use hints if you\'re stuck, but you\'ll lose 5 points',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.timelapse, color: Colors.white70),
+                    const SizedBox(width: 8),
+                    Text(
+                      'You have ${_formatTime(_timeRemaining)} to finish each level',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              firstTimePlaying = false;
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Start Playing'),
+          ),
+        ],
+      ),
+    );
   }
 }
