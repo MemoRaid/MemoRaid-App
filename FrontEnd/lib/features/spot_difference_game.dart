@@ -1158,87 +1158,461 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   }
 
   void _showTutorial() {
-    showDialog(
+    // Use PageView for a swipeable tutorial
+    PageController pageController = PageController();
+    int currentPage = 0;
+
+    showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: baseColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.info_outline, color: Colors.lightBlueAccent, size: 28),
-            const SizedBox(width: 10),
-            const Text('How to Play', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '1. Find $totalDifferences differences between the two images',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+      barrierLabel: 'Tutorial',
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Material(
+              color: Colors.transparent,
+              child: Stack(
+                children: [
+                  // Animated background gradient
+                  AnimatedContainer(
+                    duration: const Duration(seconds: 1),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          baseColor.withOpacity(0.95),
+                          baseColor
+                              .withBlue(baseColor.blue + 30)
+                              .withOpacity(0.95),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Main content
+                  SafeArea(
+                    child: Column(
+                      children: [
+                        // Header
+                        Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TweenAnimationBuilder(
+                                tween: Tween<double>(begin: 0.0, end: 1.0),
+                                duration: const Duration(seconds: 1),
+                                builder: (context, value, child) {
+                                  return Transform.scale(
+                                    scale: value,
+                                    child: ShaderMask(
+                                      shaderCallback: (bounds) =>
+                                          LinearGradient(
+                                        colors: [
+                                          Colors.lightBlueAccent,
+                                          Colors.purpleAccent
+                                        ],
+                                      ).createShader(bounds),
+                                      child: const Icon(
+                                        Icons.auto_awesome,
+                                        size: 40,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 16),
+                              TweenAnimationBuilder(
+                                tween: Tween<double>(begin: 0.0, end: 1.0),
+                                duration: const Duration(milliseconds: 1200),
+                                builder: (context, value, child) {
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(20 * (1 - value), 0),
+                                      child: const Text(
+                                        'How To Play',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Tutorial PageView
+                        Expanded(
+                          child: PageView(
+                            controller: pageController,
+                            onPageChanged: (page) {
+                              setState(() {
+                                currentPage = page;
+                              });
+                            },
+                            children: [
+                              _buildTutorialPage(
+                                icon: Icons.visibility,
+                                title: 'Find The Differences',
+                                description:
+                                    'Your mission is to find $totalDifferences hidden differences between the two images.',
+                                animation: 'lib/assets/animations/find.json',
+                              ),
+                              _buildTutorialPage(
+                                icon: Icons.touch_app,
+                                title: 'Tap To Select',
+                                description:
+                                    'When you spot a difference, tap directly on it to mark it.',
+                                animation: 'lib/assets/animations/tap.json',
+                              ),
+                              _buildTutorialPage(
+                                icon: Icons.timer,
+                                title: 'Beat The Clock',
+                                description:
+                                    'Be quick! You have ${_formatTime(_timeRemaining)} to find all differences and you earn more points for speed.',
+                                animation: 'lib/assets/animations/timer.json',
+                              ),
+                              _buildTutorialPage(
+                                icon: Icons.lightbulb_outline,
+                                title: 'Use Hints Wisely',
+                                description:
+                                    'Stuck? Use hints, but remember each hint will cost you 5 points.',
+                                animation: 'lib/assets/animations/hint.json',
+                                isLast: true,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Page indicator dots
+                        Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(4, (index) {
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                height: 10,
+                                width: currentPage == index ? 24 : 10,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: currentPage == index
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.4),
+                                  boxShadow: currentPage == index
+                                      ? [
+                                          BoxShadow(
+                                            color: accentColor.withOpacity(0.5),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ]
+                                      : [],
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+
+                        // Navigation buttons
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 24.0, right: 24.0, bottom: 40),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Back button
+                              if (currentPage > 0)
+                                _buildTutorialButton(
+                                  icon: Icons.arrow_back,
+                                  label: 'Back',
+                                  onPressed: () {
+                                    pageController.previousPage(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  },
+                                  isOutlined: true,
+                                )
+                              else
+                                const SizedBox(width: 100),
+
+                              // Next or Start button
+                              _buildTutorialButton(
+                                icon: currentPage < 3
+                                    ? Icons.arrow_forward
+                                    : Icons.play_arrow,
+                                label:
+                                    currentPage < 3 ? 'Next' : 'Start Playing',
+                                onPressed: () {
+                                  if (currentPage < 3) {
+                                    pageController.nextPage(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  } else {
+                                    Navigator.of(context).pop();
+                                    firstTimePlaying = false;
+                                    _showConfettiEffect();
+                                  }
+                                },
+                                hasPulseAnimation: currentPage == 3,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              '2. Tap directly on the difference when you spot it',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              '3. Be quick! You earn more points for finding differences faster',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              '4. Use hints if you\'re stuck, but you\'ll lose 5 points',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '5. Enable the visibility overlay for help while learning',
-              style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTutorialPage({
+    required IconData icon,
+    required String title,
+    required String description,
+    required String animation,
+    bool isLast = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Animated icon with gradient
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 5,
                 ),
-                child: Row(
+              ],
+            ),
+            child: Center(
+              // In a real app, you would use Lottie animation here
+              // Lottie.asset(animation, width: 100, height: 100)
+              child: ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [Colors.lightBlueAccent, Colors.purpleAccent],
+                ).createShader(bounds),
+                child: Icon(
+                  icon,
+                  size: 60,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          // Title with animated effect
+          TweenAnimationBuilder(
+            tween: Tween<double>(begin: 0.8, end: 1.0),
+            duration: const Duration(milliseconds: 700),
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Description text
+          Text(
+            description,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 18,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          // Extra emphasis for last page
+          if (isLast)
+            Padding(
+              padding: const EdgeInsets.only(top: 30.0),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purpleAccent.withOpacity(0.2),
+                      Colors.blueAccent.withOpacity(0.2)
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                ),
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.timelapse, color: Colors.white70),
-                    const SizedBox(width: 8),
+                    Icon(Icons.bolt, color: Colors.amberAccent),
+                    SizedBox(width: 8),
                     Text(
-                      'You have ${_formatTime(_timeRemaining)} to finish each level',
-                      style: const TextStyle(color: Colors.white),
+                      'You\'re Ready! Let\'s Play!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              firstTimePlaying = false;
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: accentColor,
-              foregroundColor: Colors.white,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTutorialButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool isOutlined = false,
+    bool hasPulseAnimation = false,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: hasPulseAnimation
+          ? AnimatedBuilder(
+              animation: _pulseAnimationController,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _pulseAnimation.value * 0.95 + 0.05,
+                  child: _buildButtonContent(icon, label, isOutlined),
+                );
+              },
+            )
+          : _buildButtonContent(icon, label, isOutlined),
+    );
+  }
+
+  Widget _buildButtonContent(IconData icon, String label, bool isOutlined) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      decoration: BoxDecoration(
+        gradient: isOutlined
+            ? null
+            : LinearGradient(
+                colors: [Colors.blueAccent, Colors.purpleAccent.shade200],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        borderRadius: BorderRadius.circular(30),
+        border: isOutlined
+            ? Border.all(color: Colors.white.withOpacity(0.5), width: 2)
+            : null,
+        boxShadow: isOutlined
+            ? null
+            : [
+                BoxShadow(
+                  color: accentColor.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: isOutlined ? FontWeight.normal : FontWeight.bold,
             ),
-            child: const Text('Start Playing'),
           ),
         ],
       ),
     );
+  }
+
+  void _showConfettiEffect() {
+    // Add confetti effect when the game starts
+    // In a real implementation, you would use a confetti package
+    // This is just a placeholder for the concept
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.celebration, color: Colors.amberAccent),
+            SizedBox(width: 10),
+            Text(
+              'Let\'s Spot the Differences!',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
+        ),
+        backgroundColor: accentColor,
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 8,
+      ),
+    );
+
+    // In a complete implementation, you would add real confetti effect here
+    // using a package like confetti or particle_field
   }
 }
