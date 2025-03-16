@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'exercises/hand_coordination.dart';
 import 'exercises/brain_boosting_yoga.dart';
+import 'exercises/cross_body_movement.dart';
 
 class ExerciseScreen extends StatelessWidget {
   const ExerciseScreen({super.key});
@@ -113,11 +114,13 @@ class ExerciseScreen extends StatelessWidget {
                                     'Exercises for hemispheric integration',
                                 rating: 4.7,
                                 icon: Icons.accessibility_new,
-                                onTap: () {
-                                  // Show coming soon dialog when clicked
-                                  _showComingSoonDialog(
-                                      context, 'Cross-Body Movement');
-                                },
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CrossBodyMovementExercise(),
+                                  ),
+                                ),
                               ),
                               _buildExerciseCard(
                                 context: context,
