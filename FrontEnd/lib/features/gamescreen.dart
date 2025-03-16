@@ -11,49 +11,79 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF0D3445),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D3445), Color(0xFF165066)],
+            ),
+          ),
+        ),
         elevation: 0,
         title: const Text(
           "Games",
           style: TextStyle(
-            color: Color(0xFF0D3445),
-            fontSize: 24,
+            color: Colors.white,
+            fontSize: 28,
             fontFamily: 'Epilogue',
             fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Stack(
         children: [
-          // Background Gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.white, Color(0xFF0D3445)],
+                colors: [
+                  Color(0xFF0D3445),
+                  Color(0xFF165066),
+                  Color(0xFF0A2632),
+                ],
+                stops: [0.0, 0.5, 1.0],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                const Text(
+                  "Challenge Your Mind",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Select a game to begin your journey",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 30),
                 Expanded(
                   child: ListView(
                     children: [
                       _buildGameCard(
                         context,
                         title: "Memory Match",
+                        subtitle: "Test your memory skills",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -67,6 +97,7 @@ class GameScreen extends StatelessWidget {
                       _buildGameCard(
                         context,
                         title: "Puzzle Solver",
+                        subtitle: "Solve challenging puzzles",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -81,6 +112,7 @@ class GameScreen extends StatelessWidget {
                       _buildGameCard(
                         context,
                         title: "Reaction Test",
+                        subtitle: "Test your reaction speed",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -95,6 +127,7 @@ class GameScreen extends StatelessWidget {
                       _buildGameCard(
                         context,
                         title: "Reaction Test",
+                        subtitle: "Test your reaction speed",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           // Navigate to Reaction Test Game
@@ -134,38 +167,75 @@ class GameScreen extends StatelessWidget {
   }
 
   Widget _buildGameCard(BuildContext context,
-      {required String title, required String image, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
+      {required String title,
+      required String image,
+      required String subtitle,
+      VoidCallback? onTap}) {
+    return Hero(
+      tag: title,
       child: Container(
-        height: 150,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          image: DecorationImage(
-            image: AssetImage(image),
-            fit: BoxFit.cover,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        margin: const EdgeInsets.only(bottom: 20),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              height: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                  image: AssetImage(image),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    const Color(0xFF0D3445).withOpacity(0.3),
+                    BlendMode.overlay,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0D3445).withOpacity(0.5),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      const Color(0xFF0D3445).withOpacity(0.2),
+                      const Color(0xFF0D3445).withOpacity(0.8),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
