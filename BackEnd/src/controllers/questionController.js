@@ -51,6 +51,26 @@ exports.generateQuestions = async (req, res) => {
       }
     `;
 
+    // Call Gemini API
+    const result = await gemini.generateContent(prompt);
+    let questionsData;
+    
+    try {
+      // Parse the response to get structured data
+      const responseText = result.response.text();
+      const jsonStr = responseText.substring(
+        responseText.indexOf('['),
+        responseText.lastIndexOf(']') + 1
+      );
+      questionsData = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('Error parsing Gemini response:', parseError);
+      return res.status(500).json({ 
+        message: 'Failed to parse AI-generated questions', 
+        error: parseError.message 
+      });
+    }
+
 
 
 
