@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Add this for HapticFeedback
 import 'dart:math';
 import 'dart:async';
 
@@ -70,105 +69,105 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   Timer? _hintTimer;
   bool firstTimePlaying = true;
   bool showOverlay = false;
-  double overlayOpacity = 0.5;  
-ese variables for wrong click animation
-  @overrideTimer;
-  void initState() {nimation = false;
-    super.initState();  Offset? wrongClickPosition;
-= true;
+  double overlayOpacity = 0.5;
+
+  @override
+  void initState() {
+    super.initState();
+
     // Initialize timer
-    _startTimer();  @override
+    _startTimer();
 
     // Initialize animations
     _pulseAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),timer
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(oller = AnimationController(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
         CurvedAnimation(
-            parent: _pulseAnimationController, curve: Curves.easeInOut));      vsync: this,
+            parent: _pulseAnimationController, curve: Curves.easeInOut));
 
     // Show tutorial on first load
-    WidgetsBinding.instance.addPostFrameCallback((_) {ouble>(begin: 1.0, end: 1.2).animate(
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (firstTimePlaying) {
-        _showTutorial();     parent: _pulseAnimationController, curve: Curves.easeInOut));
+        _showTutorial();
       }
-    }); // Show tutorial on first load
-  }    WidgetsBinding.instance.addPostFrameCallback((_) {
-irstTimePlaying) {
-  @overrideial();
+    });
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     _pulseAnimationController.dispose();
     _hintTimer?.cancel();
-    super.dispose();override
-  }  void dispose() {
+    super.dispose();
+  }
 
-  void _startTimer() {ntroller.dispose();
+  void _startTimer() {
     _timer?.cancel();
     _timeRemaining = 120; // Reset timer
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_timeRemaining > 0) {
-          _timeRemaining--;er() {
+          _timeRemaining--;
         } else {
-          _timer?.cancel();eset timer
-          _showTimeUpDialog();r = Timer.periodic(const Duration(seconds: 1), (timer) {
-        }State(() {
-      }); if (_timeRemaining > 0) {
-    });       _timeRemaining--;
-  }        } else {
+          _timer?.cancel();
+          _showTimeUpDialog();
+        }
+      });
+    });
+  }
 
-  String _formatTime(int seconds) {;
+  String _formatTime(int seconds) {
     int mins = seconds ~/ 60;
     int secs = seconds % 60;
-    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}'; });
-  }  }
+    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final currentLevelData = levels[currentLevel - 1];    int secs = seconds % 60;
-oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    final currentLevelData = levels[currentLevel - 1];
+
     return Scaffold(
       backgroundColor: baseColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: baseColor.withOpacity(0.8),lData = levels[currentLevel - 1];
+        backgroundColor: baseColor.withOpacity(0.8),
         elevation: 0,
         title: Text(
-          'Spot the Difference',Color,
+          'Spot the Difference',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 22,),
-            color: Colors.white.withOpacity(0.95),ation: 0,
-          ),tle: Text(
-        ),e Difference',
-        actions: [tStyle(
+            fontSize: 22,
+            color: Colors.white.withOpacity(0.95),
+          ),
+        ),
+        actions: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            margin: const EdgeInsets.only(right: 12),acity(0.95),
+            margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),s: [
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(t EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              children: [t: 12),
+            child: Row(
+              children: [
                 const Icon(Icons.emoji_events,
-                    color: Colors.amberAccent, size: 20),city(0.15),
-                const SizedBox(width: 8),adius: BorderRadius.circular(20),
+                    color: Colors.amberAccent, size: 20),
+                const SizedBox(width: 8),
                 Text(
                   'Score: $score',
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,ccent, size: 20),
-                    color: Colors.white,t SizedBox(width: 8),
-                  ),xt(
-                ),  'Score: $score',
-              ],    style: const TextStyle(
-            ),        fontSize: 16,
-          ),          fontWeight: FontWeight.w600,
-        ],            color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -179,13 +178,13 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
               baseColor,
               baseColor
                   .withBlue(baseColor.blue + 15)
-                  .withGreen(baseColor.green + 10),gin: Alignment.topCenter,
-            ],end: Alignment.bottomCenter,
-          ),  colors: [
+                  .withGreen(baseColor.green + 10),
+            ],
+          ),
         ),
         child: SafeArea(
-          child: Column(Blue(baseColor.blue + 15)
-            children: [aseColor.green + 10),
+          child: Column(
+            children: [
               // Game info bar
               Container(
                 padding:
@@ -195,95 +194,95 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                   color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(20, vertical: 12),
-                      color: Colors.black.withOpacity(0.1),sets.fromLTRB(16, 8, 16, 0),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 8,
-                      offset: const Offset(0, 4),r: Colors.white.withOpacity(0.1),
-                    ),rderRadius: BorderRadius.circular(16),
-                  ],boxShadow: [
-                ),ow(
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,ius: 8,
-                  children: [ffset(0, 4),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     // Level progress
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(gnment.spaceBetween,
+                        Text(
                           'Level $currentLevel',
                           style: const TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,xisAlignment.start,
-                            color: Colors.white,en: [
-                          ),xt(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                        const SizedBox(height: 4),onst TextStyle(
-                        Container( 16,
-                          width: 150,t: FontWeight.bold,
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 150,
                           height: 10,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(5),t SizedBox(height: 4),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
-                            widthFactor: foundDifferences / totalDifferences,ration(
-                            child: Container(ity(0.2),
-                              decoration: BoxDecoration((5),
+                            widthFactor: foundDifferences / totalDifferences,
+                            child: Container(
+                              decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Colors.lightBlueAccent,erLeft,
-                                    Colors.blueAccenttor: foundDifferences / totalDifferences,
-                                  ], Container(
+                                    Colors.lightBlueAccent,
+                                    Colors.blueAccent
+                                  ],
                                 ),
-                                borderRadius: BorderRadius.circular(5),gradient: const LinearGradient(
-                              ),    colors: [
-                            ),        Colors.lightBlueAccent,
-                          ),          Colors.blueAccent
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 4),   ),
+                        const SizedBox(height: 4),
                         Text(
                           '$foundDifferences/$totalDifferences differences found',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.white.withOpacity(0.8),
-                          ),nst SizedBox(height: 4),
-                        ),Text(
-                      ],    '$foundDifferences/$totalDifferences differences found',
-                    ),yle: TextStyle(
-                    // TimerntSize: 12,
-                    Container(ity(0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Timer
+                    Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: _timeRemaining < 30
                             ? Colors.redAccent.withOpacity(0.3)
                             : Colors.white.withOpacity(0.15),
-                        shape: BoxShape.circle,ainer(
-                      ),ts.all(12),
+                        shape: BoxShape.circle,
+                      ),
                       child: AnimatedBuilder(
                         animation: _pulseAnimationController,
-                        builder: (context, child) {thOpacity(0.3)
-                          return Transform.scale((0.15),
+                        builder: (context, child) {
+                          return Transform.scale(
                             scale: _timeRemaining < 30
                                 ? _pulseAnimation.value
-                                : 1.0,lder(
-                            child: Text(er,
-                              _formatTime(_timeRemaining),d) {
-                              style: TextStyle(ale(
+                                : 1.0,
+                            child: Text(
+                              _formatTime(_timeRemaining),
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: _timeRemaining < 30
                                     ? Colors.redAccent
-                                    : Colors.white,ormatTime(_timeRemaining),
-                              ),style: TextStyle(
-                            ),    fontSize: 18,
-                          );      fontWeight: FontWeight.bold,
-                        },        color: _timeRemaining < 30
-                      ),              ? Colors.redAccent
-                    ),                : Colors.white,
-                  ],            ),
-                ),            ),
-              ),                          );
+                                    : Colors.white,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
               // Instructions card
               Container(
@@ -294,13 +293,13 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                   color: Colors.amberAccent.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.amberAccent.withOpacity(0.3),eInsets.symmetric(horizontal: 12, vertical: 8),
-                    width: 1,in: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  ),coration: BoxDecoration(
-                ),lors.amberAccent.withOpacity(0.15),
-                child: Row(s: BorderRadius.circular(12),
-                  children: [r.all(
-                    const Icon(withOpacity(0.3),
+                    color: Colors.amberAccent.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
                       Icons.lightbulb_outline,
                       color: Colors.amberAccent,
                       size: 20,
@@ -308,14 +307,14 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        levels[currentLevel - 1]['description'],,
+                        levels[currentLevel - 1]['description'],
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14,SizedBox(width: 8),
-                        ),nded(
-                      ),child: Text(
-                    ),currentLevel - 1]['description'],
-                    IconButton(nst TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    IconButton(
                       icon: Icon(
                         showOverlay ? Icons.visibility_off : Icons.visibility,
                         color: Colors.white70,
@@ -323,43 +322,43 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                       ),
                       onPressed: () {
                         setState(() {
-                          showOverlay = !showOverlay;wOverlay ? Icons.visibility_off : Icons.visibility,
-                        });color: Colors.white70,
+                          showOverlay = !showOverlay;
+                        });
                       },
                       tooltip: showOverlay ? 'Hide Overlay' : 'Show Overlay',
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),  setState(() {
-                    ),      showOverlay = !showOverlay;
-                  ],      });
-                ),      },
-              ),                      tooltip: showOverlay ? 'Hide Overlay' : 'Show Overlay',
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ),
 
-              // Game images - Modified to stack vertically for landscape imagesonstraints: const BoxConstraints(),
+              // Game images - Modified to stack vertically for landscape images
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),r landscape images
+                      color: Colors.white.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.2),
                           blurRadius: 10,
-                          offset: const Offset(0, 5),r: Colors.white.withOpacity(0.05),
-                        ),rderRadius: BorderRadius.circular(20),
-                      ],boxShadow: [
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                    child: ClipRRect(,
-                      borderRadius: BorderRadius.circular(20),: 10,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
                       child: Column(
                         // Changed from Row to Column
                         children: [
                           // Original image
                           Expanded(
-                            child: Stack(rcular(20),
+                            child: Stack(
                               fit: StackFit.expand,
-                              children: [olumn
+                              children: [
                                 GestureDetector(
                                   onTapDown: (details) =>
                                       _checkDifference(details, true),
@@ -367,39 +366,39 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: Colors.white.withOpacity(0.1),
-                                          width: 1),pDown: (details) =>
-                                    ),details, true),
+                                          width: 1),
+                                    ),
                                     child: Image.asset(
                                       currentLevelData['originalImage'],
                                       fit: BoxFit.contain, // Changed to contain
-                                      errorBuilder: (ctx, obj, trace) =>ors.white.withOpacity(0.1),
+                                      errorBuilder: (ctx, obj, trace) =>
                                           Container(
                                         color: baseColor.withOpacity(0.5),
                                         child: Center(
                                           child: Column(
-                                            mainAxisSize: MainAxisSize.min,in, // Changed to contain
-                                            children: [ obj, trace) =>
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
                                               const Icon(
                                                 Icons
                                                     .image_not_supported_outlined,
                                                 color: Colors.white70,
-                                                size: 48,AxisSize: MainAxisSize.min,
+                                                size: 48,
                                               ),
-                                              const SizedBox(height: 12), Icon(
+                                              const SizedBox(height: 12),
                                               Text(
-                                                'Original Image',pported_outlined,
-                                                style: TextStyle(,
+                                                'Original Image',
+                                                style: TextStyle(
                                                   color: Colors.white
                                                       .withOpacity(0.8),
-                                                  fontSize: 16,t SizedBox(height: 12),
-                                                ),xt(
-                                              ),  'Original Image',
-                                            ],    style: TextStyle(
-                                          ),        color: Colors.white
-                                        ),              .withOpacity(0.8),
-                                      ),            fontSize: 16,
-                                    ),            ),
-                                  ),            ),
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 // Draw markers for this image
                                 ...markers.map((marker) {
@@ -407,17 +406,17 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                                     left: marker['x'] - 15,
                                     top: marker['y'] - 15,
                                     child: CircleAvatar(
-                                      radius: 15,is image
+                                      radius: 15,
                                       backgroundColor:
                                           Colors.greenAccent.withOpacity(0.7),
-                                      child: const Icon(] - 15,
+                                      child: const Icon(
                                         Icons.check,
-                                        color: Colors.white,Avatar(
-                                        size: 20,dius: 15,
-                                      ),backgroundColor:
-                                    ),      Colors.greenAccent.withOpacity(0.7),
-                                  ); const Icon(
-                                }).toList(),                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
 
                                 // Add hint animation circle
                                 if (showingHintAnimation && hintHotspot != null)
@@ -426,27 +425,27 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                                     top: hintHotspot!['y'] - 25,
                                     child: AnimatedBuilder(
                                       animation: _pulseAnimationController,
-                                      builder: (context, child) {&& hintHotspot != null)
+                                      builder: (context, child) {
                                         return Container(
-                                          width: 50,!['x'] - 25,
+                                          width: 50,
                                           height: 50,
                                           decoration: BoxDecoration(
-                                            shape: BoxShape.circle,nController,
+                                            shape: BoxShape.circle,
                                             border: Border.all(
                                               color: Colors.yellowAccent
                                                   .withOpacity(
                                                 0.6 +
-                                                    (_pulseAnimation.value -n(
-                                                            1.0) *circle,
-                                                        0.4,er: Border.all(
-                                              ),lors.yellowAccent
-                                              width: 3,    .withOpacity(
-                                            ),    0.6 +
-                                          ),          (_pulseAnimation.value -
-                                        );                    1.0) *
-                                      },                  0.4,
-                                    ),          ),
-                                  ),                                              width: 3,
+                                                    (_pulseAnimation.value -
+                                                            1.0) *
+                                                        0.4,
+                                              ),
+                                              width: 3,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
 
                                 // Show debug overlay if enabled
                                 if (showOverlay)
@@ -455,265 +454,265 @@ oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
                                     final index = levels[currentLevel - 1]
                                             ['hotspots']
                                         .indexOf(hotspot);
-                                    final found = differencesFound[index];                                if (showOverlay)
-el - 1]['hotspots']
+                                    final found = differencesFound[index];
+
                                     return Positioned(
-                                      left: hotspot['x'] - 30,entLevel - 1]
-                                      top: hotspot['y'] - 30,]
-                                      child: Container(otspot);
-                                        width: 60,ifferencesFound[index];
+                                      left: hotspot['x'] - 30,
+                                      top: hotspot['y'] - 30,
+                                      child: Container(
+                                        width: 60,
                                         height: 60,
                                         decoration: BoxDecoration(
-                                          shape: BoxShape.circle,,
-                                          border: Border.all(- 30,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
                                             color: found
                                                 ? Colors.greenAccent
                                                     .withOpacity(overlayOpacity)
                                                 : Colors.redAccent.withOpacity(
-                                                    overlayOpacity),hape.circle,
-                                            width: 2,rder: Border.all(
-                                          ),nd
+                                                    overlayOpacity),
+                                            width: 2,
+                                          ),
                                           color: found
-                                              ? Colors.greenAccent.withOpacity(yOpacity)
-                                                  overlayOpacity * 0.3)y(
+                                              ? Colors.greenAccent.withOpacity(
+                                                  overlayOpacity * 0.3)
                                               : Colors.redAccent.withOpacity(
-                                                  overlayOpacity * 0.2),  width: 2,
+                                                  overlayOpacity * 0.2),
                                         ),
                                         child: Center(
-                                          child: Text(nAccent.withOpacity(
-                                            '${index + 1}',ity * 0.3)
+                                          child: Text(
+                                            '${index + 1}',
                                             style: TextStyle(
                                               color: Colors.white.withOpacity(
                                                   overlayOpacity + 0.2),
-                                              fontWeight: FontWeight.bold, Center(
-                                            ),ild: Text(
-                                          ),  '${index + 1}',
-                                        ),    style: TextStyle(
-                                      ),        color: Colors.white.withOpacity(
-                                    );    overlayOpacity + 0.2),
-                                  }).toList(),              fontWeight: FontWeight.bold,
-                              ],              ),
-                            ),              ),
-                          ),                                        ),
-
-                          // Divider - horizontal now);
-                                  }).toList(),
-
-                                // Add wrong click animation for original imagecolor: accentColor.withOpacity(0.6),
-                                if (showWrongClickAnimation && wrongClickPosition != null && isOriginalImage)                          ),
-                                  Positioned(
-                                    left: wrongClickPosition!.dx - 20,ed image
-                                    top: wrongClickPosition!.dy - 20,
-                                    child: FadeTransition(
-                                      opacity: Tween<double>(begin: 1.0, end: 0.0).animate(it.expand,
-                                        CurvedAnimation(
-                                          parent: _pulseAnimationController,
-                                          curve: const Interval(0.0, 1.0),
-                                        ),nce(details, false),
-                                      ),
-                                      child: Container(tion(
-                                        width: 40,
-                                        height: 40,ors.white.withOpacity(0.1),
-                                        decoration: BoxDecoration(    width: 1),
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.redAccent, width: 2),
-                                        ),
-                                        child: const Center( contain
-                                          child: Icon((ctx, obj, trace) =>
-                                            Icons.close,
-                                            color: Colors.redAccent,or.withOpacity(0.5),
-                                            size: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),e: MainAxisSize.min,
+                                        ),
                                       ),
-                                    ),con(
-                                  ),
-                              ],ed_outlined,
-                            ),lors.white70,
-                          ),size: 48,
+                                    );
+                                  }).toList(),
+                              ],
+                            ),
+                          ),
 
-                          // Divider - horizontal now SizedBox(height: 12),
+                          // Divider - horizontal now
                           Container(
                             height: 4,
                             color: accentColor.withOpacity(0.6),
                           ),
-ity(0.8),
-                          // Modified imagefontSize: 16,
-                          Expanded(),
-                            child: Stack(),
-                              fit: StackFit.expand,],
-                              children: [),
-                                GestureDetector(),
-                                  onTapDown: (details) =>),
-                                      _checkDifference(details, false),),
-                                  child: Container(),
+
+                          // Modified image
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                GestureDetector(
+                                  onTapDown: (details) =>
+                                      _checkDifference(details, false),
+                                  child: Container(
                                     decoration: BoxDecoration(
-                                      border: Border.all(image
-                                          color: Colors.white.withOpacity(0.1),er) {
+                                      border: Border.all(
+                                          color: Colors.white.withOpacity(0.1),
                                           width: 1),
-                                    ),,
-                                    child: Image.asset(5,
-                                      currentLevelData['modifiedImage'],Avatar(
+                                    ),
+                                    child: Image.asset(
+                                      currentLevelData['modifiedImage'],
                                       fit: BoxFit.contain, // Changed to contain
                                       errorBuilder: (ctx, obj, trace) =>
-                                          Container(cent.withOpacity(0.7),
-                                        color: baseColor.withOpacity(0.5),con(
+                                          Container(
+                                        color: baseColor.withOpacity(0.5),
                                         child: Center(
-                                          child: Column(lors.white,
-                                            mainAxisSize: MainAxisSize.min,size: 20,
-                                            children: [),
-                                              const Icon(),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
                                                 Icons
-                                                    .image_not_supported_outlined,                                }).toList(),
+                                                    .image_not_supported_outlined,
                                                 color: Colors.white70,
                                                 size: 48,
-                                              ),ntAnimation && hintHotspot != null)
+                                              ),
                                               const SizedBox(height: 12),
-                                              Text(,
-                                                'Modified Image',- 25,
+                                              Text(
+                                                'Modified Image',
                                                 style: TextStyle(
-                                                  color: Colors.whiteontroller,
-                                                      .withOpacity(0.8),child) {
-                                                  fontSize: 16,iner(
+                                                  color: Colors.white
+                                                      .withOpacity(0.8),
+                                                  fontSize: 16,
                                                 ),
                                               ),
-                                            ],(
-                                          ),cle,
+                                            ],
+                                          ),
                                         ),
-                                      ),lowAccent
-                                    ),thOpacity(
-                                  ),
-                                ),on.value -
-                                // Draw markers for this image1.0) *
-                                ...markers.map((marker) {        0.4,
-                                  return Positioned(
-                                    left: marker['x'] - 15,width: 3,
-                                    top: marker['y'] - 15,),
-                                    child: CircleAvatar(),
-                                      radius: 15,);
-                                      backgroundColor:},
-                                          Colors.greenAccent.withOpacity(0.7),),
-                                      child: const Icon(                                  ),
-                                        Icons.check,
-                                        color: Colors.white,erlay if enabled (for second image too)
-                                        size: 20,
-                                      ),'hotspots']
+                                      ),
                                     ),
-                                  );[currentLevel - 1]
+                                  ),
+                                ),
+                                // Draw markers for this image
+                                ...markers.map((marker) {
+                                  return Positioned(
+                                    left: marker['x'] - 15,
+                                    top: marker['y'] - 15,
+                                    child: CircleAvatar(
+                                      radius: 15,
+                                      backgroundColor:
+                                          Colors.greenAccent.withOpacity(0.7),
+                                      child: const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  );
                                 }).toList(),
 
-                                // Add hint animation circle for this image too                                    final found = differencesFound[index];
+                                // Add hint animation circle for this image too
                                 if (showingHintAnimation && hintHotspot != null)
                                   Positioned(
-                                    left: hintHotspot!['x'] - 25,,
-                                    top: hintHotspot!['y'] - 25, - 30,
-                                    child: AnimatedBuilder(iner(
+                                    left: hintHotspot!['x'] - 25,
+                                    top: hintHotspot!['y'] - 25,
+                                    child: AnimatedBuilder(
                                       animation: _pulseAnimationController,
                                       builder: (context, child) {
-                                        return Container((
-                                          width: 50,cle,
-                                          height: 50,.all(
+                                        return Container(
+                                          width: 50,
+                                          height: 50,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all()
-                                              color: Colors.yellowAccentithOpacity(
-                                                  .withOpacity(verlayOpacity),
-                                                0.6 +width: 2,
+                                            border: Border.all(
+                                              color: Colors.yellowAccent
+                                                  .withOpacity(
+                                                0.6 +
                                                     (_pulseAnimation.value -
                                                             1.0) *
-                                                        0.4,Opacity(
+                                                        0.4,
                                               ),
-                                              width: 3,city(
-                                            ),        overlayOpacity * 0.2),
+                                              width: 3,
+                                            ),
                                           ),
                                         );
                                       },
                                     ),
                                   ),
-acity(
+
                                 // Show debug overlay if enabled (for second image too)
-                                if (showOverlay)fontWeight: FontWeight.bold,
-                                  ...levels[currentLevel - 1]['hotspots']),
-                                      .map<Widget>((hotspot) {),
-                                    final index = levels[currentLevel - 1]),
-                                            ['hotspots']),
+                                if (showOverlay)
+                                  ...levels[currentLevel - 1]['hotspots']
+                                      .map<Widget>((hotspot) {
+                                    final index = levels[currentLevel - 1]
+                                            ['hotspots']
                                         .indexOf(hotspot);
-                                    final found = differencesFound[index];  }).toList(),
-],
-                                    return Positioned(),
-                                      left: hotspot['x'] - 30,),
-                                      top: hotspot['y'] - 30,],
-                                      child: Container(),
-                                        width: 60,),
-                                        height: 60,),
-                                        decoration: BoxDecoration(),
-                                          shape: BoxShape.circle,              ),
+                                    final found = differencesFound[index];
+
+                                    return Positioned(
+                                      left: hotspot['x'] - 30,
+                                      top: hotspot['y'] - 30,
+                                      child: Container(
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: foundntrols
+                                            color: found
                                                 ? Colors.greenAccent
                                                     .withOpacity(overlayOpacity)
-                                                : Colors.redAccent.withOpacity(zontal: 20),
-                                                    overlayOpacity),romLTRB(16, 0, 16, 16),
+                                                : Colors.redAccent.withOpacity(
+                                                    overlayOpacity),
                                             width: 2,
                                           ),
-                                          color: foundborderRadius: BorderRadius.circular(16),
+                                          color: found
                                               ? Colors.greenAccent.withOpacity(
                                                   overlayOpacity * 0.3)
-                                              : Colors.redAccent.withOpacity(gnment: MainAxisAlignment.spaceEvenly,
+                                              : Colors.redAccent.withOpacity(
                                                   overlayOpacity * 0.2),
                                         ),
-                                        child: Center(ghtbulb_outline,
+                                        child: Center(
                                           child: Text(
-                                            '${index + 1}',,
-                                            style: TextStyle(color: Colors.amber,
+                                            '${index + 1}',
+                                            style: TextStyle(
                                               color: Colors.white.withOpacity(
                                                   overlayOpacity + 0.2),
-                                              fontWeight: FontWeight.bold,sh,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                        ),color: Colors.blueAccent,
+                                        ),
                                       ),
                                     );
-                                  }).toList(),it_to_app,
-
-                                // Add wrong click animation for modified imageor.of(context).pop(),
-                                if (showWrongClickAnimation && wrongClickPosition != null && !isOriginalImage)color: Colors.redAccent,
-                                  Positioned(),
-                                    left: wrongClickPosition!.dx - 20,],
-                                    top: wrongClickPosition!.dy - 20,),
-                                    child: FadeTransition(),
-                                      opacity: Tween<double>(begin: 1.0, end: 0.0).animate(],
-                                        CurvedAnimation(),
-                                          parent: _pulseAnimationController,),
-                                          curve: const Interval(0.0, 1.0),),
-                                        ), );
-                                      ),  }
-                                      child: Container(
-                                        width: 40,({
-                                        height: 40,,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle, onPressed,
-                                          border: Border.all(color: Colors.redAccent, width: 2),quired Color color,
-                                        ),
-                                        child: const Center(con(
-                                          child: Icon(
-                                            Icons.close,
-                                            color: Colors.redAccent,withOpacity(0.2),
-                                            size: 20,
-                                          ),etric(horizontal: 20, vertical: 12),
-                                        ),
-                                      ),
-                                    ),side: BorderSide(color: color.withOpacity(0.5), width: 1),
-                                  ),),
+                                  }).toList(),
                               ],
-                            ),con, size: 20),
-                          ),ext(
+                            ),
+                          ),
                         ],
-                      ),xtStyle(
+                      ),
                     ),
-                  ),fontWeight: FontWeight.bold,
-                ),),
-              ),),
+                  ),
+                ),
+              ),
+
+              // Game controls
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      icon: Icons.lightbulb_outline,
+                      label: 'Hint',
+                      onPressed: _showHint,
+                      color: Colors.amber,
+                    ),
+                    _buildActionButton(
+                      icon: Icons.refresh,
+                      label: 'Restart',
+                      onPressed: _restartLevel,
+                      color: Colors.blueAccent,
+                    ),
+                    _buildActionButton(
+                      icon: Icons.exit_to_app,
+                      label: 'Exit',
+                      onPressed: () => Navigator.of(context).pop(),
+                      color: Colors.redAccent,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required Color color,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color.withOpacity(0.2),
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: color.withOpacity(0.5), width: 1),
+        ),
+      ),
+      icon: Icon(icon, size: 20),
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
