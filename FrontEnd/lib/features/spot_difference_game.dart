@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
-          // Animated background
+          // Updated background with #0D3445 color
           AnimatedBuilder(
             animation: _backgroundAnimation,
             builder: (context, child) {
@@ -165,8 +165,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(0xFF6200EE),
-                      Color(0xFF3700B3),
+                      const Color(0xFF0D3445),
+                      const Color(0xFF0D3445).withOpacity(0.7),
                     ],
                     stops: [
                       _backgroundAnimation.value,
@@ -383,6 +383,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late int timeRemaining;
   late Timer timer;
 
+  // Add variables for confetti animation
+  List<FoundDifferenceAnimation> _animations = [];
+
   @override
   void initState() {
     super.initState();
@@ -460,6 +463,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             differences[i].found = true;
             foundDifferences++;
 
+            // Create a celebratory animation at the found difference spot
+            _showFoundAnimation(differences[i].x, differences[i].y);
+
             // Check if all differences have been found
             if (foundDifferences == differences.length) {
               gameCompleted = true;
@@ -475,6 +481,29 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Wrong guess, penalize time
     setState(() {
       timeRemaining = max(0, timeRemaining - 5);
+    });
+  }
+
+  void _showFoundAnimation(double x, double y) {
+    // Create a new animation at the found spot
+    final animation = FoundDifferenceAnimation(
+      position: Offset(
+        x * MediaQuery.of(context).size.width,
+        y * MediaQuery.of(context).size.height,
+      ),
+    );
+
+    setState(() {
+      _animations.add(animation);
+    });
+
+    // Remove animation after it completes
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        setState(() {
+          _animations.remove(animation);
+        });
+      }
     });
   }
 
@@ -700,61 +729,71 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           true,
                         );
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          image: const DecorationImage(
-                            image: AssetImage('lib/assets/images/memoraid.png'),
-                            fit: BoxFit.cover,
-                          ),
-                          border: Border.all(color: Colors.white, width: 4),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            // Show found differences markers
-                            ...differences
-                                .where((d) => d.found)
-                                .map((difference) {
-                              return Positioned(
-                                left: difference.x *
-                                        MediaQuery.of(context).size.width -
-                                    25,
-                                top: difference.y *
-                                        MediaQuery.of(context).size.height -
-                                    25,
-                                child: AnimatedBuilder(
-                                  animation: _pulseAnimation,
-                                  builder: (context, child) {
-                                    return Transform.scale(
-                                      scale: _pulseAnimation.value,
-                                      child: Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          color: Colors.green.withOpacity(0.5),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 30,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                      child: Stack(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              image: const DecorationImage(
+                                image: AssetImage(
+                                    'lib/assets/images/memoraid.png'),
+                                fit: BoxFit.cover,
+                              ),
+                              border: Border.all(color: Colors.white, width: 4),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
                                 ),
-                              );
-                            }).toList(),
-                          ],
-                        ),
+                              ],
+                            ),
+                            child: Stack(
+                              children: [
+                                // Show found differences markers
+                                ...differences
+                                    .where((d) => d.found)
+                                    .map((difference) {
+                                  return Positioned(
+                                    left: difference.x *
+                                            MediaQuery.of(context).size.width -
+                                        25,
+                                    top: difference.y *
+                                            MediaQuery.of(context).size.height -
+                                        25,
+                                    child: AnimatedBuilder(
+                                      animation: _pulseAnimation,
+                                      builder: (context, child) {
+                                        return Transform.scale(
+                                          scale: _pulseAnimation.value,
+                                          child: Container(
+                                            width: 50,
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.green.withOpacity(0.5),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 30,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
+                            ),
+                          ),
+
+                          // Celebratory animations
+                          ..._animations.map(
+                              (animation) => _buildConfettiEffect(animation)),
+                        ],
                       ),
                     ),
                   ),
@@ -775,61 +814,70 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           false,
                         );
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: const DecorationImage(
-                            image: AssetImage(
-                                'lib/assets/images/memoraid.png'), // This should be different image
-                            fit: BoxFit.cover,
-                          ),
-                          border: Border.all(color: Colors.white, width: 4),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            // Show found differences markers
-                            ...differences
-                                .where((d) => d.found)
-                                .map((difference) {
-                              return Positioned(
-                                left: difference.x *
-                                        MediaQuery.of(context).size.width -
-                                    25,
-                                top: difference.y *
-                                        MediaQuery.of(context).size.height -
-                                    25,
-                                child: AnimatedBuilder(
-                                  animation: _pulseAnimation,
-                                  builder: (context, child) {
-                                    return Transform.scale(
-                                      scale: _pulseAnimation.value,
-                                      child: Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          color: Colors.green.withOpacity(0.5),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 30,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              image: const DecorationImage(
+                                image: AssetImage(
+                                    'lib/assets/images/memoraid.png'), // This should be different image
+                                fit: BoxFit.cover,
+                              ),
+                              border: Border.all(color: Colors.white, width: 4),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
                                 ),
-                              );
-                            }).toList(),
-                          ],
-                        ),
+                              ],
+                            ),
+                            child: Stack(
+                              children: [
+                                // Show found differences markers
+                                ...differences
+                                    .where((d) => d.found)
+                                    .map((difference) {
+                                  return Positioned(
+                                    left: difference.x *
+                                            MediaQuery.of(context).size.width -
+                                        25,
+                                    top: difference.y *
+                                            MediaQuery.of(context).size.height -
+                                        25,
+                                    child: AnimatedBuilder(
+                                      animation: _pulseAnimation,
+                                      builder: (context, child) {
+                                        return Transform.scale(
+                                          scale: _pulseAnimation.value,
+                                          child: Container(
+                                            width: 50,
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.green.withOpacity(0.5),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 30,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
+                            ),
+                          ),
+
+                          // Celebratory animations
+                          ..._animations.map(
+                              (animation) => _buildConfettiEffect(animation)),
+                        ],
                       ),
                     ),
                   ),
@@ -877,6 +925,86 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _buildConfettiEffect(FoundDifferenceAnimation animation) {
+    return Positioned(
+      left: animation.position.dx - 50,
+      top: animation.position.dy - 50,
+      child: SizedBox(
+        width: 100,
+        height: 100,
+        child: CustomPaint(
+          painter: ConfettiPainter(),
+        ),
+      ),
+    );
+  }
+}
+
+// Class to track found difference animations
+class FoundDifferenceAnimation {
+  final Offset position;
+
+  FoundDifferenceAnimation({required this.position});
+}
+
+// Painter for confetti effect
+class ConfettiPainter extends CustomPainter {
+  final List<Particle> particles;
+
+  ConfettiPainter()
+      : particles = List.generate(30, (index) {
+          final random = Random();
+          final color = [
+            Colors.green,
+            Colors.yellow,
+            Colors.blue,
+            Colors.red,
+            Colors.purple,
+            Colors.orange,
+          ][random.nextInt(6)];
+
+          return Particle(
+            position: Offset(
+              random.nextDouble() * 100,
+              random.nextDouble() * 100,
+            ),
+            velocity: Offset(
+              random.nextDouble() * 2 - 1,
+              random.nextDouble() * 2 - 1,
+            ),
+            color: color,
+            size: random.nextDouble() * 8 + 2,
+          );
+        });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      final paint = Paint()
+        ..color = particle.color
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(particle.position, particle.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
+
+class Particle {
+  final Offset position;
+  final Offset velocity;
+  final Color color;
+  final double size;
+
+  Particle({
+    required this.position,
+    required this.velocity,
+    required this.color,
+    required this.size,
+  });
 }
 
 class Difference {
