@@ -27,10 +27,10 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   final List<List<Map<String, dynamic>>> _levelDifferences = [
     // Level 1
     [
-      {'x': 0.3, 'y': 0.4, 'radius': 0.05, 'found': false},
-      {'x': 0.7, 'y': 0.2, 'radius': 0.04, 'found': false},
-      {'x': 0.5, 'y': 0.6, 'radius': 0.05, 'found': false},
-      {'x': 0.8, 'y': 0.7, 'radius': 0.04, 'found': false},
+      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': false},
+      {'x': -0.413, 'y': 1.671, 'radius': 0.04, 'found': false},
+      {'x': 0.665, 'y': 1.326, 'radius': 0.04, 'found': false},
+      {'x': -0.263, 'y': 1.752, 'radius': 0.04, 'found': false},
       {'x': 0.2, 'y': 0.8, 'radius': 0.05, 'found': false},
     ],
     // Level 2
@@ -164,8 +164,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   // Image pairs - you would replace these with your actual images
   final List<List<String>> _imagePairs = [
     [
-      'assets/images/spot_diff/pair1_original.jpg',
-      'assets/images/spot_diff/pair1_modified.jpg'
+      'lib/assets/images/crow1.jpeg',
+      'lib/assets/images/crow2.jpeg',
     ],
     [
       'assets/images/spot_diff/pair2_original.jpg',
@@ -276,6 +276,13 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
         (localPosition.dx - (imageIndex == 0 ? 0 : imageSize.width)) /
             imageSize.width;
     final double relativeY = localPosition.dy / imageSize.height;
+
+    // Debug print for coordinate mapping
+    print(
+        'Tap Coordinates - X: ${relativeX.toStringAsFixed(3)}, Y: ${relativeY.toStringAsFixed(3)}');
+    print('Suggested format for difference map:');
+    print(
+        "{'x': ${relativeX.toStringAsFixed(3)}, 'y': ${relativeY.toStringAsFixed(3)}, 'radius': 0.04, 'found': false},");
 
     // Only process taps on the modified image (index 1)
     if (imageIndex == 1) {
