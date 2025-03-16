@@ -604,7 +604,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   Widget _buildGameScreen() {
     // Use media query to get screen size
     final size = MediaQuery.of(context).size;
-    final imageSize = Size(size.width / 2, size.height * 0.6);
+    final imageSize =
+        Size(size.width, size.height * 0.35); // Modified for landscape
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -671,7 +672,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
               // Game status bar
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -737,9 +738,9 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
               // Game instruction
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 child: Text(
-                  "Find all the differences in the right image!",
+                  "Find all the differences in the bottom image!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
@@ -772,7 +773,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: Column(
                           children: [
                             // Original Image
                             Expanded(
@@ -783,7 +784,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                   children: [
                                     Image.asset(
                                       _imagePairs[_currentLevel][0],
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.contain,
                                       width: double.infinity,
                                       height: double.infinity,
                                       errorBuilder:
@@ -814,6 +815,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                               ),
                             ),
 
+                            const Divider(height: 2, color: Colors.white24),
+
                             // Modified Image with differences
                             Expanded(
                               child: GestureDetector(
@@ -823,7 +826,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                   children: [
                                     Image.asset(
                                       _imagePairs[_currentLevel][1],
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.contain,
                                       width: double.infinity,
                                       height: double.infinity,
                                       errorBuilder:
