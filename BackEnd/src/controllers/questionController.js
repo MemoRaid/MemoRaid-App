@@ -107,6 +107,36 @@ exports.generateQuestions = async (req, res) => {
 };
 
 
+// Get questions for a memory
+exports.getMemoryQuestions = async (req, res) => {
+  try {
+    const { memoryId } = req.params;
+    
+    const { data: questions, error } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('memory_id', memoryId);
+    
+    if (error) {
+      return res.status(500).json({ 
+        message: 'Error fetching questions', 
+        error: error.message 
+      });
+    }
+    
+    res.status(200).json({
+      questions
+    });
+  } catch (error) {
+    console.error('Get questions error:', error);
+    res.status(500).json({ 
+      message: 'Server error fetching questions', 
+      error: error.message 
+    });
+  }
+};
+
+
 /*const supabase = require('../config/supabase');
 const gemini = require('../config/gemini');
 
