@@ -347,7 +347,10 @@ exports.getUserProgress = async (req, res) => {
   }
 };
 
-/*const supabase = require('../config/supabase');
+/*chages to be done since the patient_id is not clear
+
+
+const supabase = require('../config/supabase');
 const gemini = require('../config/gemini');
 
 // Generate questions for a memory
