@@ -1,1024 +1,648 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
-void main() {
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-  );
-  runApp(SpotDifferenceGame());
-}
-
-class SpotDifferenceGame extends StatelessWidget {
-  const SpotDifferenceGame({Key? key}) : super(key: key);
+class SpotDifferenceGame extends StatefulWidget {
+  const SpotDifferenceGame({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Spot the Difference',
-      theme: ThemeData(
-        primaryColor: const Color(0xFF0D3445),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0D3445),
-          brightness: Brightness.light,
-        ),
-        fontFamily: 'Poppins',
-      ),
-      home: const SplashScreen(),
-    );
-  }
+  _SpotDifferenceGameState createState() => _SpotDifferenceGameState();
 }
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen>
+class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+  late AnimationController _animationController;
+  int _totalDifferences = 5;
+  int _foundDifferences = 0;
+  int _timeRemaining = 120; // 2 minutes in seconds
+  Timer? _timer;
+  bool _gameOver = false;
+  bool _gameWon = false;
+  bool _showHint = false;
+
+  // List of differences with their coordinates (x, y, radius)
+  final List<Map<String, dynamic>> _differences = [
+    {'x': 0.3, 'y': 0.4, 'radius': 0.05, 'found': false},
+    {'x': 0.7, 'y': 0.2, 'radius': 0.04, 'found': false},
+    {'x': 0.5, 'y': 0.6, 'radius': 0.05, 'found': false},
+    {'x': 0.8, 'y': 0.7, 'radius': 0.04, 'found': false},
+    {'x': 0.2, 'y': 0.8, 'radius': 0.05, 'found': false},
+  ];
+
+  // Image pairs - you would replace these with your actual images
+  final List<List<String>> _imagePairs = [
+    [
+      'assets/images/spot_diff/pair1_original.jpg',
+      'assets/images/spot_diff/pair1_modified.jpg',
+    ],
+    [
+      'assets/images/spot_diff/pair2_original.jpg',
+      'assets/images/spot_diff/pair2_modified.jpg',
+    ],
+    [
+      'assets/images/spot_diff/pair3_original.jpg',
+      'assets/images/spot_diff/pair3_modified.jpg',
+    ],
+  ];
+
+  int _currentLevel = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
+    _animationController = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 1200),
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
-    _controller.forward();
+    _startTimer();
+    _animationController.forward();
+  }
 
-    Future.delayed(Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_timeRemaining > 0) {
+        setState(() {
+          _timeRemaining--;
+        });
+      } else {
+        _endGame(false);
+      }
+    });
+  }
+
+  void _handleTap(TapDownDetails details, Size imageSize, int imageIndex) {
+    if (_gameOver || _gameWon) return;
+
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final Offset localPosition = box.globalToLocal(details.globalPosition);
+
+    // Calculate relative position based on the image container size
+    final double relativeX =
+        (localPosition.dx - (imageIndex == 0 ? 0 : imageSize.width)) /
+            imageSize.width;
+    final double relativeY = localPosition.dy / imageSize.height;
+
+    // Only process taps on the modified image (index 1)
+    if (imageIndex == 1) {
+      _checkForDifference(relativeX, relativeY);
+    }
+  }
+
+  void _checkForDifference(double tapX, double tapY) {
+    bool foundNew = false;
+
+    for (var i = 0; i < _differences.length; i++) {
+      final difference = _differences[i];
+      if (difference['found'] == false) {
+        final dx = tapX - difference['x'];
+        final dy = tapY - difference['y'];
+        final distance = math.sqrt(dx * dx + dy * dy);
+
+        if (distance < difference['radius']) {
+          setState(() {
+            _differences[i]['found'] = true;
+            _foundDifferences++;
+            foundNew = true;
+          });
+
+          // Visual feedback for correct tap
+          _showSuccessFeedback();
+
+          break;
+        }
+      }
+    }
+
+    if (!foundNew) {
+      // Visual feedback for incorrect tap
+      _showErrorFeedback();
+    }
+
+    // Check win condition
+    if (_foundDifferences >= _totalDifferences) {
+      _endGame(true);
+    }
+  }
+
+  void _showSuccessFeedback() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Good job! You found a difference!'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
+      ),
+    );
+  }
+
+  void _showErrorFeedback() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Try again! That\'s not a difference.'),
+        backgroundColor: Colors.redAccent,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
+  void _endGame(bool won) {
+    _timer?.cancel();
+    setState(() {
+      _gameOver = true;
+      _gameWon = won;
+    });
+
+    // Show game result dialog
+    Future.delayed(const Duration(milliseconds: 500), () {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => _buildResultDialog(won),
       );
     });
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: ScaleTransition(
-          scale: _animation,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'SPOT THE',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'DIFFERENCE',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 24),
-              AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return Transform.rotate(
-                    angle: _animation.value * 2 * pi,
-                    child: Icon(
-                      Icons.search,
-                      size: 80,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                  );
-                },
-              ),
-            ],
+  Widget _buildResultDialog(bool won) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: won
+                ? [Colors.green.shade700, Colors.green.shade900]
+                : [Colors.red.shade700, Colors.red.shade900],
           ),
+          borderRadius: BorderRadius.circular(20),
         ),
-      ),
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late AnimationController _backgroundController;
-  late Animation<double> _backgroundAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _backgroundController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    )..repeat(reverse: true);
-    _backgroundAnimation = CurvedAnimation(
-      parent: _backgroundController,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _backgroundController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Updated background with #0D3445 color
-          AnimatedBuilder(
-            animation: _backgroundAnimation,
-            builder: (context, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF0D3445),
-                      const Color(0xFF0D3445).withOpacity(0.7),
-                    ],
-                    stops: [
-                      _backgroundAnimation.value,
-                      _backgroundAnimation.value + 0.5
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          // Content
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              won ? Icons.emoji_events : Icons.sentiment_dissatisfied,
+              size: 80,
+              color: Colors.white.withOpacity(0.9),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              won ? 'CONGRATULATIONS!' : 'TIME\'S UP!',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              won
+                  ? 'You found all $_totalDifferences differences!'
+                  : 'You found $_foundDifferences out of $_totalDifferences differences.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'SPOT THE DIFFERENCE',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('PLAY AGAIN'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor:
+                        won ? Colors.green.shade800 : Colors.red.shade800,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    textAlign: TextAlign.center,
                   ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _resetGame();
+                  },
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 20,
-                      children: [
-                        for (int i = 1; i <= 6; i++)
-                          LevelCard(
-                            level: i,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GameScreen(level: i),
-                                ),
-                              );
-                            },
-                          ),
-                      ],
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.home),
+                  label: const Text('MAIN MENU'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.3),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class LevelCard extends StatefulWidget {
-  final int level;
-  final VoidCallback onTap;
-
-  LevelCard({required this.level, required this.onTap});
-
-  @override
-  _LevelCardState createState() => _LevelCardState();
-}
-
-class _LevelCardState extends State<LevelCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) {
-        setState(() {
-          _isHovered = true;
-        });
-        _controller.forward();
-      },
-      onTapUp: (_) {
-        setState(() {
-          _isHovered = false;
-        });
-        _controller.reverse();
-      },
-      onTapCancel: () {
-        setState(() {
-          _isHovered = false;
-        });
-        _controller.reverse();
-      },
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: 1.0 - (_animation.value * 0.05),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'LEVEL',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    '${widget.level}',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '${widget.level * 3} differences',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int i = 0; i < min(widget.level, 5); i++)
-                        Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 16,
-                        ),
-                      for (int i = 0; i < max(5 - widget.level, 0); i++)
-                        Icon(
-                          Icons.star_border,
-                          color: Colors.amber,
-                          size: 16,
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class GameScreen extends StatefulWidget {
-  final int level;
-
-  GameScreen({required this.level});
-
-  @override
-  _GameScreenState createState() => _GameScreenState();
-}
-
-class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
-  late AnimationController _timerController;
-  late Animation<double> _timerAnimation;
-
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
-  final int totalDifferences = 3;
-  int foundDifferences = 0;
-  bool gameCompleted = false;
-
-  // To represent the differences for each level
-  late List<Difference> differences;
-
-  // Timer
-  late int timeRemaining;
-  late Timer timer;
-
-  // Add variables for confetti animation
-  List<FoundDifferenceAnimation> _animations = [];
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize the timer animation
-    _timerController = AnimationController(
-      duration: const Duration(seconds: 60),
-      vsync: this,
-    );
-    _timerAnimation =
-        Tween<double>(begin: 1.0, end: 0.0).animate(_timerController);
-    _timerController.forward();
-
-    // Initialize the pulse animation
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
-    // Initialize differences for the current level
-    differences = _generateDifferences(widget.level);
-
-    // Start the timer
-    timeRemaining = 60;
-    timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
-      setState(() {
-        if (timeRemaining > 0) {
-          timeRemaining--;
-        } else {
-          t.cancel();
-          if (!gameCompleted) {
-            _showGameOverDialog();
-          }
-        }
-      });
-    });
-  }
-
-  List<Difference> _generateDifferences(int level) {
-    // Generate random differences for the current level
-    // In a real game, these would be predefined or generated based on the level
-    final random = Random();
-    List<Difference> result = [];
-
-    for (int i = 0; i < widget.level * 3; i++) {
-      result.add(
-        Difference(
-          id: i,
-          x: random.nextDouble() * 0.8 + 0.1, // 10% to 90% of the image width
-          y: random.nextDouble() * 0.8 + 0.1, // 10% to 90% of the image height
-          radiusPercentage: 0.05,
-          found: false,
+          ],
         ),
-      );
-    }
-
-    return result;
-  }
-
-  void _checkDifference(double x, double y, bool isLeftImage) {
-    if (gameCompleted) return;
-
-    for (int i = 0; i < differences.length; i++) {
-      if (!differences[i].found) {
-        double dx = differences[i].x - x;
-        double dy = differences[i].y - y;
-        double distance = sqrt(dx * dx + dy * dy);
-
-        // Check if the tap is within the difference
-        if (distance < differences[i].radiusPercentage) {
-          setState(() {
-            differences[i].found = true;
-            foundDifferences++;
-
-            // Create a celebratory animation at the found difference spot
-            _showFoundAnimation(differences[i].x, differences[i].y);
-
-            // Check if all differences have been found
-            if (foundDifferences == differences.length) {
-              gameCompleted = true;
-              timer.cancel();
-              _showVictoryDialog();
-            }
-          });
-          return;
-        }
-      }
-    }
-
-    // Wrong guess, penalize time
-    setState(() {
-      timeRemaining = max(0, timeRemaining - 5);
-    });
-  }
-
-  void _showFoundAnimation(double x, double y) {
-    // Create a new animation at the found spot
-    final animation = FoundDifferenceAnimation(
-      position: Offset(
-        x * MediaQuery.of(context).size.width,
-        y * MediaQuery.of(context).size.height,
       ),
     );
+  }
 
+  void _resetGame() {
     setState(() {
-      _animations.add(animation);
-    });
+      _foundDifferences = 0;
+      _timeRemaining = 120;
+      _gameOver = false;
+      _gameWon = false;
+      _showHint = false;
 
-    // Remove animation after it completes
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        setState(() {
-          _animations.remove(animation);
-        });
+      // Reset all differences to not found
+      for (var i = 0; i < _differences.length; i++) {
+        _differences[i]['found'] = false;
       }
     });
+
+    _startTimer();
   }
 
-  void _showVictoryDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Level Complete!',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'You found all ${differences.length} differences!',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Time remaining: $timeRemaining seconds',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (int i = 0; i < 3; i++)
-                    Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                      size: 32,
-                    ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: Text('NEXT LEVEL'),
-            ),
-          ],
-        );
-      },
-    );
+  void _toggleHint() {
+    setState(() {
+      _showHint = !_showHint;
+    });
   }
 
-  void _showGameOverDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Time\'s Up!',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'You found $foundDifferences out of ${differences.length} differences!',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Better luck next time!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('TRY AGAIN'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                );
-              },
-              child: const Text('BACK TO LEVELS'),
-            ),
-          ],
-        );
-      },
-    );
+  String _formatTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   @override
   void dispose() {
-    _timerController.dispose();
-    _pulseController.dispose();
-    timer.cancel();
+    _timer?.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Use media query to get screen size
+    final size = MediaQuery.of(context).size;
+    final imageSize = Size(size.width / 2, size.height * 0.6);
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          'Level ${widget.level}',
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          "Spot the Difference",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: Offset(1, 1),
+                blurRadius: 3.0,
+                color: Color.fromARGB(150, 0, 0, 0),
+              ),
+            ],
+          ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+        centerTitle: true,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         actions: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            margin: const EdgeInsets.only(right: 12),
+            margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.timer, color: Colors.white, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  '$timeRemaining',
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ],
+            child: IconButton(
+              icon: Icon(_showHint ? Icons.lightbulb : Icons.lightbulb_outline,
+                  color: Colors.white),
+              onPressed: _toggleHint,
+              tooltip: 'Show hint',
             ),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Progress indicator
-          AnimatedBuilder(
-            animation: _timerAnimation,
-            builder: (context, child) {
-              return LinearProgressIndicator(
-                value: _timerAnimation.value,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  _timerAnimation.value > 0.5
-                      ? Colors.green
-                      : _timerAnimation.value > 0.2
-                          ? Colors.orange
-                          : Colors.red,
-                ),
-                minHeight: 8,
-              );
-            },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF6A1B9A), Color(0xFF4A148C)],
           ),
-
-          // Game info
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Find ${differences.length} differences',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Text(
-                    'Found: $foundDifferences/${differences.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Game images
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                children: [
-                  // Original image
-                  Expanded(
-                    child: GestureDetector(
-                      onTapUp: (details) {
-                        final RenderBox box =
-                            context.findRenderObject() as RenderBox;
-                        final localPosition =
-                            box.globalToLocal(details.globalPosition);
-                        final containerSize = box.size;
-
-                        _checkDifference(
-                          localPosition.dx / containerSize.width,
-                          localPosition.dy / containerSize.height,
-                          true,
-                        );
-                      },
-                      child: Stack(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              image: const DecorationImage(
-                                image: AssetImage(
-                                    'lib/assets/images/memoraid.png'),
-                                fit: BoxFit.cover,
-                              ),
-                              border: Border.all(color: Colors.white, width: 4),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                // Show found differences markers
-                                ...differences
-                                    .where((d) => d.found)
-                                    .map((difference) {
-                                  return Positioned(
-                                    left: difference.x *
-                                            MediaQuery.of(context).size.width -
-                                        25,
-                                    top: difference.y *
-                                            MediaQuery.of(context).size.height -
-                                        25,
-                                    child: AnimatedBuilder(
-                                      animation: _pulseAnimation,
-                                      builder: (context, child) {
-                                        return Transform.scale(
-                                          scale: _pulseAnimation.value,
-                                          child: Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.green.withOpacity(0.5),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 30,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  );
-                                }).toList(),
-                              ],
-                            ),
-                          ),
-
-                          // Celebratory animations
-                          ..._animations.map(
-                              (animation) => _buildConfettiEffect(animation)),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Modified image (with differences)
-                  Expanded(
-                    child: GestureDetector(
-                      onTapUp: (details) {
-                        final RenderBox box =
-                            context.findRenderObject() as RenderBox;
-                        final localPosition =
-                            box.globalToLocal(details.globalPosition);
-                        final containerSize = box.size;
-
-                        _checkDifference(
-                          localPosition.dx / containerSize.width,
-                          localPosition.dy / containerSize.height,
-                          false,
-                        );
-                      },
-                      child: Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              image: const DecorationImage(
-                                image: AssetImage(
-                                    'lib/assets/images/memoraid.png'), // This should be different image
-                                fit: BoxFit.cover,
-                              ),
-                              border: Border.all(color: Colors.white, width: 4),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                // Show found differences markers
-                                ...differences
-                                    .where((d) => d.found)
-                                    .map((difference) {
-                                  return Positioned(
-                                    left: difference.x *
-                                            MediaQuery.of(context).size.width -
-                                        25,
-                                    top: difference.y *
-                                            MediaQuery.of(context).size.height -
-                                        25,
-                                    child: AnimatedBuilder(
-                                      animation: _pulseAnimation,
-                                      builder: (context, child) {
-                                        return Transform.scale(
-                                          scale: _pulseAnimation.value,
-                                          child: Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.green.withOpacity(0.5),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 30,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  );
-                                }).toList(),
-                              ],
-                            ),
-                          ),
-
-                          // Celebratory animations
-                          ..._animations.map(
-                              (animation) => _buildConfettiEffect(animation)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Hints/Help button
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // Show hint by highlighting a random unfound difference briefly
-                final unfoundDifferences =
-                    differences.where((d) => !d.found).toList();
-                if (unfoundDifferences.isNotEmpty && timeRemaining > 10) {
-                  setState(() {
-                    timeRemaining -= 10; // Penalty for using hint
-                  });
-
-                  // Show hint UI here
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Look carefully! Hint used (-10 seconds)'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.lightbulb),
-              label: const Text('Use Hint (-10s)'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Game status bar
+              Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Timer indicator
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.timer,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _formatTime(_timeRemaining),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-  Widget _buildConfettiEffect(FoundDifferenceAnimation animation) {
-    return Positioned(
-      left: animation.position.dx - 50,
-      top: animation.position.dy - 50,
-      child: SizedBox(
-        width: 100,
-        height: 100,
-        child: CustomPaint(
-          painter: ConfettiPainter(),
+                    // Found differences counter
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.search,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '$_foundDifferences/$_totalDifferences',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Game instruction
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Text(
+                  "Find all the differences in the right image!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+
+              // Images container
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return FadeTransition(
+                      opacity: CurvedAnimation(
+                        parent: _animationController,
+                        curve: Curves.easeIn,
+                      ),
+                      child: child,
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Row(
+                        children: [
+                          // Original Image
+                          Expanded(
+                            child: GestureDetector(
+                              onTapDown: (details) =>
+                                  _handleTap(details, imageSize, 0),
+                              child: Stack(
+                                children: [
+                                  Image.asset(
+                                    _imagePairs[_currentLevel][0],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    // Use a placeholder until you have actual assets
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                      color: Colors.grey[300],
+                                      child: const Center(
+                                        child: Text("Image 1"),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    height: 30,
+                                    color: Colors.black.withOpacity(0.5),
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "ORIGINAL",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 2,
+                            color: Colors.white,
+                          ),
+                          // Modified Image with differences
+                          Expanded(
+                            child: GestureDetector(
+                              onTapDown: (details) =>
+                                  _handleTap(details, imageSize, 1),
+                              child: Stack(
+                                children: [
+                                  Image.asset(
+                                    _imagePairs[_currentLevel][1],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    // Use a placeholder until you have actual assets
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                      color: Colors.grey[300],
+                                      child: const Center(
+                                        child: Text("Image 2"),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    height: 30,
+                                    color: Colors.black.withOpacity(0.5),
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "FIND DIFFERENCES",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  // Render found differences markers
+                                  ..._differences.map((diff) {
+                                    if (diff['found'] || _showHint) {
+                                      return Positioned(
+                                        left: diff['x'] * imageSize.width - 15,
+                                        top: diff['y'] * imageSize.height - 15,
+                                        child: Container(
+                                          width: 30,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: diff['found']
+                                                ? Colors.green.withOpacity(0.5)
+                                                : Colors.orange
+                                                    .withOpacity(0.5),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: diff['found']
+                                                  ? Colors.green
+                                                  : Colors.orange,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            diff['found']
+                                                ? Icons.check
+                                                : Icons.search,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      return const SizedBox.shrink();
+                                    }
+                                  }).toList(),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom buttons
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('RESTART'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      onPressed: _resetGame,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purpleAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        elevation: 5,
+                      ),
+                      child: const Text(
+                        'GIVE UP',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () => _endGame(false),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-// Class to track found difference animations
-class FoundDifferenceAnimation {
-  final Offset position;
-
-  FoundDifferenceAnimation({required this.position});
-}
-
-// Painter for confetti effect
-class ConfettiPainter extends CustomPainter {
-  final List<Particle> particles;
-
-  ConfettiPainter()
-      : particles = List.generate(30, (index) {
-          final random = Random();
-          final color = [
-            Colors.green,
-            Colors.yellow,
-            Colors.blue,
-            Colors.red,
-            Colors.purple,
-            Colors.orange,
-          ][random.nextInt(6)];
-
-          return Particle(
-            position: Offset(
-              random.nextDouble() * 100,
-              random.nextDouble() * 100,
-            ),
-            velocity: Offset(
-              random.nextDouble() * 2 - 1,
-              random.nextDouble() * 2 - 1,
-            ),
-            color: color,
-            size: random.nextDouble() * 8 + 2,
-          );
-        });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final particle in particles) {
-      final paint = Paint()
-        ..color = particle.color
-        ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(particle.position, particle.size, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
-}
-
-class Particle {
-  final Offset position;
-  final Offset velocity;
-  final Color color;
-  final double size;
-
-  Particle({
-    required this.position,
-    required this.velocity,
-    required this.color,
-    required this.size,
-  });
-}
-
-class Difference {
-  final int id;
-  final double x;
-  final double y;
-  final double radiusPercentage;
-  bool found;
-
-  Difference({
-    required this.id,
-    required this.x,
-    required this.y,
-    required this.radiusPercentage,
-    this.found = false,
-  });
 }
