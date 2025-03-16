@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this for HapticFeedback
 import 'dart:math';
 import 'dart:async';
 
@@ -35,12 +36,29 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     {
       'originalImage': 'lib/assets/images/spot1.jpeg',
       'modifiedImage': 'lib/assets/images/spot2.jpeg',
+      'description': 'Find differences between these two images',
       'hotspots': [
-        {'x': 100, 'y': 150, 'radius': 20},
-        {'x': 250, 'y': 200, 'radius': 20},
-        {'x': 300, 'y': 300, 'radius': 20},
-        {'x': 150, 'y': 350, 'radius': 20},
-        {'x': 400, 'y': 250, 'radius': 20},
+        // These values should be updated to match the actual differences in your images
+        {'x': 150, 'y': 170, 'radius': 30, 'hint': 'Look at the top left area'},
+        {'x': 320, 'y': 220, 'radius': 30, 'hint': 'Check the middle section'},
+        {
+          'x': 200,
+          'y': 300,
+          'radius': 30,
+          'hint': 'Notice anything different in the bottom half?'
+        },
+        {
+          'x': 380,
+          'y': 180,
+          'radius': 30,
+          'hint': 'Look for color or object changes'
+        },
+        {
+          'x': 100,
+          'y': 250,
+          'radius': 30,
+          'hint': 'Something is missing or added here'
+        },
       ],
     },
     // More levels would be added here
@@ -51,104 +69,106 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   Map<String, dynamic>? hintHotspot;
   Timer? _hintTimer;
   bool firstTimePlaying = true;
-
-  @override
-  void initState() {
-    super.initState();
-
+  bool showOverlay = false;
+  double overlayOpacity = 0.5;  
+ese variables for wrong click animation
+  @overrideTimer;
+  void initState() {nimation = false;
+    super.initState();  Offset? wrongClickPosition;
+= true;
     // Initialize timer
-    _startTimer();
+    _startTimer();  @override
 
     // Initialize animations
     _pulseAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1500),timer
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(oller = AnimationController(
         CurvedAnimation(
-            parent: _pulseAnimationController, curve: Curves.easeInOut));
+            parent: _pulseAnimationController, curve: Curves.easeInOut));      vsync: this,
 
     // Show tutorial on first load
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {ouble>(begin: 1.0, end: 1.2).animate(
       if (firstTimePlaying) {
-        _showTutorial();
+        _showTutorial();     parent: _pulseAnimationController, curve: Curves.easeInOut));
       }
-    });
-  }
-
-  @override
+    }); // Show tutorial on first load
+  }    WidgetsBinding.instance.addPostFrameCallback((_) {
+irstTimePlaying) {
+  @overrideial();
   void dispose() {
     _timer?.cancel();
     _pulseAnimationController.dispose();
     _hintTimer?.cancel();
-    super.dispose();
-  }
+    super.dispose();override
+  }  void dispose() {
 
-  void _startTimer() {
+  void _startTimer() {ntroller.dispose();
     _timer?.cancel();
     _timeRemaining = 120; // Reset timer
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {;
       setState(() {
         if (_timeRemaining > 0) {
-          _timeRemaining--;
+          _timeRemaining--;er() {
         } else {
-          _timer?.cancel();
-          _showTimeUpDialog();
-        }
-      });
-    });
-  }
+          _timer?.cancel();eset timer
+          _showTimeUpDialog();r = Timer.periodic(const Duration(seconds: 1), (timer) {
+        }State(() {
+      }); if (_timeRemaining > 0) {
+    });       _timeRemaining--;
+  }        } else {
 
-  String _formatTime(int seconds) {
+  String _formatTime(int seconds) {;
     int mins = seconds ~/ 60;
     int secs = seconds % 60;
-    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-  }
+    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}'; });
+  }  }
 
   @override
   Widget build(BuildContext context) {
-    final currentLevelData = levels[currentLevel - 1];
-
+    final currentLevelData = levels[currentLevel - 1];    int secs = seconds % 60;
+oString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     return Scaffold(
       backgroundColor: baseColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: baseColor.withOpacity(0.8),
+        backgroundColor: baseColor.withOpacity(0.8),lData = levels[currentLevel - 1];
         elevation: 0,
         title: Text(
-          'Spot the Difference',
+          'Spot the Difference',Color,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white.withOpacity(0.95),
-          ),
-        ),
-        actions: [
+            fontSize: 22,),
+            color: Colors.white.withOpacity(0.95),ation: 0,
+          ),tle: Text(
+        ),e Difference',
+        actions: [tStyle(
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            margin: const EdgeInsets.only(right: 12),
+            margin: const EdgeInsets.only(right: 12),acity(0.95),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20),s: [
             ),
-            child: Row(
-              children: [
+            child: Row(t EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              children: [t: 12),
                 const Icon(Icons.emoji_events,
-                    color: Colors.amberAccent, size: 20),
-                const SizedBox(width: 8),
+                    color: Colors.amberAccent, size: 20),city(0.15),
+                const SizedBox(width: 8),adius: BorderRadius.circular(20),
                 Text(
                   'Score: $score',
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+                    fontWeight: FontWeight.w600,ccent, size: 20),
+                    color: Colors.white,t SizedBox(width: 8),
+                  ),xt(
+                ),  'Score: $score',
+              ],    style: const TextStyle(
+            ),        fontSize: 16,
+          ),          fontWeight: FontWeight.w600,
+        ],            color: Colors.white,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -159,13 +179,13 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
               baseColor,
               baseColor
                   .withBlue(baseColor.blue + 15)
-                  .withGreen(baseColor.green + 10),
-            ],
-          ),
+                  .withGreen(baseColor.green + 10),gin: Alignment.topCenter,
+            ],end: Alignment.bottomCenter,
+          ),  colors: [
         ),
         child: SafeArea(
-          child: Column(
-            children: [
+          child: Column(Blue(baseColor.blue + 15)
+            children: [aseColor.green + 10),
               // Game info bar
               Container(
                 padding:
@@ -175,122 +195,171 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                   color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                    BoxShadow(20, vertical: 12),
+                      color: Colors.black.withOpacity(0.1),sets.fromLTRB(16, 8, 16, 0),
                       blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                      offset: const Offset(0, 4),r: Colors.white.withOpacity(0.1),
+                    ),rderRadius: BorderRadius.circular(16),
+                  ],boxShadow: [
+                ),ow(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,ius: 8,
+                  children: [ffset(0, 4),
                     // Level progress
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        Text(gnment.spaceBetween,
                           'Level $currentLevel',
                           style: const TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                            fontWeight: FontWeight.bold,xisAlignment.start,
+                            color: Colors.white,en: [
+                          ),xt(
                         ),
-                        const SizedBox(height: 4),
-                        Container(
-                          width: 150,
+                        const SizedBox(height: 4),onst TextStyle(
+                        Container( 16,
+                          width: 150,t: FontWeight.bold,
                           height: 10,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(5),
+                            borderRadius: BorderRadius.circular(5),t SizedBox(height: 4),
                           ),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
-                            widthFactor: foundDifferences / totalDifferences,
-                            child: Container(
-                              decoration: BoxDecoration(
+                            widthFactor: foundDifferences / totalDifferences,ration(
+                            child: Container(ity(0.2),
+                              decoration: BoxDecoration((5),
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Colors.lightBlueAccent,
-                                    Colors.blueAccent
-                                  ],
+                                    Colors.lightBlueAccent,erLeft,
+                                    Colors.blueAccenttor: foundDifferences / totalDifferences,
+                                  ], Container(
                                 ),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                          ),
+                                borderRadius: BorderRadius.circular(5),gradient: const LinearGradient(
+                              ),    colors: [
+                            ),        Colors.lightBlueAccent,
+                          ),          Colors.blueAccent
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 4),   ),
                         Text(
                           '$foundDifferences/$totalDifferences differences found',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Timer
-                    Container(
+                          ),nst SizedBox(height: 4),
+                        ),Text(
+                      ],    '$foundDifferences/$totalDifferences differences found',
+                    ),yle: TextStyle(
+                    // TimerntSize: 12,
+                    Container(ity(0.8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: _timeRemaining < 30
                             ? Colors.redAccent.withOpacity(0.3)
                             : Colors.white.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                      ),
+                        shape: BoxShape.circle,ainer(
+                      ),ts.all(12),
                       child: AnimatedBuilder(
                         animation: _pulseAnimationController,
-                        builder: (context, child) {
-                          return Transform.scale(
+                        builder: (context, child) {thOpacity(0.3)
+                          return Transform.scale((0.15),
                             scale: _timeRemaining < 30
                                 ? _pulseAnimation.value
-                                : 1.0,
-                            child: Text(
-                              _formatTime(_timeRemaining),
-                              style: TextStyle(
+                                : 1.0,lder(
+                            child: Text(er,
+                              _formatTime(_timeRemaining),d) {
+                              style: TextStyle(ale(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: _timeRemaining < 30
                                     ? Colors.redAccent
-                                    : Colors.white,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                                    : Colors.white,ormatTime(_timeRemaining),
+                              ),style: TextStyle(
+                            ),    fontSize: 18,
+                          );      fontWeight: FontWeight.bold,
+                        },        color: _timeRemaining < 30
+                      ),              ? Colors.redAccent
+                    ),                : Colors.white,
+                  ],            ),
+                ),            ),
+              ),                          );
 
-              // Game images - Modified to stack vertically for landscape images
+              // Instructions card
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                decoration: BoxDecoration(
+                  color: Colors.amberAccent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.amberAccent.withOpacity(0.3),eInsets.symmetric(horizontal: 12, vertical: 8),
+                    width: 1,in: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  ),coration: BoxDecoration(
+                ),lors.amberAccent.withOpacity(0.15),
+                child: Row(s: BorderRadius.circular(12),
+                  children: [r.all(
+                    const Icon(withOpacity(0.3),
+                      Icons.lightbulb_outline,
+                      color: Colors.amberAccent,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        levels[currentLevel - 1]['description'],,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,SizedBox(width: 8),
+                        ),nded(
+                      ),child: Text(
+                    ),currentLevel - 1]['description'],
+                    IconButton(nst TextStyle(
+                      icon: Icon(
+                        showOverlay ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          showOverlay = !showOverlay;wOverlay ? Icons.visibility_off : Icons.visibility,
+                        });color: Colors.white70,
+                      },
+                      tooltip: showOverlay ? 'Hide Overlay' : 'Show Overlay',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),  setState(() {
+                    ),      showOverlay = !showOverlay;
+                  ],      });
+                ),      },
+              ),                      tooltip: showOverlay ? 'Hide Overlay' : 'Show Overlay',
+
+              // Game images - Modified to stack vertically for landscape imagesonstraints: const BoxConstraints(),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withOpacity(0.05),r landscape images
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.2),
                           blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+                          offset: const Offset(0, 5),r: Colors.white.withOpacity(0.05),
+                        ),rderRadius: BorderRadius.circular(20),
+                      ],boxShadow: [
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                    child: ClipRRect(,
+                      borderRadius: BorderRadius.circular(20),: 10,
                       child: Column(
                         // Changed from Row to Column
                         children: [
                           // Original image
                           Expanded(
-                            child: Stack(
+                            child: Stack(rcular(20),
                               fit: StackFit.expand,
-                              children: [
+                              children: [olumn
                                 GestureDetector(
                                   onTapDown: (details) =>
                                       _checkDifference(details, true),
@@ -298,39 +367,39 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: Colors.white.withOpacity(0.1),
-                                          width: 1),
-                                    ),
+                                          width: 1),pDown: (details) =>
+                                    ),details, true),
                                     child: Image.asset(
                                       currentLevelData['originalImage'],
                                       fit: BoxFit.contain, // Changed to contain
-                                      errorBuilder: (ctx, obj, trace) =>
+                                      errorBuilder: (ctx, obj, trace) =>ors.white.withOpacity(0.1),
                                           Container(
                                         color: baseColor.withOpacity(0.5),
                                         child: Center(
                                           child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
+                                            mainAxisSize: MainAxisSize.min,in, // Changed to contain
+                                            children: [ obj, trace) =>
                                               const Icon(
                                                 Icons
                                                     .image_not_supported_outlined,
                                                 color: Colors.white70,
-                                                size: 48,
+                                                size: 48,AxisSize: MainAxisSize.min,
                                               ),
-                                              const SizedBox(height: 12),
+                                              const SizedBox(height: 12), Icon(
                                               Text(
-                                                'Original Image',
-                                                style: TextStyle(
+                                                'Original Image',pported_outlined,
+                                                style: TextStyle(,
                                                   color: Colors.white
                                                       .withOpacity(0.8),
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                                  fontSize: 16,t SizedBox(height: 12),
+                                                ),xt(
+                                              ),  'Original Image',
+                                            ],    style: TextStyle(
+                                          ),        color: Colors.white
+                                        ),              .withOpacity(0.8),
+                                      ),            fontSize: 16,
+                                    ),            ),
+                                  ),            ),
                                 ),
                                 // Draw markers for this image
                                 ...markers.map((marker) {
@@ -338,17 +407,17 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                     left: marker['x'] - 15,
                                     top: marker['y'] - 15,
                                     child: CircleAvatar(
-                                      radius: 15,
+                                      radius: 15,is image
                                       backgroundColor:
                                           Colors.greenAccent.withOpacity(0.7),
-                                      child: const Icon(
+                                      child: const Icon(] - 15,
                                         Icons.check,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+                                        color: Colors.white,Avatar(
+                                        size: 20,dius: 15,
+                                      ),backgroundColor:
+                                    ),      Colors.greenAccent.withOpacity(0.7),
+                                  ); const Icon(
+                                }).toList(),                                        Icons.check,
 
                                 // Add hint animation circle
                                 if (showingHintAnimation && hintHotspot != null)
@@ -357,198 +426,294 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                     top: hintHotspot!['y'] - 25,
                                     child: AnimatedBuilder(
                                       animation: _pulseAnimationController,
-                                      builder: (context, child) {
+                                      builder: (context, child) {&& hintHotspot != null)
                                         return Container(
-                                          width: 50,
+                                          width: 50,!['x'] - 25,
                                           height: 50,
                                           decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
+                                            shape: BoxShape.circle,nController,
                                             border: Border.all(
                                               color: Colors.yellowAccent
                                                   .withOpacity(
                                                 0.6 +
-                                                    (_pulseAnimation.value -
-                                                            1.0) *
-                                                        0.4,
-                                              ),
-                                              width: 3,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
+                                                    (_pulseAnimation.value -n(
+                                                            1.0) *circle,
+                                                        0.4,er: Border.all(
+                                              ),lors.yellowAccent
+                                              width: 3,    .withOpacity(
+                                            ),    0.6 +
+                                          ),          (_pulseAnimation.value -
+                                        );                    1.0) *
+                                      },                  0.4,
+                                    ),          ),
+                                  ),                                              width: 3,
 
-                          // Divider - horizontal now
+                                // Show debug overlay if enabled
+                                if (showOverlay)
+                                  ...levels[currentLevel - 1]['hotspots']
+                                      .map<Widget>((hotspot) {
+                                    final index = levels[currentLevel - 1]
+                                            ['hotspots']
+                                        .indexOf(hotspot);
+                                    final found = differencesFound[index];                                if (showOverlay)
+el - 1]['hotspots']
+                                    return Positioned(
+                                      left: hotspot['x'] - 30,entLevel - 1]
+                                      top: hotspot['y'] - 30,]
+                                      child: Container(otspot);
+                                        width: 60,ifferencesFound[index];
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,,
+                                          border: Border.all(- 30,
+                                            color: found
+                                                ? Colors.greenAccent
+                                                    .withOpacity(overlayOpacity)
+                                                : Colors.redAccent.withOpacity(
+                                                    overlayOpacity),hape.circle,
+                                            width: 2,rder: Border.all(
+                                          ),nd
+                                          color: found
+                                              ? Colors.greenAccent.withOpacity(yOpacity)
+                                                  overlayOpacity * 0.3)y(
+                                              : Colors.redAccent.withOpacity(
+                                                  overlayOpacity * 0.2),  width: 2,
+                                        ),
+                                        child: Center(
+                                          child: Text(nAccent.withOpacity(
+                                            '${index + 1}',ity * 0.3)
+                                            style: TextStyle(
+                                              color: Colors.white.withOpacity(
+                                                  overlayOpacity + 0.2),
+                                              fontWeight: FontWeight.bold, Center(
+                                            ),ild: Text(
+                                          ),  '${index + 1}',
+                                        ),    style: TextStyle(
+                                      ),        color: Colors.white.withOpacity(
+                                    );    overlayOpacity + 0.2),
+                                  }).toList(),              fontWeight: FontWeight.bold,
+                              ],              ),
+                            ),              ),
+                          ),                                        ),
+
+                          // Divider - horizontal now);
+                                  }).toList(),
+
+                                // Add wrong click animation for original imagecolor: accentColor.withOpacity(0.6),
+                                if (showWrongClickAnimation && wrongClickPosition != null && isOriginalImage)                          ),
+                                  Positioned(
+                                    left: wrongClickPosition!.dx - 20,ed image
+                                    top: wrongClickPosition!.dy - 20,
+                                    child: FadeTransition(
+                                      opacity: Tween<double>(begin: 1.0, end: 0.0).animate(it.expand,
+                                        CurvedAnimation(
+                                          parent: _pulseAnimationController,
+                                          curve: const Interval(0.0, 1.0),
+                                        ),nce(details, false),
+                                      ),
+                                      child: Container(tion(
+                                        width: 40,
+                                        height: 40,ors.white.withOpacity(0.1),
+                                        decoration: BoxDecoration(    width: 1),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: Colors.redAccent, width: 2),
+                                        ),
+                                        child: const Center( contain
+                                          child: Icon((ctx, obj, trace) =>
+                                            Icons.close,
+                                            color: Colors.redAccent,or.withOpacity(0.5),
+                                            size: 20,
+                                          ),
+                                        ),e: MainAxisSize.min,
+                                      ),
+                                    ),con(
+                                  ),
+                              ],ed_outlined,
+                            ),lors.white70,
+                          ),size: 48,
+
+                          // Divider - horizontal now SizedBox(height: 12),
                           Container(
                             height: 4,
                             color: accentColor.withOpacity(0.6),
                           ),
-
-                          // Modified image
-                          Expanded(
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                GestureDetector(
-                                  onTapDown: (details) =>
-                                      _checkDifference(details, false),
-                                  child: Container(
+ity(0.8),
+                          // Modified imagefontSize: 16,
+                          Expanded(),
+                            child: Stack(),
+                              fit: StackFit.expand,],
+                              children: [),
+                                GestureDetector(),
+                                  onTapDown: (details) =>),
+                                      _checkDifference(details, false),),
+                                  child: Container(),
                                     decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Colors.white.withOpacity(0.1),
+                                      border: Border.all(image
+                                          color: Colors.white.withOpacity(0.1),er) {
                                           width: 1),
-                                    ),
-                                    child: Image.asset(
-                                      currentLevelData['modifiedImage'],
+                                    ),,
+                                    child: Image.asset(5,
+                                      currentLevelData['modifiedImage'],Avatar(
                                       fit: BoxFit.contain, // Changed to contain
                                       errorBuilder: (ctx, obj, trace) =>
-                                          Container(
-                                        color: baseColor.withOpacity(0.5),
+                                          Container(cent.withOpacity(0.7),
+                                        color: baseColor.withOpacity(0.5),con(
                                         child: Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
+                                          child: Column(lors.white,
+                                            mainAxisSize: MainAxisSize.min,size: 20,
+                                            children: [),
+                                              const Icon(),
                                                 Icons
-                                                    .image_not_supported_outlined,
+                                                    .image_not_supported_outlined,                                }).toList(),
                                                 color: Colors.white70,
                                                 size: 48,
-                                              ),
+                                              ),ntAnimation && hintHotspot != null)
                                               const SizedBox(height: 12),
-                                              Text(
-                                                'Modified Image',
+                                              Text(,
+                                                'Modified Image',- 25,
                                                 style: TextStyle(
-                                                  color: Colors.white
-                                                      .withOpacity(0.8),
-                                                  fontSize: 16,
+                                                  color: Colors.whiteontroller,
+                                                      .withOpacity(0.8),child) {
+                                                  fontSize: 16,iner(
                                                 ),
                                               ),
-                                            ],
-                                          ),
+                                            ],(
+                                          ),cle,
                                         ),
-                                      ),
-                                    ),
+                                      ),lowAccent
+                                    ),thOpacity(
                                   ),
-                                ),
-                                // Draw markers for this image
-                                ...markers.map((marker) {
+                                ),on.value -
+                                // Draw markers for this image1.0) *
+                                ...markers.map((marker) {        0.4,
                                   return Positioned(
-                                    left: marker['x'] - 15,
-                                    top: marker['y'] - 15,
-                                    child: CircleAvatar(
-                                      radius: 15,
-                                      backgroundColor:
-                                          Colors.greenAccent.withOpacity(0.7),
-                                      child: const Icon(
+                                    left: marker['x'] - 15,width: 3,
+                                    top: marker['y'] - 15,),
+                                    child: CircleAvatar(),
+                                      radius: 15,);
+                                      backgroundColor:},
+                                          Colors.greenAccent.withOpacity(0.7),),
+                                      child: const Icon(                                  ),
                                         Icons.check,
-                                        color: Colors.white,
+                                        color: Colors.white,erlay if enabled (for second image too)
                                         size: 20,
-                                      ),
+                                      ),'hotspots']
                                     ),
-                                  );
+                                  );[currentLevel - 1]
                                 }).toList(),
 
-                                // Add hint animation circle for this image too
+                                // Add hint animation circle for this image too                                    final found = differencesFound[index];
                                 if (showingHintAnimation && hintHotspot != null)
                                   Positioned(
-                                    left: hintHotspot!['x'] - 25,
-                                    top: hintHotspot!['y'] - 25,
-                                    child: AnimatedBuilder(
+                                    left: hintHotspot!['x'] - 25,,
+                                    top: hintHotspot!['y'] - 25, - 30,
+                                    child: AnimatedBuilder(iner(
                                       animation: _pulseAnimationController,
                                       builder: (context, child) {
-                                        return Container(
-                                          width: 50,
-                                          height: 50,
+                                        return Container((
+                                          width: 50,cle,
+                                          height: 50,.all(
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.yellowAccent
-                                                  .withOpacity(
-                                                0.6 +
+                                            border: Border.all()
+                                              color: Colors.yellowAccentithOpacity(
+                                                  .withOpacity(verlayOpacity),
+                                                0.6 +width: 2,
                                                     (_pulseAnimation.value -
                                                             1.0) *
-                                                        0.4,
+                                                        0.4,Opacity(
                                               ),
-                                              width: 3,
-                                            ),
+                                              width: 3,city(
+                                            ),        overlayOpacity * 0.2),
                                           ),
                                         );
                                       },
                                     ),
                                   ),
+acity(
+                                // Show debug overlay if enabled (for second image too)
+                                if (showOverlay)fontWeight: FontWeight.bold,
+                                  ...levels[currentLevel - 1]['hotspots']),
+                                      .map<Widget>((hotspot) {),
+                                    final index = levels[currentLevel - 1]),
+                                            ['hotspots']),
+                                        .indexOf(hotspot);
+                                    final found = differencesFound[index];  }).toList(),
+],
+                                    return Positioned(),
+                                      left: hotspot['x'] - 30,),
+                                      top: hotspot['y'] - 30,],
+                                      child: Container(),
+                                        width: 60,),
+                                        height: 60,),
+                                        decoration: BoxDecoration(),
+                                          shape: BoxShape.circle,              ),
+                                          border: Border.all(
+                                            color: foundntrols
+                                                ? Colors.greenAccent
+                                                    .withOpacity(overlayOpacity)
+                                                : Colors.redAccent.withOpacity(zontal: 20),
+                                                    overlayOpacity),romLTRB(16, 0, 16, 16),
+                                            width: 2,
+                                          ),
+                                          color: foundborderRadius: BorderRadius.circular(16),
+                                              ? Colors.greenAccent.withOpacity(
+                                                  overlayOpacity * 0.3)
+                                              : Colors.redAccent.withOpacity(gnment: MainAxisAlignment.spaceEvenly,
+                                                  overlayOpacity * 0.2),
+                                        ),
+                                        child: Center(ghtbulb_outline,
+                                          child: Text(
+                                            '${index + 1}',,
+                                            style: TextStyle(color: Colors.amber,
+                                              color: Colors.white.withOpacity(
+                                                  overlayOpacity + 0.2),
+                                              fontWeight: FontWeight.bold,sh,
+                                            ),
+                                          ),
+                                        ),color: Colors.blueAccent,
+                                      ),
+                                    );
+                                  }).toList(),it_to_app,
+
+                                // Add wrong click animation for modified imageor.of(context).pop(),
+                                if (showWrongClickAnimation && wrongClickPosition != null && !isOriginalImage)color: Colors.redAccent,
+                                  Positioned(),
+                                    left: wrongClickPosition!.dx - 20,],
+                                    top: wrongClickPosition!.dy - 20,),
+                                    child: FadeTransition(),
+                                      opacity: Tween<double>(begin: 1.0, end: 0.0).animate(],
+                                        CurvedAnimation(),
+                                          parent: _pulseAnimationController,),
+                                          curve: const Interval(0.0, 1.0),),
+                                        ), );
+                                      ),  }
+                                      child: Container(
+                                        width: 40,({
+                                        height: 40,,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle, onPressed,
+                                          border: Border.all(color: Colors.redAccent, width: 2),quired Color color,
+                                        ),
+                                        child: const Center(con(
+                                          child: Icon(
+                                            Icons.close,
+                                            color: Colors.redAccent,withOpacity(0.2),
+                                            size: 20,
+                                          ),etric(horizontal: 20, vertical: 12),
+                                        ),
+                                      ),
+                                    ),side: BorderSide(color: color.withOpacity(0.5), width: 1),
+                                  ),),
                               ],
-                            ),
-                          ),
+                            ),con, size: 20),
+                          ),ext(
                         ],
-                      ),
+                      ),xtStyle(
                     ),
-                  ),
-                ),
-              ),
-
-              // Game controls
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildActionButton(
-                      icon: Icons.lightbulb_outline,
-                      label: 'Hint',
-                      onPressed: _showHint,
-                      color: Colors.amber,
-                    ),
-                    _buildActionButton(
-                      icon: Icons.exit_to_app,
-                      label: 'Exit Game',
-                      onPressed: () => Navigator.of(context).pop(),
-                      color: Colors.redAccent,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-    required Color color,
-  }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color.withOpacity(0.2),
-        foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: color.withOpacity(0.5), width: 1),
-        ),
-      ),
-      icon: Icon(icon, size: 20),
-      label: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+                  ),fontWeight: FontWeight.bold,
+                ),),
+              ),),
     );
   }
 
@@ -911,9 +1076,10 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Look carefully at both images - there\'s a difference in one area!',
-                style: TextStyle(color: Colors.white70),
+              Text(
+                hotspot['hint'] ??
+                    'Look carefully at both images - there\'s a difference in one area!',
+                style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 16),
               Center(
@@ -973,6 +1139,25 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     }
   }
 
+  void _restartLevel() {
+    setState(() {
+      foundDifferences = 0;
+      differencesFound = List.generate(totalDifferences, (_) => false);
+      markers.clear();
+      score = score > 10 ? score - 10 : 0; // Small penalty for restarting
+      _startTimer();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Level restarted'),
+        backgroundColor: baseColor,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   void _showTutorial() {
     showDialog(
       context: context,
@@ -997,7 +1182,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
             ),
             const SizedBox(height: 12),
             const Text(
-              '2. Tap on any spot where you notice a difference',
+              '2. Tap directly on the difference when you spot it',
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
             const SizedBox(height: 12),
@@ -1009,6 +1194,14 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
             const Text(
               '4. Use hints if you\'re stuck, but you\'ll lose 5 points',
               style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '5. Enable the visibility overlay for help while learning',
+              style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 20),
             Center(
