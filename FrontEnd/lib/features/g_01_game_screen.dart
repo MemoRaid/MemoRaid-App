@@ -415,20 +415,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             scenarios[currentScenarioIndex].title),
                       ),
 
-                      SizedBox(height: 16),
+                      SizedBox(height: 12), // Reduced spacing
 
                       // Ordered steps section
                       Text(
                         'Your Sequence:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 16, // Slightly smaller
                           color: primaryColor,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 4), // Reduced spacing
                       Expanded(
-                        flex: 2,
+                        flex: 5, // Give more space to the ordered sequence
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -468,14 +468,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                     ),
                                   )
                                 : ListView.builder(
+                                    // Reverse the ListView to show most recent items at the top
+                                    reverse: true,
                                     itemCount: orderedSteps.length,
                                     padding: EdgeInsets.all(12),
                                     itemBuilder: (context, index) {
-                                      final step = orderedSteps[index];
+                                      // Adjust the index to work with reversed list
+                                      final actualIndex =
+                                          orderedSteps.length - 1 - index;
+                                      final step = orderedSteps[actualIndex];
                                       return Padding(
                                         padding: EdgeInsets.only(bottom: 8),
                                         child: ScaleTransition(
-                                          scale: orderedSteps.last == step
+                                          // Scale animation for the newest item (now at the top)
+                                          scale: index == 0
                                               ? _scaleAnimation
                                               : const AlwaysStoppedAnimation(
                                                   1.0),
@@ -530,7 +536,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                                       ),
                                                       child: Center(
                                                         child: Text(
-                                                          '${index + 1}',
+                                                          // Still display the correct step number
+                                                          '${actualIndex + 1}',
                                                           style: TextStyle(
                                                             color: Colors.white,
                                                             fontWeight:
@@ -569,20 +576,34 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      SizedBox(height: 16),
+                      SizedBox(height: 8), // Reduced spacing
 
                       // Available steps section
-                      Text(
-                        'Available Steps:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: primaryColor,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Available Steps:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16, // Slightly smaller
+                              color: primaryColor,
+                            ),
+                          ),
+                          // Optional: Add a count of remaining steps
+                          if (jumbledSteps.isNotEmpty)
+                            Text(
+                              '${jumbledSteps.length} remaining',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                        ],
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 4), // Reduced spacing
                       Expanded(
-                        flex: 2,
+                        flex: 4, // Less space to available steps
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -617,53 +638,87 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                     ],
                                   ),
                                 )
-                              : GridView.builder(
-                                  padding: EdgeInsets.all(12),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    childAspectRatio: 2.8,
-                                    crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                  ),
-                                  itemCount: jumbledSteps.length,
-                                  itemBuilder: (context, index) {
-                                    final step = jumbledSteps[index];
-                                    return Material(
-                                      color: primarySuperLightColor,
-                                      borderRadius: BorderRadius.circular(12),
-                                      elevation: 1,
-                                      child: InkWell(
-                                        onTap: () => _selectStep(step),
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Container(
-                                          padding: EdgeInsets.all(12),
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.grey.shade300),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            step.text,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: primaryDarkColor,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
+                              : LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    // Fixed parameters for consistent box sizing
+                                    int crossAxisCount =
+                                        2; // Always use 2 columns
+                                    int maxRows = 3; // Maximum of 3 rows
+
+                                    // Calculate fixed item dimensions
+                                    double availableWidth =
+                                        constraints.maxWidth -
+                                            24; // Account for padding
+                                    double availableHeight =
+                                        constraints.maxHeight - 24;
+
+                                    double itemWidth =
+                                        (availableWidth / crossAxisCount) -
+                                            4; // 8px spacing, 4px per side
+                                    double itemHeight =
+                                        availableHeight / maxRows -
+                                            4; // 8px spacing, 4px per side
+
+                                    return GridView.builder(
+                                      padding: EdgeInsets.all(12),
+                                      physics: NeverScrollableScrollPhysics(),
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: crossAxisCount,
+                                        childAspectRatio: itemWidth /
+                                            itemHeight, // Use fixed dimensions
+                                        crossAxisSpacing: 8,
+                                        mainAxisSpacing: 8,
                                       ),
+                                      itemCount: jumbledSteps.length,
+                                      itemBuilder: (context, index) {
+                                        final step = jumbledSteps[index];
+                                        return Material(
+                                          color: primarySuperLightColor,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          elevation: 1,
+                                          child: InkWell(
+                                            onTap: () => _selectStep(step),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Container(
+                                              width: itemWidth,
+                                              height: itemHeight,
+                                              padding: EdgeInsets.all(8),
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color:
+                                                        Colors.grey.shade300),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  step.text,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: primaryDarkColor,
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
                                 ),
                         ),
                       ),
 
-                      SizedBox(height: 16),
+                      SizedBox(height: 8), // Reduced spacing
 
                       // Feedback section
                       if (feedback.isNotEmpty)
@@ -771,7 +826,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
-                      SizedBox(height: 16),
+                      SizedBox(height: 8), // Reduced spacing
 
                       // Control buttons
                       Row(
