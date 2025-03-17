@@ -30,19 +30,19 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   final List<List<Map<String, dynamic>>> _levelDifferences = [
     // Level 1
     [
-      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
-      {'x': 0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
-      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
-      {'x': 0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
+      {'x': -0.372, 'y': 1.871, 'radius': 0.04, 'found': true},
+      {'x': -0.404, 'y': 1.672, 'radius': 0.04, 'found': true},
+      {'x': -0.275, 'y': 1.763, 'radius': 0.04, 'found': true},
+      {'x': -0.327, 'y': 2.169, 'radius': 0.04, 'found': true},
     ],
     // Level 2
     [
-      {'x': 0.25, 'y': 0.35, 'radius': 0.04, 'found': false},
-      {'x': 0.65, 'y': 0.15, 'radius': 0.05, 'found': false},
-      {'x': 0.45, 'y': 0.55, 'radius': 0.04, 'found': false},
-      {'x': 0.75, 'y': 0.65, 'radius': 0.05, 'found': false},
-      {'x': 0.15, 'y': 0.75, 'radius': 0.04, 'found': false},
-      {'x': 0.55, 'y': 0.85, 'radius': 0.05, 'found': false},
+      {'x': -0.380, 'y': 2.040, 'radius': 0.04, 'found': false},
+      {'x': -0.690, 'y': 1.926, 'radius': 0.04, 'found': false},
+      {'x': -0.747, 'y': 2.002, 'radius': 0.04, 'found': false},
+      {'x': -0.284, 'y': 1.907, 'radius': 0.04, 'found': false},
+      {'x': -0.275, 'y': 2.304, 'radius': 0.04, 'found': false},
+      {'x': -0.815, 'y': 1.879, 'radius': 0.04, 'found': false},
     ],
     // Level 3
     [
@@ -170,8 +170,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       'lib/assets/images/crow1.jpeg',
     ],
     [
-      'assets/images/spot_diff/pair2_original.jpg',
-      'assets/images/spot_diff/pair2_modified.jpg'
+      'lib/assets/images/plane2.jpeg',
+      'lib/assets/images/plane1.jpeg',
     ],
     [
       'assets/images/spot_diff/pair3_original.jpg',
