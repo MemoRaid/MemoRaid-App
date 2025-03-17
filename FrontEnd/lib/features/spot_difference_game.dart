@@ -37,12 +37,12 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     ],
     // Level 2
     [
-      {'x': 0.25, 'y': 0.35, 'radius': 0.04, 'found': false},
-      {'x': 0.65, 'y': 0.15, 'radius': 0.05, 'found': false},
-      {'x': 0.45, 'y': 0.55, 'radius': 0.04, 'found': false},
-      {'x': 0.75, 'y': 0.65, 'radius': 0.05, 'found': false},
-      {'x': 0.15, 'y': 0.75, 'radius': 0.04, 'found': false},
-      {'x': 0.55, 'y': 0.85, 'radius': 0.05, 'found': false},
+      {'x': -0.386, 'y': 2.046, 'radius': 0.04, 'found': false},
+      {'x': -0.682, 'y': 1.923, 'radius': 0.04, 'found': false},
+      {'x': -0.293, 'y': 1.875, 'radius': 0.04, 'found': false},
+      {'x': -0.252, 'y': 2.296, 'radius': 0.04, 'found': false},
+      {'x': -0.760, 'y': 2.004, 'radius': 0.04, 'found': false},
+      {'x': -0.808, 'y': 1.898, 'radius': 0.6, 'found': false},
     ],
     // Level 3
     [
@@ -170,12 +170,12 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       'lib/assets/images/crow1.jpeg',
     ],
     [
-      'assets/images/spot_diff/pair2_original.jpg',
-      'assets/images/spot_diff/pair2_modified.jpg'
+      'lib/assets/images/plane2.jpeg',
+      'lib/assets/images/plane1.jpeg',
     ],
     [
-      'assets/images/spot_diff/pair3_original.jpg',
-      'assets/images/spot_diff/pair3_modified.jpg'
+      'lib/assets/images/dog1.jpeg',
+      'lib/assets/images/dog2.jpeg',
     ],
     [
       'assets/images/spot_diff/pair4_original.jpg',
