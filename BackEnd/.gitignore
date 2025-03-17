@@ -25,5 +25,3 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Service account fileE
-service-account.json
