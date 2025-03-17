@@ -145,24 +145,27 @@ exports.createMemory = async (req, res) => {
       // This is where question generation is triggered
       try {
         const questions = await generateQuestionsForNewMemory(memory[0], contributor);
+        console.log('Questions generated:', questions);
+        
         if (!questions || questions.length === 0) {
-          console.warn('No questions were generated for memory:', memory[0].id);
-          return res.status(201).json({
-            message: 'Memory created successfully but no questions were generated',
-            memory: memory[0]
-          });
+            return res.status(201).json({
+                message: 'Memory created but no questions generated',
+                memory: memory[0]
+            });
         }
+        
         res.status(201).json({
-          message: 'Memory and questions created successfully',
-          memory: memory[0],
-          questions
+            message: 'Memory and questions created successfully',
+            memory: memory[0],
+            questions
         });
       } catch (questionError) {
-        console.error('Question generation error:', questionError);
+        console.error('Question generation failed:', questionError);
+        // Still return success for memory creation
         res.status(201).json({
-          message: 'Memory created successfully but failed to generate questions',
-          memory: memory[0],
-          error: questionError.message
+            message: 'Memory created but question generation failed',
+            memory: memory[0],
+            error: questionError.message
         });
       }
     } catch (error) {
@@ -307,6 +310,6 @@ exports.deleteMemory = async (req, res) => {
     }
   };
 
-  
 
 
+ 

@@ -3,8 +3,9 @@ const { GoogleAuth } = require('google-auth-library');
 const path = require('path');
 const fs = require('fs');
 
-// Export a Promise that resolves to the model
-module.exports = (async () => {
+let model = null;
+
+const initializeGemini = async () => {
     try {
         // Load service account credentials
         const serviceAccountPath = path.join(__dirname, '../../service-account.json');
@@ -12,21 +13,19 @@ module.exports = (async () => {
             throw new Error('Service account file not found');
         }
 
-        // Create auth client
         const auth = new GoogleAuth({
             keyFile: serviceAccountPath,
             scopes: ['https://www.googleapis.com/auth/cloud-platform']
         });
 
-        // Get access token
         const authClient = await auth.getClient();
         const token = await authClient.getAccessToken();
         
-        // Initialize Gemini with access token
+        // Initialize Gemini
         const genAI = new GoogleGenerativeAI(token.token);
 
         // Get model
-        const model = genAI.getGenerativeModel({ 
+const                 model = genAI.getGenerativeModel({ 
             model: "gemini-1.5-pro", // Use stable version
             generationConfig: {
                 temperature: 0.7,
@@ -34,11 +33,19 @@ module.exports = (async () => {
             }
         });
 
-        console.log('Gemini API initialized successfully with service account');
         return model;
-
     } catch (error) {
-        console.error('Error initializing Gemini API:', error);
+        console.error('Gemini initialization error:', error);
         throw error;
     }
-})();
+};
+
+// Export a function to get the initialized model
+module.exports = {
+    getModel: async () => {
+        if (!model) {
+            model = await initializeGemini();
+        }
+        return model;
+    }
+};
