@@ -111,16 +111,19 @@ exports.createMemory = async (req, res) => {
         });
       }
       
-      // Check if contributor exists
+    
+      // Get contributor and their associated patient_id
       const { data: contributor, error: contributorError } = await supabase
         .from('memory_contributors')
-        .select('id')
+        .select('id, user_id') // user_id is the patient's ID
         .eq('id', contributorId)
         .single();
       
       if (contributorError) {
         return res.status(404).json({ message: 'Contributor not found' });
       }
+
+
       
       // Create memory
       const { data: memory, error } = await supabase
