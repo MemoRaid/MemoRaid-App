@@ -26,7 +26,16 @@ dependencies:
   confetti: ^0.6.0
   just_audio: ^0.9.35
   audio_session: ^0.1.16
-
+  speech_to_text: ^6.3.0
+  google_mlkit_face_detection: ^0.8.0
+  camera: ^0.10.5+4
+  geolocator: ^10.1.0
+  url_launcher: ^6.1.14
+  permission_handler: ^11.0.1
+  flutter_animate: ^4.1.1
+  flutter_local_notifications: ^16.1.0
+  timezone: ^0.9.2
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:
@@ -54,3 +63,6 @@ flutter:
     - lib/assets/images/story.png
     - lib/assets/images/memoraid.png
     - lib/assets/images/kushen.png
+    - lib/assets/images/spot1.jpeg
+    - lib/assets/images/spot2.jpeg
+    - lib/assets/images/crow1.jpeg

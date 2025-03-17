@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'g_01_game_screen.dart';
 
-class HomeScreen03 extends StatelessWidget {
-  const HomeScreen03({super.key});
+class g01Screen extends StatelessWidget {
+  const g01Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +11,19 @@ class HomeScreen03 extends StatelessWidget {
     final Color primaryLightColor = Color(0xFF164C64);
 
     return Scaffold(
+      // Add app bar with back button
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            // Handle back navigation - typically exit the app
+            Navigator.maybePop(context);
+          },
+        ),
+      ),
+      extendBodyBehindAppBar: true, // Let the gradient extend behind app bar
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -111,13 +124,13 @@ class HomeScreen03 extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: primaryColor,
+                          color: primaryColor, // Explicitly set text color
                         ),
                       ),
                       SizedBox(width: 8),
                       Icon(
                         Icons.play_arrow_rounded,
-                        color: primaryColor,
+                        color: primaryColor, // Explicitly set icon color
                       ),
                     ],
                   ),
