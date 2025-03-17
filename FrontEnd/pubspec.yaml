@@ -65,4 +65,4 @@ flutter:
     - lib/assets/images/dog1.jpeg
     - lib/assets/images/dog2.jpeg
     - lib/assets/images/plane1.jpeg
-    -lib/assets/images/plane2.jpeg
+    - lib/assets/images/plane2.jpeg
