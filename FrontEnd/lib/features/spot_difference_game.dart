@@ -277,8 +277,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFFFFD700),
-                  const Color(0xFFFFA500),
+                  const Color(0xFF0D3445),
+                  const Color(0xFF0D3445),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
@@ -294,7 +294,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                   ),
                   child: const Icon(
                     Icons.lock,
-                    color: Color(0xFFFFD700),
+                    color: Color(0xFF0D3445),
                     size: 48,
                   ),
                 ),
@@ -356,9 +356,9 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: Color(0xFFFFD700),
+                        foregroundColor: Color(0xFF0D3445),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
+                          horizontal: 10,
                           vertical: 12,
                         ),
                         shape: RoundedRectangleBorder(
@@ -850,7 +850,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                      colors: [Color.fromARGB(255, 5, 5, 5), Color(0xFF0d3445)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -868,7 +868,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                       const Icon(
                         Icons.star,
                         color: Colors.white,
-                        size: 24,
+                        size: 26,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -1041,7 +1041,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                           ? Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFFD700).withOpacity(0.7),
+                                color: const Color(0xFF0D3445).withOpacity(0.7),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -1073,7 +1073,10 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                       const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                      colors: [
+                        Color.fromARGB(255, 255, 255, 255),
+                        Color(0xFF0D3445)
+                      ],
                     ),
                     boxShadow: [
                       BoxShadow(
