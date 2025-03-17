@@ -309,7 +309,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'This level is only available with a premium subscription. Upgrade now to unlock all levels!',
+                  'This level is only available with a premium subscription. Premium subscription on its way!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -366,7 +366,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                         ),
                       ),
                       child: const Text(
-                        'UPGRADE NOW',
+                        'COMING SOON',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -909,7 +909,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                         child: const Text(
                           "UPGRADE",
                           style: TextStyle(
-                            color: Color(0xFFFFD700),
+                            color: Color(0xFF0D3445),
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -952,12 +952,14 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                 end: Alignment.bottomRight,
                 colors: isPremiumLevel
                     ? [
-                        Colors.grey.withOpacity(0.5),
-                        Colors.grey.withOpacity(0.7),
+                        const Color.fromARGB(255, 107, 128, 137)
+                            .withOpacity(0.9),
+                        const Color(0xFF0d3445).withOpacity(0.9),
                       ]
                     : [
-                        const Color(0xFF2196F3).withOpacity(0.8),
-                        const Color(0xFF0D47A1).withOpacity(0.9),
+                        const Color.fromARGB(255, 107, 128, 137)
+                            .withOpacity(0.5),
+                        const Color(0xFF0d3445).withOpacity(0.5),
                       ],
               ),
               boxShadow: [
