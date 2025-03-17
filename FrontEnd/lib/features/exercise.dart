@@ -86,12 +86,15 @@ class ExerciseScreen extends StatelessWidget {
                                 rating: 4.8,
                                 icon: Icons.pan_tool_outlined,
                                 isHighlighted: true,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
+                                onTap: () {
+                                  print("Hand Coordination tapped");
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
                                       builder: (context) =>
-                                          HandCoordinationExercise()),
-                                ),
+                                          const HandCoordinationExercise(),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildExerciseCard(
                                 context: context,
@@ -100,12 +103,15 @@ class ExerciseScreen extends StatelessWidget {
                                     'Yoga poses that enhance memory and focus',
                                 rating: 4.6,
                                 icon: Icons.self_improvement,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
+                                onTap: () {
+                                  print("Yoga tapped");
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
                                       builder: (context) =>
-                                          BrainBoostingYogaExercise()),
-                                ),
+                                          const BrainBoostingYogaExercise(),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildExerciseCard(
                                 context: context,
@@ -207,130 +213,134 @@ class ExerciseScreen extends StatelessWidget {
     required VoidCallback onTap,
     bool isHighlighted = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: ShapeDecoration(
-          color: isHighlighted ? Color(0xFFFCFFFC) : Color(0xFFF4F7FB),
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              width: 1,
-              color: Colors.white.withOpacity(isHighlighted ? 1 : 0.5),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: ShapeDecoration(
+            color: isHighlighted ? Color(0xFFFCFFFC) : Color(0xFFF4F7FB),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                width: 1,
+                color: Colors.white.withOpacity(isHighlighted ? 1 : 0.5),
+              ),
+              borderRadius: BorderRadius.circular(22),
             ),
-            borderRadius: BorderRadius.circular(22),
+            shadows: [
+              BoxShadow(
+                color: Color(0x333B4056),
+                blurRadius: 40,
+                offset: Offset(0, 20),
+              ),
+            ],
           ),
-          shadows: [
-            BoxShadow(
-              color: Color(0x333B4056),
-              blurRadius: 40,
-              offset: Offset(0, 20),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Exercise image/icon
-            Positioned(
-              left: 0,
-              top: 0,
-              right: 0,
-              child: Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Color(0xFF0D3445).withOpacity(0.1),
+          child: Stack(
+            children: [
+              // Exercise image/icon
+              Positioned(
+                left: 0,
+                top: 0,
+                right: 0,
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF0D3445).withOpacity(0.1),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      icon,
+                      size: 60,
+                      color: Color(0xFF0D3445),
+                    ),
+                  ),
                 ),
-                child: Center(
+              ),
+
+              // Bookmark button
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: ShapeDecoration(
+                    color: Colors.black.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                   child: Icon(
-                    icon,
-                    size: 60,
-                    color: Color(0xFF0D3445),
+                    Icons.bookmark_border,
+                    size: 14,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ),
 
-            // Bookmark button
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                width: 22,
-                height: 22,
-                decoration: ShapeDecoration(
-                  color: Colors.black.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Icon(
-                  Icons.bookmark_border,
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-
-            // Title and rating
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: Color(0xFF0D3445),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+              // Title and rating
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: Color(0xFF0D3445),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: Color(0xFF0D3445).withOpacity(0.7),
-                        fontSize: 10,
+                      SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Color(0xFF0D3445).withOpacity(0.7),
+                          fontSize: 10,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        ...List.generate(
-                          5,
-                          (index) => Padding(
-                            padding: EdgeInsets.only(right: 2),
-                            child: Icon(
-                              index < rating.floor()
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              size: 12,
-                              color: Color(0xFF0D3445),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          ...List.generate(
+                            5,
+                            (index) => Padding(
+                              padding: EdgeInsets.only(right: 2),
+                              child: Icon(
+                                index < rating.floor()
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                size: 12,
+                                color: Color(0xFF0D3445),
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          rating.toString(),
-                          style: TextStyle(
-                            color: Color(0xFF0D3445),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                          SizedBox(width: 4),
+                          Text(
+                            rating.toString(),
+                            style: TextStyle(
+                              color: Color(0xFF0D3445),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
