@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../../components/exercise_video_player.dart';
 
 class HandCoordinationExercise extends StatefulWidget {
   const HandCoordinationExercise({super.key});
@@ -20,6 +21,8 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
       'title': 'Finger Tapping',
       'description':
           'Tap each finger against your thumb in sequence, then reverse. This builds fine motor control and activates multiple brain regions.',
+      'videoUrl':
+          'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4', // Example video URL
       'duration': 30,
       'instructions': [
         'Sit comfortably with your hand raised, palm facing you',
@@ -37,6 +40,8 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
       'title': 'Finger Isolation',
       'description':
           'Place your palm flat on a surface, then lift and lower each finger independently while keeping others down.',
+      'videoUrl':
+          'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4', // Example video URL
       'duration': 45,
       'instructions': [
         'Place your hand flat on a table, palm down',
@@ -54,6 +59,8 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
       'title': 'Thumb Opposition',
       'description':
           'Create complex patterns by touching thumb to specific fingers in varying sequences, challenging your brain.',
+      'videoUrl':
+          'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', // Example video URL
       'duration': 60,
       'instructions': [
         'Create this pattern: thumb→index→middle→ring→pinky',
@@ -70,6 +77,8 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
       'title': 'Finger Counting',
       'description':
           'Count using your fingers but in creative patterns - skip numbers, use different bases, or count backward.',
+      'videoUrl':
+          'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4', // Example video URL
       'duration': 45,
       'instructions': [
         'Hold both hands up, palms facing you',
@@ -232,20 +241,24 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
                       ),
                       SizedBox(height: 16),
 
-                      // Exercise image placeholder
+                      // Video player instead of static icon
                       Container(
-                        height: 200,
+                        height: 220,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Color(0xFF0D3445).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            )
+                          ],
                         ),
-                        child: Center(
-                          child: Icon(
-                            Icons.pan_tool_outlined,
-                            size: 80,
-                            color: Color(0xFF0D3445).withOpacity(0.5),
-                          ),
+                        child: ExerciseVideoPlayer(
+                          videoUrl: currentExercise['videoUrl'],
+                          autoplay: false,
+                          looping: true,
                         ),
                       ),
                       SizedBox(height: 16),
