@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'homescreen01.dart';
 
 class Task {
   final String id;
@@ -187,6 +188,15 @@ class _TaskSchedulerScreenState extends State<TaskSchedulerScreen>
       floating: false,
       pinned: true,
       backgroundColor: Colors.transparent,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          // Navigate to HomeScreen01 instead of HomeScreen2
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+          );
+        },
+      ),
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           DateFormat('EEEE, MMMM d').format(_selectedDate),

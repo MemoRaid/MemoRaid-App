@@ -20,11 +20,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Progress"),
+        BottomNavigationBarItem(icon: Icon(Icons.book), label: "Notebook"),
         BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble), label: "AI Chatbot"),
+        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Progress"),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: "Achievements"),
       ],
       onTap: (index) {
         switch (index) {
@@ -32,16 +32,16 @@ class CustomBottomNavigationBar extends StatelessWidget {
             Navigator.pushReplacementNamed(context, '/home');
             break;
           case 1:
-            Navigator.pushReplacementNamed(context, '/progress');
+            Navigator.pushReplacementNamed(context, '/notebook');
             break;
           case 2:
             Navigator.pushReplacementNamed(context, '/chatbot');
             break;
           case 3:
-            Navigator.pushReplacementNamed(context, '/settings');
+            Navigator.pushReplacementNamed(context, '/progress');
             break;
           case 4:
-            Navigator.pushReplacementNamed(context, '/achievements');
+            Navigator.pushReplacementNamed(context, '/settings');
             break;
         }
         onTap(index);
