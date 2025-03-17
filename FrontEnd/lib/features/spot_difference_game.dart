@@ -174,8 +174,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       'lib/assets/images/plane1.jpeg',
     ],
     [
-      'lib/assets/images/dog1.jpeg',
       'lib/assets/images/dog2.jpeg',
+      'lib/assets/images/dog1.jpeg',
     ],
     [
       'assets/images/spot_diff/pair4_original.jpg',
