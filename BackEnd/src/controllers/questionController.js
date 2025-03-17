@@ -1,5 +1,5 @@
 const supabase = require('../config/supabase');
-const gemini = require('../config/gemini');
+const geminiPromise = require('../config/gemini');
 
 // Generate questions for a memory
 exports.generateQuestions = async (req, res) => {
@@ -109,8 +109,11 @@ exports.generateQuestionsForNewMemory = async (memory, contributorDetails) => {
     try {
         console.log('Starting question generation for memory:', memory.id);
         
-        const prompt = `
-            Generate 5 questions about this memory that would help someone with amnesia recall details:
+        // Wait for Gemini model to be ready
+        const model = await geminiPromise;
+        
+        const prompt = {
+            text: `Generate 5 questions about this memory that would help someone with amnesia recall details:
             
             Description: ${memory.description}
             Relationship: This memory is from a ${contributorDetails.relationship_type} named ${contributorDetails.name}
@@ -122,47 +125,66 @@ exports.generateQuestionsForNewMemory = async (memory, contributorDetails) => {
             3. Assign a difficulty level (1-5)
             4. Assign points (5-20 based on difficulty)
             
-            Format the response as JSON with this structure for each question:
-            {
-                "question": "Question text here?",
-                "correct_answer": "Correct answer here",
-                "difficulty": 3,
-                "points": 15
-            }
-        `;
+            Format as JSON array of objects. Example:
+            [
+                {
+                    "question": "What was happening in this memory?",
+                    "correct_answer": "A family dinner",
+                    "difficulty": 1,
+                    "points": 5
+                }
+            ]`
+        };
 
+        // Generate content with error handling
         console.log('Calling Gemini API...');
-        const result = await gemini.generateContent(prompt);
-        const responseText = result.response.text();
-        console.log('Gemini API Response:', responseText);
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        console.log('Raw API Response:', text);
 
-        const jsonStr = responseText.match(/\[.*\]/s)[0];
-        const questions = JSON.parse(jsonStr);
+        // Parse JSON carefully
+        try {
+            const jsonMatch = text.match(/\[[\s\S]*\]/);
+            if (!jsonMatch) {
+                throw new Error('No JSON array found in response');
+            }
+            const questions = JSON.parse(jsonMatch[0]);
+            console.log('Parsed questions:', questions);
 
-        console.log('Parsed questions:', questions);
+            // Validate questions format
+            if (!Array.isArray(questions) || questions.length === 0) {
+                throw new Error('Invalid questions format');
+            }
 
-        // Save questions to database
-        const { data: savedQuestions, error } = await supabase
-            .from('questions')
-            .insert(
-                questions.map(q => ({
-                    memory_id: memory.id,
-                    patient_id: memory.patient_id,
-                    question_text: q.question,
-                    correct_answer: q.correct_answer,
-                    difficulty_level: q.difficulty,
-                    points: q.points
-                }))
-            )
-            .select();
+            // Save questions
+            const { data: savedQuestions, error } = await supabase
+                .from('questions')
+                .insert(
+                    questions.map(q => ({
+                        memory_id: memory.id,
+                        patient_id: memory.patient_id,
+                        question_text: q.question,
+                        correct_answer: q.correct_answer,
+                        difficulty_level: q.difficulty,
+                        points: q.points
+                    }))
+                )
+                .select();
 
-        if (error) {
-            console.error('Database error:', error);
-            throw error;
+            if (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+
+            console.log('Questions saved successfully:', savedQuestions);
+            return savedQuestions;
+
+        } catch (parseError) {
+            console.error('Error parsing Gemini response:', parseError);
+            throw new Error('Failed to parse AI response: ' + parseError.message);
         }
 
-        console.log('Questions saved successfully:', savedQuestions);
-        return savedQuestions;
     } catch (error) {
         console.error('Question generation error:', error);
         throw error;
