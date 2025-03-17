@@ -60,26 +60,16 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     ],
     // Level 4
     [
-      {'x': 0.15, 'y': 0.25, 'radius': 0.04, 'found': false},
-      {'x': 0.45, 'y': 0.35, 'radius': 0.04, 'found': false},
-      {'x': 0.75, 'y': 0.45, 'radius': 0.04, 'found': false},
-      {'x': 0.25, 'y': 0.65, 'radius': 0.04, 'found': false},
-      {'x': 0.55, 'y': 0.75, 'radius': 0.04, 'found': false},
-      {'x': 0.85, 'y': 0.85, 'radius': 0.04, 'found': false},
-      {'x': 0.35, 'y': 0.15, 'radius': 0.04, 'found': false},
-      {'x': 0.65, 'y': 0.55, 'radius': 0.04, 'found': false},
+      {'x': -0.245, 'y': 2.126, 'radius': 0.04, 'found': false},
+      {'x': -0.492, 'y': 2.290, 'radius': 0.04, 'found': false},
+      {'x': -0.731, 'y': 2.036, 'radius': 0.04, 'found': false},
+      {'x': -0.712, 'y': 1.774, 'radius': 0.04, 'found': false},
     ],
     // Level 5
     [
-      {'x': 0.2, 'y': 0.3, 'radius': 0.04, 'found': false},
-      {'x': 0.5, 'y': 0.2, 'radius': 0.04, 'found': false},
-      {'x': 0.8, 'y': 0.4, 'radius': 0.04, 'found': false},
-      {'x': 0.3, 'y': 0.6, 'radius': 0.04, 'found': false},
-      {'x': 0.6, 'y': 0.7, 'radius': 0.04, 'found': false},
-      {'x': 0.9, 'y': 0.8, 'radius': 0.04, 'found': false},
-      {'x': 0.4, 'y': 0.1, 'radius': 0.04, 'found': false},
-      {'x': 0.7, 'y': 0.5, 'radius': 0.04, 'found': false},
-      {'x': 0.1, 'y': 0.9, 'radius': 0.04, 'found': false},
+      {'x': -0.578, 'y': 1.668, 'radius': 0.04, 'found': false},
+      {'x': -0.634, 'y': 2.151, 'radius': 0.04, 'found': false},
+      {'x': -0.684, 'y': 1.981, 'radius': 0.04, 'found': false},
     ],
     // Level 6
     [
@@ -182,12 +172,12 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       'lib/assets/images/dog1.jpeg',
     ],
     [
-      'assets/images/spot_diff/pair4_original.jpg',
-      'assets/images/spot_diff/pair4_modified.jpg'
+      'lib/assets/images/cow2.jpeg',
+      'lib/assets/images/cow1.jpeg',
     ],
     [
-      'assets/images/spot_diff/pair5_original.jpg',
-      'assets/images/spot_diff/pair5_modified.jpg'
+      'lib/assets/images/boy2.jpeg',
+      'lib/assets/images/boy1.jpeg',
     ],
     [
       'assets/images/spot_diff/pair6_original.jpg',

@@ -67,3 +67,7 @@ flutter:
     - lib/assets/images/dog2.jpeg
     - lib/assets/images/plane1.jpeg
     - lib/assets/images/plane2.jpeg
+    - lib/assets/images/cow1.jpeg
+    - lib/assets/images/cow2.jpeg
+    - lib/assets/images/boy1.jpeg
+    - lib/assets/images/boy2.jpeg
