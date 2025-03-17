@@ -30,10 +30,10 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   final List<List<Map<String, dynamic>>> _levelDifferences = [
     // Level 1
     [
-      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
-      {'x': 0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
-      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
-      {'x': 0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
+      {'x': -0.372, 'y': 1.860, 'radius': 0.04, 'found': true},
+      {'x': -0.272, 'y': 1.749, 'radius': 0.04, 'found': true},
+      {'x': -0.418, 'y': 1.658, 'radius': 0.04, 'found': true},
+      {'x': -0.344, 'y': 2.164, 'radius': 0.04, 'found': true},
     ],
     // Level 2
     [
@@ -166,8 +166,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   // Image pairs - you would replace these with your actual images
   final List<List<String>> _imagePairs = [
     [
-      'lib/assets/images/crow1.jpeg',
       'lib/assets/images/crow2.jpeg',
+      'lib/assets/images/crow1.jpeg',
     ],
     [
       'assets/images/spot_diff/pair2_original.jpg',
