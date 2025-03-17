@@ -103,7 +103,7 @@ class GameScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const HomeScreen03()),
+                                builder: (context) => const g01Screen()),
                           );
                           // Navigate to Puzzle Solver Game
                         },
