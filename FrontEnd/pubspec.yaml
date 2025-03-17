@@ -26,7 +26,9 @@ dependencies:
   confetti: ^0.6.0
   just_audio: ^0.9.35
   audio_session: ^0.1.16
-
+  # Add video player packages
+  video_player: ^2.8.2  # Core video playback functionality
+  chewie: ^1.7.4        # UI wrapper for video_player with controls
 
 dev_dependencies:
   flutter_test:
@@ -54,3 +56,5 @@ flutter:
     - lib/assets/images/story.png
     - lib/assets/images/memoraid.png
     - lib/assets/images/kushen.png
+    # Add folder for exercise videos (create this folder in your project)
+    - lib/assets/videos/  # Directory for local video assets
