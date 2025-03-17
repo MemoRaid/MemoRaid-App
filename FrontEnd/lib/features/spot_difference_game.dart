@@ -46,13 +46,13 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     ],
     // Level 3
     [
-      {'x': 0.2, 'y': 0.3, 'radius': 0.04, 'found': false},
-      {'x': 0.6, 'y': 0.1, 'radius': 0.04, 'found': false},
-      {'x': 0.4, 'y': 0.5, 'radius': 0.04, 'found': false},
-      {'x': 0.7, 'y': 0.6, 'radius': 0.04, 'found': false},
-      {'x': 0.1, 'y': 0.7, 'radius': 0.04, 'found': false},
-      {'x': 0.5, 'y': 0.8, 'radius': 0.04, 'found': false},
-      {'x': 0.9, 'y': 0.4, 'radius': 0.04, 'found': false},
+      {'x': -0.516, 'y': 1.973, 'radius': 0.04, 'found': false},
+      {'x': -0.388, 'y': 2.005, 'radius': 0.04, 'found': false},
+      {'x': -0.684, 'y': 2.324, 'radius': 0.04, 'found': false},
+      {'x': -0.227, 'y': 2.141, 'radius': 0.04, 'found': false},
+      {'x': -0.534, 'y': 1.604, 'radius': 0.04, 'found': false},
+      {'x': -0.773, 'y': 1.946, 'radius': 0.04, 'found': false},
+      {'x': -0.474, 'y': 2.364, 'radius': 0.04, 'found': false},
     ],
     // Level 4
     [
