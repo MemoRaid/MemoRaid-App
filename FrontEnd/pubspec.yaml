@@ -25,6 +25,7 @@ dependencies:
   google_generative_ai: ^0.2.0
   confetti: ^0.7.0
   just_audio: ^0.9.36
+  audio_session: ^0.1.18  # Add this line
 
 dev_dependencies:
   flutter_test:
