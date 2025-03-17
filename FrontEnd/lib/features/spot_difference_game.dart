@@ -71,87 +71,6 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       {'x': -0.634, 'y': 2.151, 'radius': 0.04, 'found': false},
       {'x': -0.684, 'y': 1.981, 'radius': 0.04, 'found': false},
     ],
-    // Level 6
-    [
-      // Add 10 differences with unique positions
-      {'x': 0.15, 'y': 0.15, 'radius': 0.03, 'found': false},
-      {'x': 0.35, 'y': 0.25, 'radius': 0.03, 'found': false},
-      {'x': 0.55, 'y': 0.35, 'radius': 0.03, 'found': false},
-      {'x': 0.75, 'y': 0.45, 'radius': 0.03, 'found': false},
-      {'x': 0.95, 'y': 0.55, 'radius': 0.03, 'found': false},
-      {'x': 0.25, 'y': 0.65, 'radius': 0.03, 'found': false},
-      {'x': 0.45, 'y': 0.75, 'radius': 0.03, 'found': false},
-      {'x': 0.65, 'y': 0.85, 'radius': 0.03, 'found': false},
-      {'x': 0.85, 'y': 0.95, 'radius': 0.03, 'found': false},
-      {'x': 0.05, 'y': 0.05, 'radius': 0.03, 'found': false},
-    ],
-    // Level 7
-    [
-      // Add 11 differences
-      {'x': 0.1, 'y': 0.1, 'radius': 0.03, 'found': false},
-      {'x': 0.3, 'y': 0.2, 'radius': 0.03, 'found': false},
-      {'x': 0.5, 'y': 0.3, 'radius': 0.03, 'found': false},
-      {'x': 0.7, 'y': 0.4, 'radius': 0.03, 'found': false},
-      {'x': 0.9, 'y': 0.5, 'radius': 0.03, 'found': false},
-      {'x': 0.2, 'y': 0.6, 'radius': 0.03, 'found': false},
-      {'x': 0.4, 'y': 0.7, 'radius': 0.03, 'found': false},
-      {'x': 0.6, 'y': 0.8, 'radius': 0.03, 'found': false},
-      {'x': 0.8, 'y': 0.9, 'radius': 0.03, 'found': false},
-      {'x': 0.1, 'y': 0.5, 'radius': 0.03, 'found': false},
-      {'x': 0.9, 'y': 0.1, 'radius': 0.03, 'found': false},
-    ],
-    // Level 8
-    [
-      // Add 12 differences
-      {'x': 0.05, 'y': 0.15, 'radius': 0.03, 'found': false},
-      {'x': 0.25, 'y': 0.25, 'radius': 0.03, 'found': false},
-      {'x': 0.45, 'y': 0.35, 'radius': 0.03, 'found': false},
-      {'x': 0.65, 'y': 0.45, 'radius': 0.03, 'found': false},
-      {'x': 0.85, 'y': 0.55, 'radius': 0.03, 'found': false},
-      {'x': 0.15, 'y': 0.65, 'radius': 0.03, 'found': false},
-      {'x': 0.35, 'y': 0.75, 'radius': 0.03, 'found': false},
-      {'x': 0.55, 'y': 0.85, 'radius': 0.03, 'found': false},
-      {'x': 0.75, 'y': 0.95, 'radius': 0.03, 'found': false},
-      {'x': 0.95, 'y': 0.05, 'radius': 0.03, 'found': false},
-      {'x': 0.15, 'y': 0.45, 'radius': 0.03, 'found': false},
-      {'x': 0.85, 'y': 0.15, 'radius': 0.03, 'found': false},
-    ],
-    // Level 9
-    [
-      // Add 13 differences
-      {'x': 0.1, 'y': 0.1, 'radius': 0.025, 'found': false},
-      {'x': 0.3, 'y': 0.2, 'radius': 0.025, 'found': false},
-      {'x': 0.5, 'y': 0.3, 'radius': 0.025, 'found': false},
-      {'x': 0.7, 'y': 0.4, 'radius': 0.025, 'found': false},
-      {'x': 0.9, 'y': 0.5, 'radius': 0.025, 'found': false},
-      {'x': 0.2, 'y': 0.6, 'radius': 0.025, 'found': false},
-      {'x': 0.4, 'y': 0.7, 'radius': 0.025, 'found': false},
-      {'x': 0.6, 'y': 0.8, 'radius': 0.025, 'found': false},
-      {'x': 0.8, 'y': 0.9, 'radius': 0.025, 'found': false},
-      {'x': 0.1, 'y': 0.5, 'radius': 0.025, 'found': false},
-      {'x': 0.9, 'y': 0.1, 'radius': 0.025, 'found': false},
-      {'x': 0.5, 'y': 0.5, 'radius': 0.025, 'found': false},
-      {'x': 0.3, 'y': 0.8, 'radius': 0.025, 'found': false},
-    ],
-    // Level 10
-    [
-      // Add 15 differences
-      {'x': 0.05, 'y': 0.05, 'radius': 0.025, 'found': false},
-      {'x': 0.25, 'y': 0.15, 'radius': 0.025, 'found': false},
-      {'x': 0.45, 'y': 0.25, 'radius': 0.025, 'found': false},
-      {'x': 0.65, 'y': 0.35, 'radius': 0.025, 'found': false},
-      {'x': 0.85, 'y': 0.45, 'radius': 0.025, 'found': false},
-      {'x': 0.15, 'y': 0.55, 'radius': 0.025, 'found': false},
-      {'x': 0.35, 'y': 0.65, 'radius': 0.025, 'found': false},
-      {'x': 0.55, 'y': 0.75, 'radius': 0.025, 'found': false},
-      {'x': 0.75, 'y': 0.85, 'radius': 0.025, 'found': false},
-      {'x': 0.95, 'y': 0.95, 'radius': 0.025, 'found': false},
-      {'x': 0.15, 'y': 0.35, 'radius': 0.025, 'found': false},
-      {'x': 0.85, 'y': 0.15, 'radius': 0.025, 'found': false},
-      {'x': 0.45, 'y': 0.55, 'radius': 0.025, 'found': false},
-      {'x': 0.65, 'y': 0.75, 'radius': 0.025, 'found': false},
-      {'x': 0.35, 'y': 0.95, 'radius': 0.025, 'found': false},
-    ],
   ];
 
   // Current differences for the level
@@ -179,40 +98,20 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
       'lib/assets/images/boy2.jpeg',
       'lib/assets/images/boy1.jpeg',
     ],
-    [
-      'assets/images/spot_diff/pair6_original.jpg',
-      'assets/images/spot_diff/pair6_modified.jpg'
-    ],
-    [
-      'assets/images/spot_diff/pair7_original.jpg',
-      'assets/images/spot_diff/pair7_modified.jpg'
-    ],
-    [
-      'assets/images/spot_diff/pair8_original.jpg',
-      'assets/images/spot_diff/pair8_modified.jpg'
-    ],
-    [
-      'assets/images/spot_diff/pair9_original.jpg',
-      'assets/images/spot_diff/pair9_modified.jpg'
-    ],
-    [
-      'assets/images/spot_diff/pair10_original.jpg',
-      'assets/images/spot_diff/pair10_modified.jpg'
-    ],
   ];
 
   // Level names and descriptions
   final List<Map<String, String>> _levelInfo = [
-    {'name': 'Level 1', 'description': 'Beginner: Find 5 differences'},
+    {'name': 'Level 1', 'description': 'Beginner: Find 4 differences'},
     {'name': 'Level 2', 'description': 'Beginner: Find 6 differences'},
     {'name': 'Level 3', 'description': 'Easy: Find 7 differences'},
-    {'name': 'Level 4', 'description': 'Easy: Find 8 differences'},
-    {'name': 'Level 5', 'description': 'Medium: Find 9 differences'},
-    {'name': 'Level 6', 'description': 'Medium: Find 10 differences'},
-    {'name': 'Level 7', 'description': 'Hard: Find 11 differences'},
-    {'name': 'Level 8', 'description': 'Hard: Find 12 differences'},
-    {'name': 'Level 9', 'description': 'Expert: Find 13 differences'},
-    {'name': 'Level 10', 'description': 'Master: Find 15 differences'},
+    {'name': 'Level 4', 'description': 'Easy: Find 4 differences'},
+    {'name': 'Level 5', 'description': 'Medium: Find 3 differences'},
+    {'name': 'Level 6', 'description': 'Medium'},
+    {'name': 'Level 7', 'description': 'Hard'},
+    {'name': 'Level 8', 'description': 'Hard'},
+    {'name': 'Level 9', 'description': 'Expert'},
+    {'name': 'Level 10', 'description': 'Master'},
   ];
 
   @override

@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               radius: 70,
                               backgroundColor: Colors.white,
                               backgroundImage:
-                                  AssetImage("lib/assets/images/kushen.png"),
+                                  AssetImage("lib/assets/images/no.png"),
                             ),
                           ),
                           Positioned(
