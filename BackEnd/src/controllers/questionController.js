@@ -106,58 +106,67 @@ exports.generateQuestions = async (req, res) => {
 
 // Internal function to generate questions automatically when memory is created
 exports.generateQuestionsForNewMemory = async (memory, contributorDetails) => {
-  try {
-    const prompt = `
-      Generate 5 questions about this memory that would help someone with amnesia recall details:
-      
-      Description: ${memory.description}
-      Relationship: This memory is from a ${contributorDetails.relationship_type} named ${contributorDetails.name}
-      ${memory.event_date ? `Date: This happened on ${memory.event_date}` : ''}
-      
-      For each question:
-      1. Make it specific to the description provided
-      2. Include a correct answer based on the description
-      3. Assign a difficulty level (1-5)
-      4. Assign points (5-20 based on difficulty)
-      
-      Format the response as JSON with this structure for each question:
-      {
-        "question": "Question text here?",
-        "correct_answer": "Correct answer here",
-        "difficulty": 3,
-        "points": 15
-      }
-    `;
-    console.log('Calling Gemini API...');
-    const result = await gemini.generateContent(prompt);
-    const responseText = result.response.text();
-    console.log('Gemini API Response:', responseText);
-    
-    const jsonStr = responseText.substring(
-      responseText.indexOf('['),
-      responseText.lastIndexOf(']') + 1
-    );
-    const questionsData = JSON.parse(jsonStr);
+    try {
+        console.log('Starting question generation for memory:', memory.id);
+        
+        const prompt = `
+            Generate 5 questions about this memory that would help someone with amnesia recall details:
+            
+            Description: ${memory.description}
+            Relationship: This memory is from a ${contributorDetails.relationship_type} named ${contributorDetails.name}
+            ${memory.event_date ? `Date: This happened on ${memory.event_date}` : ''}
+            
+            For each question:
+            1. Make it specific to the description provided
+            2. Include a correct answer based on the description
+            3. Assign a difficulty level (1-5)
+            4. Assign points (5-20 based on difficulty)
+            
+            Format the response as JSON with this structure for each question:
+            {
+                "question": "Question text here?",
+                "correct_answer": "Correct answer here",
+                "difficulty": 3,
+                "points": 15
+            }
+        `;
 
-    // Insert questions with patient_id
-    const { data: questions, error } = await supabase
-      .from('questions')
-      .insert(questionsData.map(q => ({
-        memory_id: memory.id,
-        patient_id: memory.patient_id,
-        question: q.question,
-        correct_answer: q.correct_answer,
-        points: q.points,
-        difficulty: q.difficulty
-      })))
-      .select();
+        console.log('Calling Gemini API...');
+        const result = await gemini.generateContent(prompt);
+        const responseText = result.response.text();
+        console.log('Gemini API Response:', responseText);
 
-    if (error) throw error;
-    return questions;
-  } catch (error) {
-    console.error('Question generation error:', error);
-    throw new Error(`Failed to generate questions: ${error.message}`);
-  }
+        const jsonStr = responseText.match(/\[.*\]/s)[0];
+        const questions = JSON.parse(jsonStr);
+
+        console.log('Parsed questions:', questions);
+
+        // Save questions to database
+        const { data: savedQuestions, error } = await supabase
+            .from('questions')
+            .insert(
+                questions.map(q => ({
+                    memory_id: memory.id,
+                    patient_id: memory.patient_id,
+                    question_text: q.question,
+                    correct_answer: q.correct_answer,
+                    difficulty_level: q.difficulty,
+                    points: q.points
+                }))
+            )
+            .select();
+
+        if (error) {
+            console.error('Database error:', error);
+            throw error;
+        }
+
+        console.log('Questions saved successfully:', savedQuestions);
+        return savedQuestions;
+    } catch (error) {
+        console.error('Question generation error:', error);
+        throw error;
+    }
 };
 
 // Get questions for a memory
