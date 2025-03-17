@@ -23,6 +23,10 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   int _maxLevels = 10; // Changed from 3 to 10
   bool _showLevelSelection = true;
 
+  // New properties for premium features
+  bool _hasPremiumAccess = false; // Set to true when user has premium access
+  int _freeLevelsCount = 5; // First 5 levels are free
+
   // Add these new properties
   List<Widget> _animations = [];
 
@@ -231,6 +235,151 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     _differences = _levelDifferences[_currentLevel];
     _totalDifferences = _differences.length;
     _animationController.forward();
+
+    // You would typically check for premium status here
+    // e.g. _checkPremiumStatus();
+  }
+
+  // Add this method to check premium status
+  void _checkPremiumStatus() {
+    // Here you would check your backend or local storage
+    // For now, we'll just use the hardcoded value
+    setState(() {
+      _hasPremiumAccess = false; // Set to false for demonstration
+    });
+  }
+
+  // Add this method to handle premium level selection
+  void _handleLevelSelection(int level) {
+    if (level >= _freeLevelsCount && !_hasPremiumAccess) {
+      _showPremiumUpgradeDialog();
+    } else {
+      setState(() {
+        _currentLevel = level;
+      });
+      _startGame();
+    }
+  }
+
+  // Add this method to show premium upgrade dialog
+  void _showPremiumUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFFFFD700),
+                  const Color(0xFFFFA500),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock,
+                    color: Color(0xFFFFD700),
+                    size: 48,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Premium Content',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'This level is only available with a premium subscription. Upgrade now to unlock all levels!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        'MAYBE LATER',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Here you would implement your subscription flow
+                        // For now, we'll just show a snackbar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Subscription feature coming soon!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Color(0xFFFFD700),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        'UPGRADE NOW',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _startGame() {
@@ -555,10 +704,14 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
 
   void _nextLevel() {
     if (_currentLevel < _maxLevels - 1) {
-      setState(() {
-        _currentLevel++;
-      });
-      _startGame();
+      if (_currentLevel + 1 >= _freeLevelsCount && !_hasPremiumAccess) {
+        _showPremiumUpgradeDialog();
+      } else {
+        setState(() {
+          _currentLevel++;
+        });
+        _startGame();
+      }
     }
   }
 
@@ -689,7 +842,83 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              // Premium info banner
+              if (!_hasPremiumAccess)
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.star,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "PREMIUM LEVELS",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              "Unlock all 10 levels with premium subscription",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Here you would implement your subscription flow
+                          _showPremiumUpgradeDialog();
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                        ),
+                        child: const Text(
+                          "UPGRADE",
+                          style: TextStyle(
+                            color: Color(0xFFFFD700),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 10),
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -707,111 +936,164 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   }
 
   Widget _buildLevelCard(int level) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentLevel = level;
-        });
-        _startGame();
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF2196F3).withOpacity(0.8),
-              const Color(0xFF0D47A1).withOpacity(0.9),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Background decorative elements
-            Positioned(
-              right: -20,
-              bottom: -20,
-              child: Icon(
-                Icons.search,
-                size: 100,
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
+    bool isPremiumLevel = level >= _freeLevelsCount && !_hasPremiumAccess;
 
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
+    return GestureDetector(
+      onTap: () => _handleLevelSelection(level),
+      child: Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isPremiumLevel
+                    ? [
+                        Colors.grey.withOpacity(0.5),
+                        Colors.grey.withOpacity(0.7),
+                      ]
+                    : [
+                        const Color(0xFF2196F3).withOpacity(0.8),
+                        const Color(0xFF0D47A1).withOpacity(0.9),
                       ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        "${level + 1}",
-                        style: TextStyle(
-                          color: const Color(0xFF0D3445),
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Background decorative elements
+                Positioned(
+                  right: -20,
+                  bottom: -20,
+                  child: Icon(
+                    Icons.search,
+                    size: 100,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            "${level + 1}",
+                            style: TextStyle(
+                              color: isPremiumLevel
+                                  ? Colors.grey.withOpacity(0.7)
+                                  : const Color(0xFF0D3445),
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _levelInfo[level]['name']!,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _levelInfo[level]['description']!,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      isPremiumLevel
+                          ? Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFD700).withOpacity(0.7),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.lock,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Premium banner if applicable
+          if (isPremiumLevel)
+            Positioned(
+              top: 10,
+              right: -30,
+              child: Transform.rotate(
+                angle: math.pi / 4,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'PREMIUM',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _levelInfo[level]['name']!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _levelInfo[level]['description']!,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
