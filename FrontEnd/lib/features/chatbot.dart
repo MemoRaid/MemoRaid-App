@@ -434,7 +434,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       SizedBox(width: 8),
-                      if (isUser) _buildAvatar("lib/assets/images/kushen.png"),
+                      if (isUser) _buildAvatar("lib/assets/images/no.png"),
                     ],
                   ),
                 ),

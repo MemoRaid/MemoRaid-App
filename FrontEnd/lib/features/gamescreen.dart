@@ -149,16 +149,16 @@ class GameScreen extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/home');
               break;
             case 1:
-              Navigator.pushReplacementNamed(context, '/progress');
+              Navigator.pushReplacementNamed(context, '/notes');
               break;
             case 2:
               Navigator.pushReplacementNamed(context, '/chatbot');
               break;
             case 3:
-              Navigator.pushReplacementNamed(context, '/rocket');
+              Navigator.pushReplacementNamed(context, '/progress');
               break;
             case 4:
-              Navigator.pushReplacementNamed(context, '/achievements');
+              Navigator.pushReplacementNamed(context, '/settings');
               break;
           }
         },
