@@ -125,12 +125,13 @@ exports.createMemory = async (req, res) => {
 
 
       
-      // Create memory
+      // Create memory with patient_id
       const { data: memory, error } = await supabase
         .from('memories')
         .insert([
           { 
             contributor_id: contributorId,
+            patient_id: contributor.user_id, // Add patient_id
             photo_url: photoUrl,
             description,
             event_date: eventDate || null
@@ -144,11 +145,12 @@ exports.createMemory = async (req, res) => {
           error: error.message 
         });
       }
-      
+
       res.status(201).json({
         message: 'Memory created successfully',
         memory: memory[0]
       });
+      
     } catch (error) {
       console.error('Create memory error:', error);
       res.status(500).json({ 
