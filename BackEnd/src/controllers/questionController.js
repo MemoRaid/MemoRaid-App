@@ -104,6 +104,62 @@ exports.generateQuestions = async (req, res) => {
     }
 };
 
+// Internal function to generate questions automatically when memory is created
+exports.generateQuestionsForNewMemory = async (memory, contributorDetails) => {
+  try {
+    const prompt = `
+      Generate 5 questions about this memory that would help someone with amnesia recall details:
+      
+      Description: ${memory.description}
+      Relationship: This memory is from a ${contributorDetails.relationship_type} named ${contributorDetails.name}
+      ${memory.event_date ? `Date: This happened on ${memory.event_date}` : ''}
+      
+      For each question:
+      1. Make it specific to the description provided
+      2. Include a correct answer based on the description
+      3. Assign a difficulty level (1-5)
+      4. Assign points (5-20 based on difficulty)
+      
+      Format the response as JSON with this structure for each question:
+      {
+        "question": "Question text here?",
+        "correct_answer": "Correct answer here",
+        "difficulty": 3,
+        "points": 15
+      }
+    `;
+    console.log('Calling Gemini API...');
+    const result = await gemini.generateContent(prompt);
+    const responseText = result.response.text();
+    console.log('Gemini API Response:', responseText);
+    
+    const jsonStr = responseText.substring(
+      responseText.indexOf('['),
+      responseText.lastIndexOf(']') + 1
+    );
+    const questionsData = JSON.parse(jsonStr);
+
+    // Insert questions with patient_id
+    const { data: questions, error } = await supabase
+      .from('questions')
+      .insert(questionsData.map(q => ({
+        memory_id: memory.id,
+        patient_id: memory.patient_id,
+        question: q.question,
+        correct_answer: q.correct_answer,
+        points: q.points,
+        difficulty: q.difficulty
+      })))
+      .select();
+
+    if (error) throw error;
+    return questions;
+  } catch (error) {
+    console.error('Question generation error:', error);
+    throw new Error(`Failed to generate questions: ${error.message}`);
+  }
+};
+
 // Get questions for a memory
 exports.getMemoryQuestions = async (req, res) => {
     try {
@@ -138,40 +194,19 @@ exports.getDailyQuestions = async (req, res) => {
     try {
       const userId = req.user.id;
       
-      // Get a random memory for this user that has questions
-      const { data: memories, error: memoriesError } = await supabase
-        .from('memories')
-        .select(`
-          id,
-          photo_url,
-          description,
-          memory_contributors!inner (
-            id,
-            user_id
-          )
-        `)
-        .eq('memory_contributors.user_id', userId)
-        .order('created_at', { ascending: false });
-      
-      if (memoriesError) {
-        return res.status(500).json({ 
-          message: 'Error fetching memories', 
-          error: memoriesError.message 
-        });
-      }
-      
-      if (!memories.length) {
-        return res.status(404).json({ message: 'No memories found for this user' });
-      }
-      
-      // Get a random memory from the list
-      const randomMemory = memories[Math.floor(Math.random() * memories.length)];
-      
-      // Get questions for this memory
+      // Get questions for this patient directly
       const { data: questions, error: questionsError } = await supabase
         .from('questions')
-        .select('*')
-        .eq('memory_id', randomMemory.id)
+        .select(`
+          *,
+          memories (
+            id,
+            photo_url,
+            description
+          )
+        `)
+        .eq('patient_id', userId)
+        .order('created_at', { ascending: false })
         .limit(5);
       
       if (questionsError) {
@@ -181,19 +216,13 @@ exports.getDailyQuestions = async (req, res) => {
         });
       }
       
-      // If no questions, generate them
       if (!questions.length) {
-        // Call the generate questions function
-        // This would typically be a direct function call, but for API purposes we'll return a message
-        return res.status(200).json({
-          message: 'No questions available yet. Need to generate questions for this memory.',
-          memory: randomMemory,
-          needsQuestions: true
+        return res.status(404).json({ 
+          message: 'No questions found for this user' 
         });
       }
       
       res.status(200).json({
-        memory: randomMemory,
         questions
       });
     } catch (error) {
@@ -208,8 +237,7 @@ exports.getDailyQuestions = async (req, res) => {
 // Submit user's answer to a question
 exports.submitAnswer = async (req, res) => {
     try {
-      const { questionId } = req.params;
-      const { answer } = req.body;
+      const { questionId, answer } = req.body;
       const userId = req.user.id;
       
       if (!answer) {
@@ -269,7 +297,7 @@ exports.submitAnswer = async (req, res) => {
             {
               user_id: userId,
               points: question.points,
-              reward_type: 'question_correct'
+              reward_type: 'question_correct' 
             }
           ]);
       }
@@ -337,7 +365,6 @@ exports.getUserProgress = async (req, res) => {
       }
       
       const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
-      
       const accuracyRate = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
       
       res.status(200).json({
@@ -356,8 +383,4 @@ exports.getUserProgress = async (req, res) => {
       });
     }
 };
-  
 
-  
-
-  
