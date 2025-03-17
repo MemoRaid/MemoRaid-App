@@ -150,7 +150,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex:
-            4, // Updated from 3 to 4 since Achievements is now at index 4
+            3, // Updated from 3 to 4 since Achievements is now at index 4
         onTap: (index) {
           // The navigation is now handled in the CustomBottomNavigationBar
         },
