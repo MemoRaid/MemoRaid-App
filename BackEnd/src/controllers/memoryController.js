@@ -150,7 +150,7 @@ exports.createMemory = async (req, res) => {
         message: 'Memory created successfully',
         memory: memory[0]
       });
-      
+
     } catch (error) {
       console.error('Create memory error:', error);
       res.status(500).json({ 
@@ -165,26 +165,7 @@ exports.getUserMemories = async (req, res) => {
     try {
       const { userId } = req.params;
       
-      // Get all contributors for this user
-      const { data: contributors, error: contributorsError } = await supabase
-        .from('memory_contributors')
-        .select('id')
-        .eq('user_id', userId);
-      
-      if (contributorsError) {
-        return res.status(500).json({ 
-          message: 'Error fetching contributors', 
-          error: contributorsError.message 
-        });
-      }
-      
-      if (!contributors.length) {
-        return res.status(200).json({ memories: [] });
-      }
-      
-      // Get all memories from these contributors
-      const contributorIds = contributors.map(c => c.id);
-      
+      // Get memories directly using patient_id instead of going through contributors
       const { data: memories, error: memoriesError } = await supabase
         .from('memories')
         .select(`
@@ -193,13 +174,13 @@ exports.getUserMemories = async (req, res) => {
           description,
           event_date,
           created_at,
-          contributor_id,
+          patient_id,
           memory_contributors (
             name,
             relationship_type
           )
         `)
-        .in('contributor_id', contributorIds)
+        .eq('patient_id', userId)  // Direct query using patient_id
         .order('created_at', { ascending: false });
       
       if (memoriesError) {
@@ -210,7 +191,7 @@ exports.getUserMemories = async (req, res) => {
       }
       
       res.status(200).json({
-        memories
+        memories: memories || []
       });
     } catch (error) {
       console.error('Get memories error:', error);
@@ -311,6 +292,5 @@ exports.deleteMemory = async (req, res) => {
       });
     }
   };
-  
-  
-  
+
+
