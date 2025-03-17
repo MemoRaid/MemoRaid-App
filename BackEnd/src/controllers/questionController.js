@@ -135,3 +135,85 @@ exports.generateQuestionsForNewMemory = async (memory, contributorDetails) => {
     }
 };
 
+exports.generateQuestions = async (memory, contributorDetails) => {
+    try {
+        console.log('Starting question generation for memory:', memory.id);
+        
+        // Get Gemini model
+        const model = await gemini.getModel();
+
+        // Create prompt
+        const prompt = {
+            text: `Generate 5 questions about this memory that would help someone with amnesia recall details:
+            
+            Description: ${memory.description}
+            Relationship: This memory is from a ${contributorDetails.relationship_type} named ${contributorDetails.name}
+            ${memory.event_date ? `Date: This happened on ${memory.event_date}` : ''}
+            
+            For each question:
+            1. Make it specific to the description provided
+            2. Include a correct answer based on the description
+            3. Assign a difficulty level (1-5)
+            4. Assign points (5-20 based on difficulty)
+            
+            Format as JSON array of objects with this exact structure:
+            [
+                {
+                    "question": "What was happening in this memory?",
+                    "correct_answer": "A family dinner",
+                    "difficulty": 1,
+                    "points": 5
+                }
+            ]`
+        };
+
+        // Generate questions
+        console.log('Calling Gemini API...');
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        console.log('Raw AI response:', text);
+
+        // Parse JSON response
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) {
+            throw new Error('No valid JSON found in response');
+        }
+
+        const questions = JSON.parse(jsonMatch[0]);
+        console.log('Parsed questions:', questions);
+
+        // Validate questions format
+        if (!Array.isArray(questions) || questions.length === 0) {
+            throw new Error('Invalid questions format received from AI');
+        }
+
+        // Save questions to database
+        const { data: savedQuestions, error: saveError } = await supabase
+            .from('questions')
+            .insert(
+                questions.map(q => ({
+                    memory_id: memory.id,
+                    patient_id: memory.patient_id,
+                    question_text: q.question,
+                    correct_answer: q.correct_answer,
+                    difficulty_level: q.difficulty,
+                    points: q.points
+                }))
+            )
+            .select();
+
+        if (saveError) {
+            console.error('Database error:', saveError);
+            throw saveError;
+        }
+
+        console.log('Questions saved successfully:', savedQuestions);
+        return savedQuestions;
+
+    } catch (error) {
+        console.error('Question generation error:', error);
+        throw error;
+    }
+};
+

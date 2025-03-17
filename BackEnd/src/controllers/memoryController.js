@@ -1,6 +1,6 @@
 const supabase = require('../config/supabase');
 const { v4: uuidv4 } = require('uuid');
-const { generateQuestionsForNewMemory } = require('./questionController');
+const { generateQuestions } = require('./questionController');
 
 // Create a memory contributor
 exports.createContributor = async (req, res) => {
@@ -103,77 +103,68 @@ exports.uploadPhoto = async (req, res) => {
 // Create a memory
 exports.createMemory = async (req, res) => {
     try {
-      const { contributorId, photoUrl, description, eventDate } = req.body;
-      
-      // Validate input
-      if (!contributorId || !photoUrl || !description) {
-        return res.status(400).json({ 
-          message: 'Contributor ID, photo URL, and description are required' 
-        });
-      }
-      
-      // Get contributor details including name and relationship type
-      const { data: contributor, error: contributorError } = await supabase
-        .from('memory_contributors')
-        .select('id, user_id, name, relationship_type')
-        .eq('id', contributorId)
-        .single();
-      
-      if (contributorError) {
-        return res.status(404).json({ message: 'Contributor not found' });
-      }
-      
-      // Create memory with patient_id
-      const { data: memory, error } = await supabase
-        .from('memories')
-        .insert([{ 
-          contributor_id: contributorId,
-          patient_id: contributor.user_id,
-          photo_url: photoUrl,
-          description,
-          event_date: eventDate || null
-        }])
-        .select();
-      
-      if (error) {
-        return res.status(500).json({ 
-          message: 'Error creating memory', 
-          error: error.message 
-        });
-      }
-
-      // This is where question generation is triggered
-      try {
-        const questions = await generateQuestionsForNewMemory(memory[0], contributor);
-        console.log('Questions generated:', questions);
+        const { contributorId, photoUrl, description, eventDate } = req.body;
         
-        if (!questions || questions.length === 0) {
-            return res.status(201).json({
-                message: 'Memory created but no questions generated',
-                memory: memory[0]
+        // Validate input
+        if (!contributorId || !photoUrl || !description) {
+            return res.status(400).json({ 
+                message: 'Contributor ID, photo URL, and description are required' 
             });
         }
         
-        res.status(201).json({
-            message: 'Memory and questions created successfully',
-            memory: memory[0],
-            questions
-        });
-      } catch (questionError) {
-        console.error('Question generation failed:', questionError);
-        // Still return success for memory creation
-        res.status(201).json({
-            message: 'Memory created but question generation failed',
-            memory: memory[0],
-            error: questionError.message
-        });
-      }
+        // Get contributor details
+        const { data: contributor, error: contributorError } = await supabase
+            .from('memory_contributors')
+            .select('id, user_id, name, relationship_type')
+            .eq('id', contributorId)
+            .single();
+        
+        if (contributorError) {
+            return res.status(404).json({ message: 'Contributor not found' });
+        }
+        
+        // Create memory
+        const { data: memory, error } = await supabase
+            .from('memories')
+            .insert([{ 
+                contributor_id: contributorId,
+                patient_id: contributor.user_id,
+                photo_url: photoUrl,
+                description,
+                event_date: eventDate || null
+            }])
+            .select();
+        
+        if (error) {
+            return res.status(500).json({ 
+                message: 'Error creating memory', 
+                error: error.message 
+            });
+        }
+
+        // Generate questions
+        try {
+            const questions = await generateQuestions(memory[0], contributor);
+            
+            res.status(201).json({
+                message: 'Memory and questions created successfully',
+                memory: memory[0],
+                questions
+            });
+        } catch (questionError) {
+            console.error('Question generation failed:', questionError);
+            res.status(201).json({
+                message: 'Memory created but question generation failed',
+                memory: memory[0],
+                error: questionError.message
+            });
+        }
     } catch (error) {
-      console.error('Create memory error:', error);
-      res.status(500).json({ 
-        message: 'Server error creating memory', 
-        error: error.message 
-      });
+        console.error('Create memory error:', error);
+        res.status(500).json({ 
+            message: 'Server error creating memory', 
+            error: error.message 
+        });
     }
 };
 
@@ -312,4 +303,4 @@ exports.deleteMemory = async (req, res) => {
 
 
 
- 
+
