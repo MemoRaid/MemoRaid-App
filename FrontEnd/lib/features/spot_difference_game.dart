@@ -23,15 +23,17 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   int _maxLevels = 10; // Changed from 3 to 10
   bool _showLevelSelection = true;
 
+  // Add these new properties
+  List<Widget> _animations = [];
+
   // List of differences per level
   final List<List<Map<String, dynamic>>> _levelDifferences = [
     // Level 1
     [
-      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': false},
-      {'x': -0.413, 'y': 1.671, 'radius': 0.04, 'found': false},
-      {'x': 0.665, 'y': 1.326, 'radius': 0.04, 'found': false},
-      {'x': -0.263, 'y': 1.752, 'radius': 0.04, 'found': false},
-      {'x': 0.2, 'y': 0.8, 'radius': 0.05, 'found': false},
+      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
+      {'x': 0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
+      {'x': -0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
+      {'x': 0.326, 'y': 1.882, 'radius': 0.04, 'found': true},
     ],
     // Level 2
     [
@@ -284,6 +286,31 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
     print(
         "{'x': ${relativeX.toStringAsFixed(3)}, 'y': ${relativeY.toStringAsFixed(3)}, 'radius': 0.04, 'found': false},");
 
+    // Add a tap indicator animation for any tap
+    setState(() {
+      _animations = [
+        TapIndicatorAnimation(
+          position: Offset(
+            (imageIndex == 0 ? relativeX : relativeX) * imageSize.width,
+            relativeY * imageSize.height,
+          ),
+        ),
+        ..._animations,
+      ];
+    });
+
+    // Remove the tap indicator after a short delay
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          if (_animations.isNotEmpty &&
+              _animations.last is TapIndicatorAnimation) {
+            _animations.removeLast();
+          }
+        });
+      }
+    });
+
     // Only process taps on the modified image (index 1)
     if (imageIndex == 1) {
       _checkForDifference(relativeX, relativeY);
@@ -292,6 +319,8 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
 
   void _checkForDifference(double tapX, double tapY) {
     bool foundNew = false;
+    final size = MediaQuery.of(context).size;
+    final imageSize = Size(size.width, size.height * 0.35);
 
     for (var i = 0; i < _differences.length; i++) {
       final difference = _differences[i];
@@ -305,18 +334,58 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
             _differences[i]['found'] = true;
             _foundDifferences++;
             foundNew = true;
+
+            // Add correct animation
+            _animations = [
+              BubbleAnimation(
+                position: Offset(
+                  difference['x'] * imageSize.width,
+                  difference['y'] * imageSize.height,
+                ),
+                isCorrect: true,
+              ),
+              ..._animations,
+            ];
           });
 
-          // Visual feedback for correct tap
-          _showSuccessFeedback();
+          // Remove animation after delay
+          Future.delayed(const Duration(milliseconds: 800), () {
+            if (mounted) {
+              setState(() {
+                _animations.removeLast();
+              });
+            }
+          });
 
+          _showSuccessFeedback();
           break;
         }
       }
     }
 
     if (!foundNew) {
-      // Visual feedback for incorrect tap
+      setState(() {
+        // Add wrong animation at tap position
+        _animations = [
+          BubbleAnimation(
+            position: Offset(tapX * imageSize.width, tapY * imageSize.height),
+            isCorrect: false,
+          ),
+          ..._animations,
+        ];
+      });
+
+      // Remove animation after delay
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) {
+          setState(() {
+            if (_animations.isNotEmpty) {
+              _animations.removeLast();
+            }
+          });
+        }
+      });
+
       _showErrorFeedback();
     }
 
@@ -1036,6 +1105,7 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
                                         return const SizedBox.shrink();
                                       }
                                     }).toList(),
+                                    ..._animations, // Add this line to show animations
                                   ],
                                 ),
                               ),
@@ -1092,6 +1162,200 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
           ),
         ),
       ),
+    );
+  }
+}
+
+class BubbleAnimation extends StatelessWidget {
+  final Offset position;
+  final bool isCorrect;
+
+  const BubbleAnimation({
+    Key? key,
+    required this.position,
+    required this.isCorrect,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.elasticOut,
+      builder: (context, double value, child) {
+        final mainOpacity = (1 - value).clamp(0.0, 1.0);
+        final ringOpacity = ((1 - value) * 0.5).clamp(0.0, 1.0);
+
+        return Stack(
+          children: [
+            // Ripple effect
+            Positioned(
+              left: position.dx - 40,
+              top: position.dy - 40,
+              child: Opacity(
+                opacity: (1 - value).clamp(0.0, 0.5),
+                child: Transform.scale(
+                  scale: value * 2.5,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isCorrect ? Colors.green : Colors.red,
+                        width: (3 * (1 - value)).clamp(0.0, 3.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Tap point flash
+            Positioned(
+              left: position.dx - 5,
+              top: position.dy - 5,
+              child: Opacity(
+                opacity: (1 - value).clamp(0.0, 1.0),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: isCorrect ? Colors.green : Colors.red,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isCorrect ? Colors.green : Colors.red)
+                            .withOpacity(0.5),
+                        blurRadius: 10,
+                        spreadRadius: value * 5,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Main bubble with icon
+            Positioned(
+              left: position.dx - 20,
+              top: position.dy - 20,
+              child: Opacity(
+                opacity: mainOpacity,
+                child: Transform.scale(
+                  scale: 0.2 + (value * 1.2),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: (isCorrect ? Colors.green : Colors.red)
+                          .withOpacity(0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isCorrect ? Colors.green : Colors.red,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isCorrect ? Colors.green : Colors.red)
+                              .withOpacity(0.3),
+                          blurRadius: 10,
+                          spreadRadius: (value * 5).clamp(0.0, 5.0),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        isCorrect ? Icons.check : Icons.close,
+                        color: isCorrect ? Colors.green : Colors.red,
+                        size: (24 * (0.5 + value)).clamp(12.0, 36.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Outer pulse ring
+            if (isCorrect)
+              Positioned(
+                left: position.dx - 30,
+                top: position.dy - 30,
+                child: Opacity(
+                  opacity: ringOpacity,
+                  child: Transform.scale(
+                    scale: (value * 1.5).clamp(0.0, 1.5),
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.green.withOpacity(0.5),
+                          width: (2 * (1 - value)).clamp(0.0, 2.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Add this new class after the BubbleAnimation class
+class TapIndicatorAnimation extends StatelessWidget {
+  final Offset position;
+
+  const TapIndicatorAnimation({
+    Key? key,
+    required this.position,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      builder: (context, double value, child) {
+        return Positioned(
+          left: position.dx - 20,
+          top: position.dy - 20,
+          child: Opacity(
+            opacity: (1 - value).clamp(0.0, 1.0),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.2),
+                border: Border.all(
+                  color: Colors.white,
+                  width: (3 * (1 - value)).clamp(0.0, 3.0),
+                ),
+              ),
+              child: Center(
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.7),
+                        blurRadius: 10,
+                        spreadRadius: value * 5,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
