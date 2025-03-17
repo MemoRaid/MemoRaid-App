@@ -13,7 +13,9 @@ import 'features/password_security_screen.dart';
 import 'features/notifications_screen.dart';
 import 'features/privacy_policy_screen.dart';
 import 'features/terms_of_service_screen.dart';
-import 'config/api_config.dart'; // Import the API config
+import 'config/api_config.dart';
+import 'features/note.dart';
+// Import the API config
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,8 +47,9 @@ class MyApp extends StatelessWidget {
             '/': (context) => const SplashScreen(),
             '/home': (context) => const HomeScreen(),
             '/chatbot': (context) => const ChatScreen(),
-            '/achievements': (context) => const LeaderboardScreen(),
+            '/progress': (context) => const LeaderboardScreen(),
             '/settings': (context) => const SettingsScreen(),
+            '/notebook': (context) => const TaskSchedulerScreen(),
 
             // Settings sub-screens
             '/help_center': (context) => const HelpCenterScreen(),

@@ -3,6 +3,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../config/api_config.dart';
+import 'homescreen01.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -238,7 +239,12 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Navigate to HomeScreen01 instead of just popping
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          },
         ),
         actions: [
           IconButton(
