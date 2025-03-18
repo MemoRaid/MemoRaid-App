@@ -6,6 +6,11 @@ const generateQuestions = async (memory, contributorDetails) => {
     try {
         console.log('Starting question generation for memory:', memory.id);
         
+        // Validate memory ID
+        if (!memory.id) {
+            throw new Error('Invalid memory ID');
+        }
+
         const model = await gemini.getModel();
 
         const promptText = `Generate 5 multiple-choice questions to help an amnesia patient recall this memory. Return ONLY a JSON array.
@@ -48,38 +53,47 @@ Format response exactly like this:
         try {
             const questions = JSON.parse(text);
             
-            // Validate question format
+            // Enhanced validation
             if (!Array.isArray(questions) || questions.length === 0) {
                 throw new Error('Invalid question format received');
             }
 
-            // Validate each question's structure
+            // More detailed validation with specific error messages
             questions.forEach((q, index) => {
-                if (!q.question || !Array.isArray(q.options) || 
-                    q.options.length !== 4 || 
-                    q.correct_option_index === undefined ||
-                    q.options[3] !== "I don't remember") {
-                    throw new Error(`Invalid question format at index ${index}`);
+                const errors = [];
+                if (!q.question) errors.push('Question text missing');
+                if (!Array.isArray(q.options)) errors.push('Options must be an array');
+                if (q.options.length !== 4) errors.push('Must have exactly 4 options');
+                if (q.options[3] !== "I don't remember") errors.push('Last option must be "I don\'t remember"');
+                if (q.correct_option_index === undefined) errors.push('Correct option index missing');
+                
+                if (errors.length > 0) {
+                    throw new Error(`Question ${index + 1} validation failed: ${errors.join(', ')}`);
                 }
             });
 
-            // Save to database with validation
+            // Format questions for database insertion
+            const formattedQuestions = questions.map(q => ({
+                memory_id: memory.id,
+                patient_id: memory.patient_id,
+                question_text: q.question,
+                options: JSON.stringify(q.options), // Convert to JSON string
+                correct_option_index: parseInt(q.correct_option_index),
+                difficulty_level: Math.min(Math.max(parseInt(q.difficulty), 1), 5),
+                points: Math.min(Math.max(parseInt(q.points), 5), 20)
+            }));
+
+            // Save to database with better error handling
             const { data: savedQuestions, error } = await supabase
                 .from('questions')
-                .insert(
-                    questions.map(q => ({
-                        memory_id: memory.id,
-                        patient_id: memory.patient_id,
-                        question_text: q.question,
-                        options: q.options,
-                        correct_option_index: q.correct_option_index,
-                        difficulty_level: Math.min(Math.max(parseInt(q.difficulty), 1), 5),
-                        points: Math.min(Math.max(parseInt(q.points), 5), 20)
-                    }))
-                )
+                .insert(formattedQuestions)
                 .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Database insertion error:', error);
+                throw new Error(`Failed to save questions: ${error.message}`);
+            }
+
             return savedQuestions;
 
         } catch (parseError) {
