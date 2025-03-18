@@ -8,36 +8,60 @@ const generateQuestions = async (memory, contributorDetails) => {
         
         const model = await gemini.getModel();
 
-        const promptText = `Generate 5 multiple-choice questions based on this memory. Return ONLY a JSON array, no markdown formatting or other text.
+        const promptText = `Generate 5 multiple-choice questions to help an amnesia patient recall this memory. Return ONLY a JSON array.
 
 Context:
 - Description: ${memory.description}
 - Person: ${contributorDetails.name} (${contributorDetails.relationship_type})
 ${memory.event_date ? `- Date: ${memory.event_date}` : ''}
 
-Format your response exactly like this, with no additional text or formatting:
+Requirements:
+- Questions should help patient gradually recall details
+- Start with simpler questions about visible elements
+- Progress to more specific memory details
+- Each question must have exactly 4 options
+- Last option must always be "I don't remember"
+- Wrong options should be plausible but clearly incorrect
+- Difficulty increases progressively (1-5)
+
+Format response exactly like this:
 [{
-    "question": "What was the specific event described?",
-    "correct_answer": "Birthday party at the beach",
+    "question": "Who can you see in this photo?",
+    "options": [
+        "Mom and Dad",
+        "Only Dad",
+        "The whole family",
+        "I don't remember"
+    ],
+    "correct_option_index": 0,
     "difficulty": 1,
     "points": 5
-}]
-
-Make questions test specific memory details. Difficulty: 1-5, Points: 5-20.`;
+}]`;
 
         const result = await model.generateContent([promptText]);
         const response = await result.response;
         let text = response.text();
         
-        // Clean up the response to extract just the JSON array
+        // Clean up and parse JSON
         text = text.replace(/```json\n|\n```/g, '').trim();
         
-        // Parse and validate JSON
         try {
             const questions = JSON.parse(text);
+            
+            // Validate question format
             if (!Array.isArray(questions) || questions.length === 0) {
                 throw new Error('Invalid question format received');
             }
+
+            // Validate each question's structure
+            questions.forEach((q, index) => {
+                if (!q.question || !Array.isArray(q.options) || 
+                    q.options.length !== 4 || 
+                    q.correct_option_index === undefined ||
+                    q.options[3] !== "I don't remember") {
+                    throw new Error(`Invalid question format at index ${index}`);
+                }
+            });
 
             // Save to database with validation
             const { data: savedQuestions, error } = await supabase
@@ -47,7 +71,8 @@ Make questions test specific memory details. Difficulty: 1-5, Points: 5-20.`;
                         memory_id: memory.id,
                         patient_id: memory.patient_id,
                         question_text: q.question,
-                        correct_answer: q.correct_answer,
+                        options: q.options,
+                        correct_option_index: q.correct_option_index,
                         difficulty_level: Math.min(Math.max(parseInt(q.difficulty), 1), 5),
                         points: Math.min(Math.max(parseInt(q.points), 5), 20)
                     }))
@@ -56,9 +81,10 @@ Make questions test specific memory details. Difficulty: 1-5, Points: 5-20.`;
 
             if (error) throw error;
             return savedQuestions;
+
         } catch (parseError) {
-            console.error('JSON Parse Error:', text); // Log the actual text for debugging
-            throw new Error('Failed to parse questions: ' + parseError.message);
+            console.error('Question generation error:', parseError);
+            throw new Error('Failed to generate valid questions: ' + parseError.message);
         }
 
     } catch (error) {
