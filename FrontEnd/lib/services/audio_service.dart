@@ -1,6 +1,8 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'dart:async';
+import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 
 class AudioService {
   final AudioPlayer _player = AudioPlayer();
@@ -29,41 +31,57 @@ class AudioService {
 
   Future<void> loadStoryAudio(String storyTitle) async {
     try {
-      // Map specific story titles to their actual file names
-      String audioPath = 'lib/assets/audio/';
+      // Clear any previous audio
+      await _player.stop();
+
+      // Debug the story title being requested
+      developer.log('Loading audio for story: "$storyTitle"');
+
+      // Using direct path mapping for each story with audio
       if (storyTitle == 'The Family Reunion') {
-        audioPath += 'Story1.mp3';
+        developer.log('Loading Story1.mp3');
+        await _player.setAsset('lib/assets/audio/Story1.mp3');
       } else if (storyTitle == 'The World Traveler') {
-        audioPath += 'Story2.mp3';
-      } else {
-        // For stories without specific audio files, create a file name based on the title
-        String audioFileName = storyTitle.toLowerCase().replaceAll(' ', '_');
-        audioPath += '$audioFileName.mp3';
-      }
+        developer.log('Loading Story2.mp3');
+        await _player.setAsset('lib/assets/audio/Story2.mp3');
+      } else if (storyTitle == 'The Battle of Rivers Crossing') {
+        // Use a more direct approach for Story4
+        developer.log('Attempting to load Story4.mp3');
 
-      print('Attempting to load audio file: $audioPath');
+        try {
+          // Try loading directly with the absolute path first
+          await _player.setAsset('lib/assets/audio/Story4.mp3');
+          developer.log('Successfully loaded Story4.mp3');
+        } catch (error) {
+          developer.log('Failed to load Story4.mp3: $error', error: error);
 
-      // Try to load the audio file
-      if (storyTitle == 'The Family Reunion' ||
-          storyTitle == 'The World Traveler') {
-        await _player.setAsset(audioPath);
-        print('Successfully loaded story audio: $storyTitle');
+          // Try with a folder path approach
+          try {
+            await _player.setAsset('assets/audio/Story4.mp3');
+            developer.log('Loaded Story4 with assets/ prefix');
+          } catch (error2) {
+            // Final fallback to online sample
+            developer.log(
+                'All attempts to load Story4.mp3 failed, using online sample');
+            await _player.setUrl(
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+          }
+        }
       } else {
-        // For other stories, use a sample audio as fallback
-        print('No specific audio file for this story, using fallback');
+        // Use online sample for other stories
+        developer.log('No audio mapping for $storyTitle, using online sample');
         await _player.setUrl(
             'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
       }
     } catch (e) {
-      print('Error loading audio: $e');
+      developer.log('Error in loadStoryAudio: $e', error: e);
 
-      // Fallback to online sample if local audio fails
+      // Fallback to online sample
       try {
         await _player.setUrl(
             'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
-        print('Loaded fallback audio');
       } catch (fallbackError) {
-        print('Error loading fallback audio: $fallbackError');
+        developer.log('Failed to load fallback audio', error: fallbackError);
       }
     }
   }
