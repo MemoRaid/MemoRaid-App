@@ -9,7 +9,7 @@ const app = express();
 
 // CORS configuration - Important to allow requests from your frontend
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.251.135:3000'],
+  origin: '*',  // Allow all origins in development
   credentials: true
 }));
 

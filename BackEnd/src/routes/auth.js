@@ -24,4 +24,5 @@ router.get('/me', auth, authController.getCurrentUser);
 router.post('/request-verification', authController.requestEmailVerification);
 router.post('/verify-email', authController.verifyEmail);
 
-module.exports = router;
+// Add these new endpoints for password reset
+module.exports = router
