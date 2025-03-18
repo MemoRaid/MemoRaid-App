@@ -44,6 +44,9 @@ class AudioService {
       } else if (storyTitle == 'The World Traveler') {
         developer.log('Loading Story2.mp3');
         await _player.setAsset('lib/assets/audio/Story2.mp3');
+      } else if (storyTitle == 'The Mansion Mystery') {
+        developer.log('Loading Story3.mp3');
+        await _player.setAsset('lib/assets/audio/Story3.mp3');
       } else if (storyTitle == 'The Battle of Rivers Crossing') {
         // Use a more direct approach for Story4
         developer.log('Attempting to load Story4.mp3');
