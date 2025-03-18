@@ -14,8 +14,6 @@ import 'features/notifications_screen.dart';
 import 'features/privacy_policy_screen.dart';
 import 'features/terms_of_service_screen.dart';
 import 'config/api_config.dart'; // Import the API config
-import 'features/tests/question_test_screen.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await APIConfig.listModels();
@@ -55,8 +53,7 @@ class MyApp extends StatelessWidget {
             '/password_security': (context) => const PasswordSecurityScreen(),
             '/notifications': (context) => const NotificationsScreen(),
             '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-            '/terms': (context) => const TermsOfServiceScreen(),
-            '/test-questions': (context) => const QuestionTestScreen(),
+            '/terms': (context) => const TermsOfServiceScreen()
           },
         );
       },
