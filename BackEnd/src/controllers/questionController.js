@@ -128,7 +128,7 @@ const getMemoryQuestions = async (req, res) => {
             });
         }
 
-        // Get questions
+        // Update the questions query section
         const { data: questions, error } = await supabase
             .from('questions')
             .select(`
@@ -138,24 +138,39 @@ const getMemoryQuestions = async (req, res) => {
                 difficulty_level,
                 points,
                 memory_id,
+                correct_option_index,  // Add this
                 memories (
                     photo_url,
-                    brief_description
+                    brief_description,
+                    description      // Add this for context
                 )
             `)
             .eq('memory_id', memory_id)
+            .eq('patient_id', patient_id)  // Add this line
             .order('difficulty_level', { ascending: true });
         
         if (error) throw error;
 
-        // Format questions for frontend
+        // Update the formatting section
         const formattedQuestions = questions.map(q => ({
-            ...q,
+            id: q.id,
+            question: q.question_text,
             options: JSON.parse(q.options),
-            correct_answer: q.correct_answer || q.options[q.correct_option_index]
+            difficulty: q.difficulty_level,
+            points: q.points,
+            memory: {
+                id: q.memory_id,
+                photo_url: q.memories.photo_url,
+                brief_description: q.memories.brief_description
+            },
+            correct_option_index: q.correct_option_index
         }));
 
-        res.json({ questions: formattedQuestions });
+        res.json({ 
+            success: true,
+            questions: formattedQuestions,
+            total: formattedQuestions.length
+        });
     } catch (error) {
         console.error('Error fetching memory questions:', error);
         res.status(500).json({ error: error.message });
