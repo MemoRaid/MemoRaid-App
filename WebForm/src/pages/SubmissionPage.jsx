@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom'; // Add useLocation import
 import { 
   Container, 
   Typography, 
@@ -19,7 +19,8 @@ import { submitContributor, getUserFromToken } from '../services/api';
 const steps = ['Your Information', 'Add Memories'];
 
 const SubmissionPage = () => {
-  const { token } = useParams();
+  const { token: pathToken } = useParams(); // Rename to pathToken to avoid conflicts
+  const location = useLocation(); // Add this to get location object
   const navigate = useNavigate();
   
   const [activeStep, setActiveStep] = useState(0);
@@ -34,6 +35,13 @@ const SubmissionPage = () => {
   useEffect(() => {
     const fetchUserFromToken = async () => {
       try {
+        // Get token from either path params or query params
+        const queryParams = new URLSearchParams(location.search);
+        const queryToken = queryParams.get('token');
+        const token = pathToken || queryToken;
+        
+        console.log("Using token:", token); // Debug log
+        
         if (token) {
           try {
             const userData = await getUserFromToken(token);
@@ -56,7 +64,7 @@ const SubmissionPage = () => {
     };
   
     fetchUserFromToken();
-  }, [token]);
+  }, [pathToken, location]);
   
   const handleContributorSubmit = async (contributorData) => {
     try {
