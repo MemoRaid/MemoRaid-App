@@ -21,6 +21,8 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
   int _remainingQuestionTime = 30; // seconds per question
   int _score = 0;
   List<bool?> _questionResults = [];
+  // Add a list to track selected option indexes
+  List<int?> _selectedOptions = [];
   late AnimationController _animationController;
   late AudioService _audioService;
   bool _isPlaying = false;
@@ -552,6 +554,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     });
     // Initialize with empty list since no story is selected yet
     _questionResults = [];
+    _selectedOptions = [];
   }
 
   @override
@@ -572,6 +575,8 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
       _score = 0;
       // Initialize question results with the correct length for the selected story
       _questionResults = List.filled(_stories[index]['questions'].length, null);
+      // Initialize selected options list with nulls
+      _selectedOptions = List.filled(_stories[index]['questions'].length, null);
     });
 
     // Load audio for the selected story
@@ -621,6 +626,8 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
           // Record as incorrect answer if time runs out
           if (_questionResults[_currentQuestionIndex] == null) {
             _questionResults[_currentQuestionIndex] = false;
+            // No option was selected if time ran out
+            _selectedOptions[_currentQuestionIndex] = null;
           }
 
           // Move to next question or results
@@ -644,6 +651,8 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     final correctIndex = questions[_currentQuestionIndex]['correctIndex'];
 
     setState(() {
+      // Store the selected option index
+      _selectedOptions[_currentQuestionIndex] = selectedOptionIndex;
       _questionResults[_currentQuestionIndex] =
           selectedOptionIndex == correctIndex;
       if (selectedOptionIndex == correctIndex) {
@@ -1195,7 +1204,10 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                 bool isCorrectOption = index == correctIndex;
                 bool isAnswered =
                     _questionResults[_currentQuestionIndex] != null;
-                bool userSelectedThisOption = false; // We'll set this if needed
+
+                // Check if this is the option the user selected
+                bool userSelectedThisOption =
+                    _selectedOptions[_currentQuestionIndex] == index;
 
                 // Determine the container color based on various states
                 Color containerColor = Color(0xFF0D3445); // Default color
@@ -1204,8 +1216,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                   if (isCorrectOption) {
                     // Always show correct option in green once answered
                     containerColor = Colors.green;
-                  } else if (_questionResults[_currentQuestionIndex] == false &&
-                      userSelectedThisOption) {
+                  } else if (userSelectedThisOption) {
                     // Show incorrect selected option in red
                     containerColor = Colors.red;
                   }
