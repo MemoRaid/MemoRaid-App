@@ -17,18 +17,25 @@ import {
   Alert,
   Stepper,
   Step,
-  StepLabel
+  StepLabel,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PhotoUpload from './PhotoUpload';
 import { submitMemory } from '../services/api';
 
 // Validation schema
 const MemorySchema = Yup.object().shape({
   description: Yup.string()
-    .required('Please provide a description of this memory')
-    .min(10, 'Description should be at least 10 characters'),
+    .required('Please provide a detailed description')
+    .min(100, 'Description should be at least 100 characters'),
+  briefDescription: Yup.string()
+    .required('Please provide a brief description')
+    .max(100, 'Brief description should be under 100 characters'),
   eventDate: Yup.date()
     .nullable()
     .typeError('Please enter a valid date')
@@ -57,6 +64,7 @@ const MemoryForm = ({ contributorId, onMemoryAdded, onComplete }) => {
       const newMemory = {
         photoUrl: currentPhoto,
         description: values.description,
+        briefDescription: values.briefDescription,
         eventDate: values.eventDate || null,
         contributorId
       };
@@ -162,6 +170,7 @@ const MemoryForm = ({ contributorId, onMemoryAdded, onComplete }) => {
           <Formik
             initialValues={{
               description: '',
+              briefDescription: '',
               eventDate: ''
             }}
             validationSchema={MemorySchema}
@@ -169,11 +178,49 @@ const MemoryForm = ({ contributorId, onMemoryAdded, onComplete }) => {
           >
             {({ errors, touched, values, handleChange, handleSubmit }) => (
               <Form>
+                <Accordion defaultExpanded sx={{ mb: 2 }}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="subtitle1" color="primary">
+                      Description Guidelines
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" color="primary">
+                        Detailed Description (For Question Generation):
+                      </Typography>
+                      <ul>
+                        <li>Include specific details about who was present</li>
+                        <li>Mention the exact location</li>
+                        <li>Include the date or time period</li>
+                        <li>Describe emotions and reactions</li>
+                      </ul>
+                      <Typography variant="caption" color="text.secondary">
+                        Example: "On July 15th, we celebrated Sarah's birthday at Miami Beach with Mom and Dad. Sarah was overjoyed with her new watch."
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="primary">
+                        Brief Description (For Patient Display):
+                      </Typography>
+                      <ul>
+                        <li>Keep it under 30 words</li>
+                        <li>Avoid specific names</li>
+                        <li>Use general locations</li>
+                        <li>Focus on the type of event</li>
+                      </ul>
+                      <Typography variant="caption" color="text.secondary">
+                        Example: "A family celebration at the beach during summer"
+                      </Typography>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+
                 <TextField
                   fullWidth
                   id="description"
                   name="description"
-                  label="Describe this memory"
+                  label="Detailed Description"
                   multiline
                   rows={4}
                   value={values.description}
@@ -183,7 +230,22 @@ const MemoryForm = ({ contributorId, onMemoryAdded, onComplete }) => {
                   margin="normal"
                   placeholder="What was happening in this photo? Who was there? What makes this memory special?"
                 />
-                
+
+                <TextField
+                  fullWidth
+                  id="briefDescription"
+                  name="briefDescription"
+                  label="Brief Description (For Patient)"
+                  multiline
+                  rows={2}
+                  value={values.briefDescription}
+                  onChange={handleChange}
+                  error={touched.briefDescription && Boolean(errors.briefDescription)}
+                  helperText={touched.briefDescription && errors.briefDescription}
+                  margin="normal"
+                  placeholder="Provide a general description without specific details"
+                />
+
                 <TextField
                   fullWidth
                   id="eventDate"

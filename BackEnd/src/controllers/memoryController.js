@@ -3,17 +3,19 @@ const { v4: uuidv4 } = require('uuid');
 const { generateQuestions } = require('./questionController');
 const descriptionGuidelines = require('../utils/descriptionGuidelines');
 
-// Add this function at the top
+// Add validation function
 const validateDescriptions = (description, briefDescription) => {
     const errors = [];
     
-    if (!description) {
+    // Validate description format and content
+    if (!description?.trim()) {
         errors.push('Detailed description is required');
     } else if (description.split(' ').length > 500) {
         errors.push('Detailed description exceeds 500 words');
     }
 
-    if (!briefDescription) {
+    // Validate brief description format and content
+    if (!briefDescription?.trim()) {
         errors.push('Brief description is required');
     } else if (briefDescription.split(' ').length > 30) {
         errors.push('Brief description should be under 30 words');
@@ -23,7 +25,7 @@ const validateDescriptions = (description, briefDescription) => {
 };
 
 // Create a memory contributor
-exports.createContributor = async (req, res) => {
+const createContributor = async (req, res) => {
     try {
       console.log("Received contributor data:", req.body);
       const { name, email, relationshipType, relationshipYears, userId } = req.body;
@@ -74,7 +76,7 @@ exports.createContributor = async (req, res) => {
 };
   
 // Upload a photo
-exports.uploadPhoto = async (req, res) => {
+const uploadPhoto = async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
@@ -120,32 +122,40 @@ exports.uploadPhoto = async (req, res) => {
     }
 };
 
-// Modify the createMemory function
-exports.createMemory = async (req, res) => {
+// Create a memory
+const createMemory = async (req, res) => {
     try {
         const { contributorId, photoUrl, description, briefDescription, eventDate } = req.body;
         
+        // Validate required fields
+        if (!contributorId || !photoUrl) {
+            return res.status(400).json({ 
+                message: 'Contributor ID and photo URL are required' 
+            });
+        }
+
         // Validate descriptions
         const validationErrors = validateDescriptions(description, briefDescription);
         if (validationErrors.length > 0) {
             return res.status(400).json({ 
                 message: 'Invalid descriptions',
-                errors: validationErrors,
-                guidelines: descriptionGuidelines // Return guidelines for reference
+                errors: validationErrors
             });
         }
 
         // Get contributor details
         const { data: contributor, error: contributorError } = await supabase
             .from('memory_contributors')
-            .select('user_id')
+            .select('user_id, name, relationship_type')
             .eq('id', contributorId)
             .single();
 
-        if (contributorError) throw contributorError;
+        if (contributorError || !contributor) {
+            throw new Error('Invalid contributor ID');
+        }
 
-        // Create memory with both descriptions
-        const { data: memory, error } = await supabase
+        // Create memory
+        const { data: memory, error: memoryError } = await supabase
             .from('memories')
             .insert([{ 
                 contributor_id: contributorId,
@@ -158,202 +168,116 @@ exports.createMemory = async (req, res) => {
             .select()
             .single();
         
-        if (error) throw error;
+        if (memoryError) throw memoryError;
 
-        // Generate questions using full description
-        const questions = await generateQuestions(memory, contributor);
-        
-        res.status(201).json({
-            message: 'Memory and questions created successfully',
-            memory,
-            questions
-        });
+        // Generate questions
+        try {
+            const questions = await generateQuestions(memory, contributor);
+            res.status(201).json({
+                message: 'Memory and questions created successfully',
+                memory,
+                questions
+            });
+        } catch (questionError) {
+            // Log error but don't fail the request
+            console.error('Question generation failed:', questionError);
+            res.status(201).json({
+                message: 'Memory created but question generation failed',
+                memory,
+                error: questionError.message
+            });
+        }
     } catch (error) {
         console.error('Create memory error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.message,
+            message: 'Failed to create memory'
+        });
     }
 };
 
 // Get memories for a user
-exports.getUserMemories = async (req, res) => {
+const getUserMemories = async (req, res) => {
     try {
-      const { userId } = req.params;
-      
-      // Get memories directly using patient_id instead of going through contributors
-      const { data: memories, error: memoriesError } = await supabase
-        .from('memories')
-        .select(`
-          id,
-          photo_url,
-          description,
-          event_date,
-          created_at,
-          patient_id,
-          memory_contributors (
-            name,
-            relationship_type
-          )
-        `)
-        .eq('patient_id', userId)  // Direct query using patient_id
-        .order('created_at', { ascending: false });
-      
-      if (memoriesError) {
-        return res.status(500).json({ 
-          message: 'Error fetching memories', 
-          error: memoriesError.message 
+        const { userId } = req.params;
+        
+        const { data: memories, error: memoriesError } = await supabase
+            .from('memories')
+            .select(`
+                id,
+                photo_url,
+                description,
+                brief_description,
+                event_date,
+                created_at,
+                patient_id,
+                memory_contributors (
+                    name,
+                    relationship_type
+                )
+            `)
+            .eq('patient_id', userId)
+            .order('created_at', { ascending: false });
+        
+        if (memoriesError) throw memoriesError;
+        
+        res.status(200).json({
+            memories: memories || []
         });
-      }
-      
-      res.status(200).json({
-        memories: memories || []
-      });
     } catch (error) {
-      console.error('Get memories error:', error);
-      res.status(500).json({ 
-        message: 'Server error fetching memories', 
-        error: error.message 
-      });
+        console.error('Get memories error:', error);
+        res.status(500).json({ 
+            message: 'Failed to fetch memories',
+            error: error.message 
+        });
     }
 };
 
 // Get a single memory
-exports.getMemory = async (req, res) => {
+const getMemory = async (req, res) => {
     try {
-      const { memoryId } = req.params;
-      
-      const { data: memory, error } = await supabase
-        .from('memories')
-        .select(`
-          id,
-          photo_url,
-          description,
-          event_date,
-          created_at,
-          contributor_id,
-          memory_contributors (
-            name,
-            relationship_type,
-            user_id
-          )
-        `)
-        .eq('id', memoryId)
-        .single();
-      
-      if (error) {
-        return res.status(404).json({ message: 'Memory not found' });
-      }
-      
-      res.status(200).json({
-        memory
-      });
+        const { memoryId } = req.params;
+        const { data: memory, error } = await supabase
+            .from('memories')
+            .select('*')
+            .eq('id', memoryId)
+            .single();
+
+        if (error) throw error;
+        res.json({ memory });
     } catch (error) {
-      console.error('Get memory error:', error);
-      res.status(500).json({ 
-        message: 'Server error fetching memory', 
-        error: error.message 
-      });
+        res.status(500).json({ error: error.message });
     }
 };
   
 // Delete a memory
-exports.deleteMemory = async (req, res) => {
+const deleteMemory = async (req, res) => {
     try {
-      const { memoryId } = req.params;
-      
-      // Check if memory exists and belongs to a contributor of the current user
-      const { data: memory, error: memoryError } = await supabase
-        .from('memories')
-        .select(`
-          id,
-          contributor_id,
-          memory_contributors (
-            user_id
-          )
-        `)
-        .eq('id', memoryId)
-        .single();
-      
-      if (memoryError) {
-        return res.status(404).json({ message: 'Memory not found' });
-      }
-      
-      // Check if the current user is authorized to delete this memory
-      if (memory.memory_contributors.user_id !== req.user.id) {
-        return res.status(403).json({ message: 'Not authorized to delete this memory' });
-      }
-      
-      // Delete the memory
-      const { error: deleteError } = await supabase
-        .from('memories')
-        .delete()
-        .eq('id', memoryId);
-      
-      if (deleteError) {
-        return res.status(500).json({ 
-          message: 'Error deleting memory', 
-          error: deleteError.message 
-        });
-      }
-      
-      res.status(200).json({
-        message: 'Memory deleted successfully'
-      });
+        const { memoryId } = req.params;
+        const { error } = await supabase
+            .from('memories')
+            .delete()
+            .eq('id', memoryId);
+
+        if (error) throw error;
+        res.json({ message: 'Memory deleted successfully' });
     } catch (error) {
-      console.error('Delete memory error:', error);
-      res.status(500).json({ 
-        message: 'Server error deleting memory', 
-        error: error.message 
-      });
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Add endpoint to get description guidelines
-exports.getDescriptionGuidelines = async (req, res) => {
-    res.status(200).json({ guidelines: descriptionGuidelines });
-};
-
-// Add this before the module.exports
-const getDescriptionGuidelines = async (req, res) => {
-    try {
-        res.status(200).json({ 
-            success: true,
-            guidelines: descriptionGuidelines 
-        });
-    } catch (error) {
-        console.error('Error getting guidelines:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Failed to get guidelines' 
-        });
-    }
-};
-
-// Update exports to include the new function
+// Single export statement at the end
 module.exports = {
-    createContributor: exports.createContributor,
-    uploadPhoto: exports.uploadPhoto,
-    createMemory: exports.createMemory,
-    getUserMemories: exports.getUserMemories,
-    getMemory: exports.getMemory,
-    deleteMemory: exports.deleteMemory,
-    getDescriptionGuidelines // Add this line
+    createContributor,
+    uploadPhoto,
+    createMemory,
+    getUserMemories,
+    getMemory,
+    deleteMemory,
+    validateDescriptions  // Export for testing if needed
 };
 
-// Add this with your other exports
-exports.getDescriptionGuidelines = (req, res) => {
-    try {
-        res.status(200).json({ 
-            success: true,
-            guidelines: descriptionGuidelines 
-        });
-    } catch (error) {
-        console.error('Error getting guidelines:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Failed to get guidelines' 
-        });
-    }
-};
+
 
 
 
