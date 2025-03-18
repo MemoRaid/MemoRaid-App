@@ -108,54 +108,102 @@ Format response exactly like this:
     }
 };
 
-module.exports = {
-    generateQuestions,
-    getMemoryQuestions: async (req, res) => {
-        try {
-            const { memory_id } = req.params;
-            const { data: questions, error } = await supabase
-                .from('questions')
-                .select(`
-                    *,
-                    memories (
-                        description,
-                        photo_url,
-                        brief_description
-                    )
-                `)
-                .eq('memory_id', memory_id)
-                .order('difficulty_level', { ascending: true });
-                
-            if (error) throw error;
+// Get questions for a specific memory
+const getMemoryQuestions = async (req, res) => {
+    try {
+        const { memory_id } = req.params;
+        const patient_id = req.user.id; // From auth middleware
 
-            // Format questions for frontend
-            const formattedQuestions = questions.map(q => ({
-                ...q,
-                options: JSON.parse(q.options),
-                correct_answer: q.correct_answer || q.options[q.correct_option_index]
-            }));
+        // First verify memory belongs to patient
+        const { data: memory, error: memoryError } = await supabase
+            .from('memories')
+            .select('id')
+            .eq('id', memory_id)
+            .eq('patient_id', patient_id)
+            .single();
 
-            res.json({ questions: formattedQuestions });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
+        if (memoryError || !memory) {
+            return res.status(403).json({ 
+                error: 'Memory not found or access denied' 
+            });
         }
-    },
 
-    getDailyQuestions: async (req, res) => {
-        try {
-            const userId = req.user.id;
-            const { data: questions, error } = await supabase
-                .from('questions')
-                .select('*, memories(description, photo_url)')
-                .eq('patient_id', userId)
-                .order('created_at', { ascending: false })
-                .limit(5);
-                
-            if (error) throw error;
-            res.json({ questions });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
+        // Get questions
+        const { data: questions, error } = await supabase
+            .from('questions')
+            .select(`
+                id,
+                question_text,
+                options,
+                difficulty_level,
+                points,
+                memory_id,
+                memories (
+                    photo_url,
+                    brief_description
+                )
+            `)
+            .eq('memory_id', memory_id)
+            .order('difficulty_level', { ascending: true });
+        
+        if (error) throw error;
+
+        // Format questions for frontend
+        const formattedQuestions = questions.map(q => ({
+            ...q,
+            options: JSON.parse(q.options),
+            correct_answer: q.correct_answer || q.options[q.correct_option_index]
+        }));
+
+        res.json({ questions: formattedQuestions });
+    } catch (error) {
+        console.error('Error fetching memory questions:', error);
+        res.status(500).json({ error: error.message });
     }
+};
+
+// Get daily practice questions
+const getDailyQuestions = async (req, res) => {
+    try {
+        const patient_id = req.user.id;
+
+        // Get random selection of questions from patient's memories
+        const { data: questions, error } = await supabase
+            .from('questions')
+            .select(`
+                id,
+                question_text,
+                options,
+                difficulty_level,
+                points,
+                memory_id,
+                memories (
+                    photo_url,
+                    brief_description
+                )
+            `)
+            .eq('patient_id', patient_id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        if (error) throw error;
+
+        const formattedQuestions = questions.map(q => ({
+            ...q,
+            options: JSON.parse(q.options),
+            correct_answer: q.correct_answer || q.options[q.correct_option_index]
+        }));
+
+        res.json({ questions: formattedQuestions });
+    } catch (error) {
+        console.error('Error fetching daily questions:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = {
+    getMemoryQuestions,
+    getDailyQuestions,
+    generateQuestions  // Your existing function
 };
 
