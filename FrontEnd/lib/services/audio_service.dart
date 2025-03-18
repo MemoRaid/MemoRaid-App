@@ -28,14 +28,44 @@ class AudioService {
   }
 
   Future<void> loadStoryAudio(String storyTitle) async {
-    // In a real app, you would have actual audio files for each story
-    // For now, we'll use a dummy URL based on the story title
-    final audioUrl = 'https://example.com/audio/$storyTitle.mp3';
+    try {
+      // Map specific story titles to their actual file names
+      String audioPath = 'lib/assets/audio/';
+      if (storyTitle == 'The Family Reunion') {
+        audioPath += 'Story1.mp3';
+      } else if (storyTitle == 'The World Traveler') {
+        audioPath += 'Story2.mp3';
+      } else {
+        // For stories without specific audio files, create a file name based on the title
+        String audioFileName = storyTitle.toLowerCase().replaceAll(' ', '_');
+        audioPath += '$audioFileName.mp3';
+      }
 
-    // For demo purposes, let's use a sample audio URL
-    // You'd replace this with actual story audio files
-    await _player.setUrl(
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+      print('Attempting to load audio file: $audioPath');
+
+      // Try to load the audio file
+      if (storyTitle == 'The Family Reunion' ||
+          storyTitle == 'The World Traveler') {
+        await _player.setAsset(audioPath);
+        print('Successfully loaded story audio: $storyTitle');
+      } else {
+        // For other stories, use a sample audio as fallback
+        print('No specific audio file for this story, using fallback');
+        await _player.setUrl(
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+      }
+    } catch (e) {
+      print('Error loading audio: $e');
+
+      // Fallback to online sample if local audio fails
+      try {
+        await _player.setUrl(
+            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+        print('Loaded fallback audio');
+      } catch (fallbackError) {
+        print('Error loading fallback audio: $fallbackError');
+      }
+    }
   }
 
   void play() {
