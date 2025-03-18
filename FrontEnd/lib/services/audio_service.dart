@@ -48,12 +48,15 @@ class AudioService {
         developer.log('Loading Story3.mp3');
         await _player.setAsset('lib/assets/audio/Story3.mp3');
       } else if (storyTitle == 'The Battle of Rivers Crossing') {
-        developer.log('Loading Story4.mp3');
+        developer.log('Loading Story5.mp3');
         await _player.setAsset('lib/assets/audio/Story5.mp3');
       } else if (storyTitle == 'Arctic Expedition Crisis') {
-        // Add support for Arctic Expedition Crisis story
-        developer.log('Loading Story6.mp3');
+        developer.log('Loading Story7.mp3');
         await _player.setAsset('lib/assets/audio/Story7.mp3');
+      } else if (storyTitle == 'The Mars Mission Anomaly') {
+        // Add support for Mars Mission story
+        developer.log('Loading Story8.mp3');
+        await _player.setAsset('lib/assets/audio/Story8.mp3');
       } else {
         // Use online sample for other stories
         developer.log('No audio mapping for $storyTitle, using online sample');
