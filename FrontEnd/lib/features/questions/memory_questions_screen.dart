@@ -27,14 +27,32 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   @override
   void initState() {
     super.initState();
-    _questionsFuture = QuestionService().getMemoryQuestions(widget.memoryId);
+    try {
+      _questionsFuture = QuestionService().getMemoryQuestions(widget.memoryId);
+    } catch (e) {
+      print('Error initializing questions: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Memory Practice'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Memory Practice',
+          style: TextStyle(
+            color: Color(0xFF0D3445),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<Question>>(
         future: _questionsFuture,
@@ -51,7 +69,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
 
           return Column(
             children: [
-              // Memory Context Section
+              // Memory Context
               Container(
                 height: 200,
                 width: double.infinity,
@@ -66,38 +84,26 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   widget.briefDescription,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-
-              // Question Section
-              if (!_showResult) ...[
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    questions[_currentQuestionIndex].question,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  style: const TextStyle(
+                    color: Color(0xFF0D3445),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                ...questions[_currentQuestionIndex].options.asMap().entries.map(
-                  (entry) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => _handleAnswer(entry.key),
-                        child: Text(entry.value),
-                      ),
-                    );
-                  },
-                ).toList(),
-              ],
+              ),
 
               // Progress Indicator
               LinearProgressIndicator(
                 value: (_currentQuestionIndex + 1) / questions.length,
+                backgroundColor: Colors.grey[200],
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0D3445)),
+              ),
+
+              // Questions Section
+              Expanded(
+                child: _showResult 
+                    ? _buildResultView(questions.length)
+                    : _buildQuestionView(questions[_currentQuestionIndex]),
               ),
             ],
           );
@@ -106,52 +112,116 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
     );
   }
 
-  void _handleAnswer(int selectedIndex) async {
+  Widget _buildQuestionView(Question question) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            question.question,
+            style: const TextStyle(
+              color: Color(0xFF0D3445),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          ...question.options.asMap().entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: ElevatedButton(
+                onPressed: () => _handleAnswer(entry.key, question),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF0D3445),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(entry.value),
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultView(int totalQuestions) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Practice Complete!',
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0D3445),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Score: $_score / ${totalQuestions * 5}',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0D3445),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _currentQuestionIndex = 0;
+                    _score = 0;
+                    _showResult = false;
+                    _questionsFuture = QuestionService().getMemoryQuestions(widget.memoryId);
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0D3445),
+                ),
+                child: const Text('Try Again'),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[300],
+                ),
+                child: const Text('Done'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleAnswer(int selectedIndex, Question question) async {
     try {
       final questions = await _questionsFuture;
-      final currentQuestion = questions[_currentQuestionIndex];
-      
-      if (selectedIndex == currentQuestion.correctOptionIndex) {
-        setState(() {
-          _score += currentQuestion.points;
-        });
-      }
+      setState(() {
+        if (selectedIndex == question.correctOptionIndex) {
+          _score += question.points;
+        }
 
-      if (_currentQuestionIndex < questions.length - 1) {
-        setState(() {
+        if (_currentQuestionIndex < questions.length - 1) {
           _currentQuestionIndex++;
-        });
-      } else {
-        setState(() {
+        } else {
           _showResult = true;
-        });
-        // Show results
-        _showResultDialog();
-      }
+        }
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     }
-  }
-
-  void _showResultDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Practice Complete!'),
-        content: Text('Your score: $_score'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Return to previous screen
-            },
-            child: const Text('Done'),
-          ),
-        ],
-      ),
-    );
   }
 }

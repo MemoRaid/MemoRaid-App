@@ -4,7 +4,7 @@ import 'bottomnavbar.dart';
 import 'gamescreen.dart';
 import 'note.dart';
 import 'story_recall_screen.dart';
-import './questions/memory_questions_screen.dart';
+
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -234,17 +234,14 @@ class HomeScreen2 extends StatelessWidget {
                           ),
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MemoryQuestionsScreen(
-                                    memoryId: "test-memory-id",
-                                    photoUrl: "your_test_photo_url",
-                                    briefDescription:
-                                        "Test Memory Description",
-                                  ),
+                              // Show a placeholder message
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Memory training will be available soon!'),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
+                              // Later you can add the real navigation here
                             },
                             child: Text(
                               'Start Training',
