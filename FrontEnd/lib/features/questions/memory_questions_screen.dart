@@ -106,12 +106,15 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
     );
   }
 
-  void _handleAnswer(int selectedIndex) {
-    final questions = _questionsFuture.then((questions) {
+  void _handleAnswer(int selectedIndex) async {
+    try {
+      final questions = await _questionsFuture;
       final currentQuestion = questions[_currentQuestionIndex];
       
       if (selectedIndex == currentQuestion.correctOptionIndex) {
-        _score += currentQuestion.points;
+        setState(() {
+          _score += currentQuestion.points;
+        });
       }
 
       if (_currentQuestionIndex < questions.length - 1) {
@@ -122,8 +125,33 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
         setState(() {
           _showResult = true;
         });
-        // Navigate to results or show results dialog
+        // Show results
+        _showResultDialog();
       }
-    });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  void _showResultDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Practice Complete!'),
+        content: Text('Your score: $_score'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Return to previous screen
+            },
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
   }
 }
