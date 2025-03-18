@@ -25,6 +25,8 @@ function App() {
         <Routes>
           <Route path="/" element={<SubmissionPage />} />
           <Route path="/memories/:token" element={<SubmissionPage />} />
+          {/* Add this new route */}
+          <Route path="/share" element={<SubmissionPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
