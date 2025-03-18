@@ -79,6 +79,7 @@ Format response exactly like this:
                 question_text: q.question,
                 options: JSON.stringify(q.options), // Convert to JSON string
                 correct_option_index: parseInt(q.correct_option_index),
+                correct_answer: q.options[q.correct_option_index], // Add this line
                 difficulty_level: Math.min(Math.max(parseInt(q.difficulty), 1), 5),
                 points: Math.min(Math.max(parseInt(q.points), 5), 20)
             }));
@@ -114,12 +115,27 @@ module.exports = {
             const { memory_id } = req.params;
             const { data: questions, error } = await supabase
                 .from('questions')
-                .select('*')
+                .select(`
+                    *,
+                    memories (
+                        description,
+                        photo_url,
+                        brief_description
+                    )
+                `)
                 .eq('memory_id', memory_id)
                 .order('difficulty_level', { ascending: true });
                 
             if (error) throw error;
-            res.json({ questions });
+
+            // Format questions for frontend
+            const formattedQuestions = questions.map(q => ({
+                ...q,
+                options: JSON.parse(q.options),
+                correct_answer: q.correct_answer || q.options[q.correct_option_index]
+            }));
+
+            res.json({ questions: formattedQuestions });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
