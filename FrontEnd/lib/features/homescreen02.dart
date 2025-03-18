@@ -4,6 +4,7 @@ import 'bottomnavbar.dart';
 import 'gamescreen.dart';
 import 'note.dart';
 import 'story_recall_screen.dart';
+import './questions/memory_questions_screen.dart';
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -231,11 +232,26 @@ class HomeScreen2 extends StatelessWidget {
                             color: Color(0xFF4E6077),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Text(
-                            'Start Training',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MemoryQuestionsScreen(
+                                    memoryId: "test-memory-id",
+                                    photoUrl: "your_test_photo_url",
+                                    briefDescription:
+                                        "Test Memory Description",
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Start Training',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
