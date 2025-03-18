@@ -1,77 +1,109 @@
 import 'package:flutter/material.dart';
 import '../models/memory.dart';
-import '../services/auth_service.dart';
 import './questions/memory_questions_screen.dart';
 
 class MemoryDetailScreen extends StatelessWidget {
-  final Memory memory;  // Add this
-  final AuthService authService;  // Add this
+  final Memory memory;
 
   const MemoryDetailScreen({
     Key? key,
     required this.memory,
-    required this.authService,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Get current user from auth service
-    final currentUser = authService.currentUser;
-
-    // Check if user is authenticated
-    if (currentUser == null) {
-      return const Center(child: Text('Please log in'));
-    }
-
     return Scaffold(
-      // ...existing scaffold code...
-      body: Column(
-        children: [
-          // ...existing memory display widgets...
-          
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MemoryQuestionsScreen(
-                    memoryId: memory.id,
-                    photoUrl: memory.photoUrl,
-                    briefDescription: memory.briefDescription,
-                    patientId: currentUser.id,
-                    authToken: currentUser.token,
-                  ),
+      appBar: AppBar(
+        title: const Text('Memory Details'),
+        backgroundColor: const Color(0xFF0D3445),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Memory Image
+            Container(
+              height: 250,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(memory.photoUrl),
+                  fit: BoxFit.cover,
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0D3445),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: const Text(
-              'Practice Memory',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-        ],
+
+            // Memory Details
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    memory.briefDescription,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0D3445),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    memory.description,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Practice Button - Positioned after memory details
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MemoryQuestionsScreen(
+                              memoryId: memory.id,
+                              photoUrl: memory.photoUrl,
+                              briefDescription: memory.briefDescription,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D3445),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.quiz, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text(
+                            'Practice Memory',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-}
-
-// Inside your button onPressed or navigation method
-void navigateToMemoryDetail(BuildContext context, Memory memory) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => MemoryDetailScreen(
-        memory: memory,
-        authService: AuthService(),
-      ),
-    ),
-  );
 }

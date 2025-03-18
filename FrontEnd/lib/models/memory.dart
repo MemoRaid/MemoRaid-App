@@ -37,13 +37,3 @@ class Memory {
     };
   }
 }
-
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => MemoryDetailScreen(
-      memory: memory,
-      authService: AuthService(),
-    ),
-  ),
-);
