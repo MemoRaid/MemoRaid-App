@@ -1,6 +1,26 @@
 const supabase = require('../config/supabase');
 const { v4: uuidv4 } = require('uuid');
 const { generateQuestions } = require('./questionController');
+const descriptionGuidelines = require('../utils/descriptionGuidelines');
+
+// Add this function at the top
+const validateDescriptions = (description, briefDescription) => {
+    const errors = [];
+    
+    if (!description) {
+        errors.push('Detailed description is required');
+    } else if (description.split(' ').length > 500) {
+        errors.push('Detailed description exceeds 500 words');
+    }
+
+    if (!briefDescription) {
+        errors.push('Brief description is required');
+    } else if (briefDescription.split(' ').length > 30) {
+        errors.push('Brief description should be under 30 words');
+    }
+
+    return errors;
+};
 
 // Create a memory contributor
 exports.createContributor = async (req, res) => {
@@ -100,30 +120,31 @@ exports.uploadPhoto = async (req, res) => {
     }
 };
 
-// Create a memory
+// Modify the createMemory function
 exports.createMemory = async (req, res) => {
     try {
-        const { contributorId, photoUrl, description, eventDate } = req.body;
+        const { contributorId, photoUrl, description, briefDescription, eventDate } = req.body;
         
-        // Validate input
-        if (!contributorId || !photoUrl || !description) {
+        // Validate descriptions
+        const validationErrors = validateDescriptions(description, briefDescription);
+        if (validationErrors.length > 0) {
             return res.status(400).json({ 
-                message: 'Contributor ID, photo URL, and description are required' 
+                message: 'Invalid descriptions',
+                errors: validationErrors,
+                guidelines: descriptionGuidelines // Return guidelines for reference
             });
         }
-        
+
         // Get contributor details
         const { data: contributor, error: contributorError } = await supabase
             .from('memory_contributors')
-            .select('id, user_id, name, relationship_type')
+            .select('user_id')
             .eq('id', contributorId)
             .single();
-        
-        if (contributorError) {
-            return res.status(404).json({ message: 'Contributor not found' });
-        }
-        
-        // Create memory
+
+        if (contributorError) throw contributorError;
+
+        // Create memory with both descriptions
         const { data: memory, error } = await supabase
             .from('memories')
             .insert([{ 
@@ -131,40 +152,25 @@ exports.createMemory = async (req, res) => {
                 patient_id: contributor.user_id,
                 photo_url: photoUrl,
                 description,
+                brief_description: briefDescription,
                 event_date: eventDate || null
             }])
-            .select();
+            .select()
+            .single();
         
-        if (error) {
-            return res.status(500).json({ 
-                message: 'Error creating memory', 
-                error: error.message 
-            });
-        }
+        if (error) throw error;
 
-        // Generate questions
-        try {
-            const questions = await generateQuestions(memory[0], contributor);
-            
-            res.status(201).json({
-                message: 'Memory and questions created successfully',
-                memory: memory[0],
-                questions
-            });
-        } catch (questionError) {
-            console.error('Question generation failed:', questionError);
-            res.status(201).json({
-                message: 'Memory created but question generation failed',
-                memory: memory[0],
-                error: questionError.message
-            });
-        }
+        // Generate questions using full description
+        const questions = await generateQuestions(memory, contributor);
+        
+        res.status(201).json({
+            message: 'Memory and questions created successfully',
+            memory,
+            questions
+        });
     } catch (error) {
         console.error('Create memory error:', error);
-        res.status(500).json({ 
-            message: 'Server error creating memory', 
-            error: error.message 
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -299,7 +305,55 @@ exports.deleteMemory = async (req, res) => {
         error: error.message 
       });
     }
-  };
+};
+
+// Add endpoint to get description guidelines
+exports.getDescriptionGuidelines = async (req, res) => {
+    res.status(200).json({ guidelines: descriptionGuidelines });
+};
+
+// Add this before the module.exports
+const getDescriptionGuidelines = async (req, res) => {
+    try {
+        res.status(200).json({ 
+            success: true,
+            guidelines: descriptionGuidelines 
+        });
+    } catch (error) {
+        console.error('Error getting guidelines:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to get guidelines' 
+        });
+    }
+};
+
+// Update exports to include the new function
+module.exports = {
+    createContributor: exports.createContributor,
+    uploadPhoto: exports.uploadPhoto,
+    createMemory: exports.createMemory,
+    getUserMemories: exports.getUserMemories,
+    getMemory: exports.getMemory,
+    deleteMemory: exports.deleteMemory,
+    getDescriptionGuidelines // Add this line
+};
+
+// Add this with your other exports
+exports.getDescriptionGuidelines = (req, res) => {
+    try {
+        res.status(200).json({ 
+            success: true,
+            guidelines: descriptionGuidelines 
+        });
+    } catch (error) {
+        console.error('Error getting guidelines:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to get guidelines' 
+        });
+    }
+};
 
 
 

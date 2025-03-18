@@ -4,6 +4,9 @@ const memoryController = require('../controllers/memoryController');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
+// Guidelines route (keep this first)
+router.get('/guidelines', memoryController.getDescriptionGuidelines);
+
 // Create a memory contributor
 router.post('/contributor', memoryController.createContributor);
 
@@ -16,7 +19,7 @@ router.post('/', memoryController.createMemory);
 // Get memories for a user
 router.get('/user/:userId', auth, memoryController.getUserMemories);
 
-// Get a single memory
+// Get a single memory (keep dynamic routes last)
 router.get('/:memoryId', auth, memoryController.getMemory);
 
 // Delete a memory
