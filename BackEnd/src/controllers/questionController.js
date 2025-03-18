@@ -112,8 +112,12 @@ Format response exactly like this:
 const getMemoryQuestions = async (req, res) => {
     try {
         const { memory_id } = req.params;
-        const patient_id = req.user.id; // From auth middleware
-
+        // TESTING ONLY: Use query parameter instead of auth
+        const patient_id = req.query.patient_id || (req.user && req.user.id);
+         
+        if (!patient_id) {
+            return res.status(400).json({ error: 'Patient ID is required' });
+        }
         // First verify memory belongs to patient
         const { data: memory, error: memoryError } = await supabase
             .from('memories')

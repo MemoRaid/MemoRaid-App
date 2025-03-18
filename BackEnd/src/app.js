@@ -7,10 +7,18 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration - Important to allow requests from your frontend
+// CORS configuration - With specific Flutter web port
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.251.135:3000'],
-  credentials: true
+  origin: ['*',
+    'http://localhost:3000', 
+    'http://localhost:3001', 
+    'http://192.168.251.135:3000',
+    'http://localhost:49680',  // Add your Flutter web app port
+    'http://127.0.0.1:49680'   // Also add with 127.0.0.1
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Middleware

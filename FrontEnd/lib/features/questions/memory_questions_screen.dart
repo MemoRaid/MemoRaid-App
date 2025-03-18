@@ -20,9 +20,9 @@ class MemoryQuestionsScreen extends StatefulWidget {
 
 class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   late Future<List<Question>> _questionsFuture;
-  int _currentQuestionIndex = 0;
+  int _currentIndex = 0;
   int _score = 0;
-  bool _showResult = false;
+  bool _showResults = false;
 
   @override
   void initState() {
@@ -94,16 +94,16 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
 
               // Progress Indicator
               LinearProgressIndicator(
-                value: (_currentQuestionIndex + 1) / questions.length,
+                value: (_currentIndex + 1) / questions.length,
                 backgroundColor: Colors.grey[200],
                 valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0D3445)),
               ),
 
               // Questions Section
               Expanded(
-                child: _showResult 
+                child: _showResults 
                     ? _buildResultView(questions.length)
-                    : _buildQuestionView(questions[_currentQuestionIndex]),
+                    : _buildQuestionView(questions[_currentIndex]),
               ),
             ],
           );
@@ -178,9 +178,9 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    _currentQuestionIndex = 0;
+                    _currentIndex = 0;
                     _score = 0;
-                    _showResult = false;
+                    _showResults = false;
                     _questionsFuture = QuestionService().getMemoryQuestions(widget.memoryId);
                   });
                 },
@@ -212,10 +212,10 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
           _score += question.points;
         }
 
-        if (_currentQuestionIndex < questions.length - 1) {
-          _currentQuestionIndex++;
+        if (_currentIndex < questions.length - 1) {
+          _currentIndex++;
         } else {
-          _showResult = true;
+          _showResults = true;
         }
       });
     } catch (e) {

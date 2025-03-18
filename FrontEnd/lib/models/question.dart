@@ -2,27 +2,27 @@ class Question {
   final String id;
   final String question;
   final List<String> options;
+  final int correctOptionIndex;
   final int difficulty;
   final int points;
-  final int correctOptionIndex;
-
+  
   Question({
     required this.id,
     required this.question,
     required this.options,
+    required this.correctOptionIndex,
     required this.difficulty,
     required this.points,
-    required this.correctOptionIndex,
   });
-
+            
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
       id: json['id'],
-      question: json['question_text'],
+      question: json['question'],
       options: List<String>.from(json['options']),
-      difficulty: json['difficulty_level'],
-      points: json['points'],
       correctOptionIndex: json['correct_option_index'],
+      difficulty: json['difficulty'],
+      points: json['points'],
     );
   }
 }
