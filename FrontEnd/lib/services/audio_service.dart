@@ -48,28 +48,9 @@ class AudioService {
         developer.log('Loading Story3.mp3');
         await _player.setAsset('lib/assets/audio/Story3.mp3');
       } else if (storyTitle == 'The Battle of Rivers Crossing') {
-        // Use a more direct approach for Story4
-        developer.log('Attempting to load Story4.mp3');
-
-        try {
-          // Try loading directly with the absolute path first
-          await _player.setAsset('lib/assets/audio/Story4.mp3');
-          developer.log('Successfully loaded Story4.mp3');
-        } catch (error) {
-          developer.log('Failed to load Story4.mp3: $error', error: error);
-
-          // Try with a folder path approach
-          try {
-            await _player.setAsset('assets/audio/Story4.mp3');
-            developer.log('Loaded Story4 with assets/ prefix');
-          } catch (error2) {
-            // Final fallback to online sample
-            developer.log(
-                'All attempts to load Story4.mp3 failed, using online sample');
-            await _player.setUrl(
-                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
-          }
-        }
+        // Simple, direct approach for Story4
+        developer.log('Loading Story4.mp3');
+        await _player.setAsset('lib/assets/audio/Story5.mp3');
       } else {
         // Use online sample for other stories
         developer.log('No audio mapping for $storyTitle, using online sample');
@@ -77,12 +58,13 @@ class AudioService {
             'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
       }
     } catch (e) {
-      developer.log('Error in loadStoryAudio: $e', error: e);
+      developer.log('Error loading audio: $e', error: e);
 
-      // Fallback to online sample
+      // Fallback to online sample if any audio fails
       try {
         await _player.setUrl(
             'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+        developer.log('Loaded fallback audio');
       } catch (fallbackError) {
         developer.log('Failed to load fallback audio', error: fallbackError);
       }
