@@ -109,7 +109,7 @@ class AudioService {
       } else if (storyTitle == 'The Mars Mission Anomaly') {
         await tempPlayer.setAsset('lib/assets/audio/Story8.mp3');
       } else if (storyTitle == 'The Rainforest Expedition') {
-        await tempPlayer.setAsset('lib/assets/audio/Story9.mp3');
+        await tempPlayer.setAsset('lib/assets/audio/Story.mp3');
       }
 
       // Get the duration and store it
