@@ -29,6 +29,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   Map<int, Duration> _storyAudioDurations = {};
+  bool _audioCompleted = false; // New variable to track if audio has finished
 
   final List<Map<String, dynamic>> _stories = [
     {
@@ -551,6 +552,18 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     _audioService.playingStream.listen((playing) {
       setState(() {
         _isPlaying = playing;
+        // If audio stops and we're at the end of the track (with some small tolerance)
+        if (!playing &&
+            _currentPosition.inMilliseconds >=
+                _totalDuration.inMilliseconds - 500) {
+          _audioCompleted = true;
+        }
+      });
+    });
+    // Listen for completion events
+    _audioService.completionStream.listen((_) {
+      setState(() {
+        _audioCompleted = true;
       });
     });
     // Initialize with empty list since no story is selected yet
@@ -598,6 +611,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
       _questionResults = List.filled(_stories[index]['questions'].length, null);
       // Initialize selected options list with nulls
       _selectedOptions = List.filled(_stories[index]['questions'].length, null);
+      _audioCompleted = false; // Reset audio completion status for new story
     });
 
     // Load audio for the selected story
@@ -623,6 +637,13 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     final position =
         Duration(milliseconds: (value * _totalDuration.inMilliseconds).round());
     _audioService.seek(position);
+
+    // Consider audio completed if user skips to near the end
+    if (position.inMilliseconds >= _totalDuration.inMilliseconds - 1000) {
+      setState(() {
+        _audioCompleted = true;
+      });
+    }
   }
 
   void _startQuestions() {
@@ -1102,24 +1123,35 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
               ),
             ),
           ),
-          // Start Questions button (moved to bottom)
+          // Start Questions button (modified to be enabled/disabled based on audio completion)
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _startQuestions,
+                onPressed: _audioCompleted ? _startQuestions : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF0D3445),
+                  backgroundColor:
+                      _audioCompleted ? Color(0xFF0D3445) : Colors.grey,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: Text(
-                  "Start Questions",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _audioCompleted
+                        ? Icon(Icons.question_answer, size: 20)
+                        : Icon(Icons.headphones, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      _audioCompleted ? "Start Questions" : "Start Questions",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
             ),

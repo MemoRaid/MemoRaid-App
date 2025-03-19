@@ -8,10 +8,14 @@ class AudioService {
   final AudioPlayer _player = AudioPlayer();
   final _positionSubject = StreamController<Duration>.broadcast();
   final _stateSubject = StreamController<bool>.broadcast();
+  final _completionSubject =
+      StreamController<void>.broadcast(); // New stream for completion events
   final Map<String, Duration?> _audioDurations = {};
 
   Stream<Duration> get positionStream => _positionSubject.stream;
   Stream<bool> get playingStream => _stateSubject.stream;
+  Stream<void> get completionStream =>
+      _completionSubject.stream; // Expose completion stream
 
   AudioService() {
     _init();
@@ -22,6 +26,13 @@ class AudioService {
     _player.playerStateStream.listen((state) {
       final isPlaying = state.playing;
       _stateSubject.add(isPlaying);
+    });
+
+    // Listen for completion events
+    _player.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
+        _completionSubject.add(null);
+      }
     });
   }
 
@@ -137,5 +148,6 @@ class AudioService {
     _player.dispose();
     _positionSubject.close();
     _stateSubject.close();
+    _completionSubject.close(); // Close the new stream
   }
 }
