@@ -8,6 +8,7 @@ class AudioService {
   final AudioPlayer _player = AudioPlayer();
   final _positionSubject = StreamController<Duration>.broadcast();
   final _stateSubject = StreamController<bool>.broadcast();
+  final Map<String, Duration?> _audioDurations = {};
 
   Stream<Duration> get positionStream => _positionSubject.stream;
   Stream<bool> get playingStream => _stateSubject.stream;
@@ -75,6 +76,41 @@ class AudioService {
         developer.log('Failed to load fallback audio', error: fallbackError);
       }
     }
+  }
+
+  // Add this method to preload audio duration without playing
+  Future<void> preloadAudioDuration(String storyTitle) async {
+    final tempPlayer = AudioPlayer();
+    try {
+      // Use the same audio path mapping logic as in loadStoryAudio
+      if (storyTitle == 'The Family Reunion') {
+        await tempPlayer.setAsset('lib/assets/audio/Story1.mp3');
+      } else if (storyTitle == 'The World Traveler') {
+        await tempPlayer.setAsset('lib/assets/audio/Story2.mp3');
+      } else if (storyTitle == 'The Mansion Mystery') {
+        await tempPlayer.setAsset('lib/assets/audio/Story3.mp3');
+      } else if (storyTitle == 'The Battle of Rivers Crossing') {
+        await tempPlayer.setAsset('lib/assets/audio/Story5.mp3');
+      } else if (storyTitle == 'Arctic Expedition Crisis') {
+        await tempPlayer.setAsset('lib/assets/audio/Story7.mp3');
+      } else if (storyTitle == 'The Mars Mission Anomaly') {
+        await tempPlayer.setAsset('lib/assets/audio/Story8.mp3');
+      }
+
+      // Get the duration and store it
+      final duration = await tempPlayer.duration;
+      _audioDurations[storyTitle] = duration;
+    } catch (e) {
+      developer.log('Error preloading audio duration: $e', error: e);
+    } finally {
+      await tempPlayer.dispose();
+    }
+  }
+
+  // Add method to get cached duration
+  Future<Duration?> getAudioDuration(String storyTitle) async {
+    // Return cached duration if available
+    return _audioDurations[storyTitle];
   }
 
   void play() {
