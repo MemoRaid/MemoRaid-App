@@ -173,12 +173,14 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
 
     _flippedCards = List.generate(_gameImages.length, (_) => false);
     _matchedCards = List.generate(_gameImages.length, (_) => false);
-    _score = 0;
+    _score = _score; // Preserve the score from previous levels
     _firstFlippedIndex = null;
     _canFlip = true;
 
-    // Use specified time or calculate based on level
-    _timeLeft = widget.initialTimeSeconds;
+    // Set time based on level if not already set
+    if (_timeLeft == widget.initialTimeSeconds) {
+      _timeLeft = max(30, 90 - ((_level - 1) * 7));
+    }
 
     // Set difficulty based on level
     _difficultyFactor = 1.0 + ((_level - 1) * 0.1);
@@ -196,6 +198,7 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     _timer = null;
   }
 
+  // Start timer when first card is tapped
   void _startTimer() {
     if (!_timerStarted) {
       _timerStarted = true;
@@ -552,7 +555,29 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
             child: ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _initializeGame();
+                // Calculate the correct time for the next level
+                int nextLevelTime = max(30, 90 - ((_level - 1) * 7));
+
+                setState(() {
+                  // Update the time left for the next level
+                  _timeLeft = nextLevelTime;
+
+                  // Reset game state for the new level
+                  _firstFlippedIndex = null;
+                  _canFlip = true;
+                  _streak = 0;
+                  _moves = 0;
+                  _stars = 3;
+                  _showSuccess = false;
+                  _timerStarted = false;
+
+                  // Cancel any existing timer
+                  _timer?.cancel();
+                  _timer = null;
+
+                  // Re-initialize the game with new level
+                  _initializeGame();
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
