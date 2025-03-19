@@ -70,16 +70,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
           ],
           'correctIndex': 2
         },
-        {
-          'question': 'What was the pattern on the twins\' t-shirts?',
-          'options': [
-            'Cartoon characters',
-            'Sports logos',
-            'Dinosaurs',
-            'Spaceships'
-          ],
-          'correctIndex': 2
-        },
+        {'correctIndex': 2},
         {
           'question': 'How many bottles of wine did Miguel bring?',
           'options': ['Two', 'Three', 'Four', 'Five'],
