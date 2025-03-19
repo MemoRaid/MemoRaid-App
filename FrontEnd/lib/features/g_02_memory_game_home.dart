@@ -460,3 +460,112 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       ),
     );
   }
+
+  void showLevelUpDialog() {
+    String difficultyText =
+        _level == 2 ? 'The challenge begins!' : 'Difficulty increases!';
+
+    int timeForNextLevel = max(30, 90 - ((_level - 1) * 7));
+    double multiplierForNextLevel = 1.0 + ((_level - 1) * 0.1);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Color(0xFF0A2836).withOpacity(0.95),
+        title: Text(
+          'Level $_level',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(_level <= 3 ? Icons.arrow_upward : Icons.warning,
+                color: _level <= 3 ? Colors.green : Colors.orange, size: 50),
+            const SizedBox(height: 10),
+            Text(
+              'Get ready for Level $_level!',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              difficultyText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontStyle: _level > 3 ? FontStyle.italic : FontStyle.normal,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.timer,
+                          size: 16,
+                          color: _level > 5 ? Colors.red : Colors.lightBlue),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Time: $timeForNextLevel seconds',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.star, size: 16, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Score: ${multiplierForNextLevel.toStringAsFixed(1)}x',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _initializeGame();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text('Start Level'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
