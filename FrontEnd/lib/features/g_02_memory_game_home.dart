@@ -64,3 +64,25 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
         '⛪',
       ],
     ),
+
+    'Hobbies': custom_theme.Theme(
+      name: 'Hobbies',
+      emojis: [
+        '🎨',
+        '🎸',
+        '🎹',
+        '🎤',
+        '🎧',
+        '🎮',
+        '🎲',
+        '🎯',
+        '🎳',
+        '🎽',
+        '🎿',
+        '🏀',
+        '⚽', // Added more emojis for 4x5 grid
+        '🏓',
+        '🎭',
+      ],
+    ),
+  };
