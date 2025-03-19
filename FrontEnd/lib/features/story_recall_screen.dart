@@ -739,7 +739,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
           _selectedStoryIndex == -1
               ? "Story Recall"
               : _readingStory
-                  ? 
+                  ? "Reading Time"
                   : _showQuestions
                       ? "Story Questions"
                       : "Results",
