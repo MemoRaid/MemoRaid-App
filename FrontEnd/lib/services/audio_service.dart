@@ -55,9 +55,11 @@ class AudioService {
         developer.log('Loading Story7.mp3');
         await _player.setAsset('lib/assets/audio/Story7.mp3');
       } else if (storyTitle == 'The Mars Mission Anomaly') {
-        // Add support for Mars Mission story
         developer.log('Loading Story8.mp3');
         await _player.setAsset('lib/assets/audio/Story8.mp3');
+      } else if (storyTitle == 'The Rainforest Expedition') {
+        developer.log('Loading Story9.mp3');
+        await _player.setAsset('lib/assets/audio/Story9.mp3');
       } else {
         // Use online sample for other stories
         developer.log('No audio mapping for $storyTitle, using online sample');
@@ -95,6 +97,8 @@ class AudioService {
         await tempPlayer.setAsset('lib/assets/audio/Story7.mp3');
       } else if (storyTitle == 'The Mars Mission Anomaly') {
         await tempPlayer.setAsset('lib/assets/audio/Story8.mp3');
+      } else if (storyTitle == 'The Rainforest Expedition') {
+        await tempPlayer.setAsset('lib/assets/audio/Story9.mp3');
       }
 
       // Get the duration and store it
