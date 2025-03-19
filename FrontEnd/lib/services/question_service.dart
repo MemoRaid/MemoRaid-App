@@ -33,4 +33,35 @@ class QuestionService {
       throw Exception('Error getting questions: $e');
     }
   }
+
+  Future<bool> saveQuizResults({
+    required String memoryId,
+    required int score,
+    required int correctAnswers,
+    required int totalQuestions,
+  }) async {
+    try {
+      print('Saving quiz results for memory: $memoryId, score: $score');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/quiz-results'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'patient_id': testPatientId,
+          'memory_id': memoryId,
+          'score': score,
+          'correct_answers': correctAnswers,
+          'total_questions': totalQuestions,
+        }),
+      );
+      
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      
+      return response.statusCode == 201;
+    } catch (e) {
+      print('Error saving quiz results: $e');
+      return false;
+    }
+  }
 }
