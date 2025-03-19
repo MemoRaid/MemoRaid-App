@@ -163,3 +163,37 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
         break;
     }
   }
+
+  void _initializeGame() {
+    // Need 10 pairs for a 4x5 grid (20 cards total)
+    // Get the first 10 emojis from the theme
+    List<String> selectedEmojis = _themes[_currentTheme]!.emojis.sublist(0, 10);
+
+    // Create pairs of each emoji
+    _gameImages = [...selectedEmojis, ...selectedEmojis];
+    _gameImages.shuffle();
+
+    _flippedCards = List.generate(_gameImages.length, (_) => false);
+    _matchedCards = List.generate(_gameImages.length, (_) => false);
+    _score = 0;
+    _firstFlippedIndex = null;
+    _canFlip = true;
+
+    // Use specified time or calculate based on level
+    _timeLeft = widget.initialTimeSeconds;
+
+    // Set difficulty based on level
+    _difficultyFactor = 1.0 + ((_level - 1) * 0.1);
+
+    _isGameActive = true;
+    _moves = 0;
+    _stars = 3;
+    _streak = 0;
+
+    // Reset timer started flag
+    _timerStarted = false;
+
+    // Cancel any existing timer
+    _timer?.cancel();
+    _timer = null;
+  }
