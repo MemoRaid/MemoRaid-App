@@ -569,3 +569,55 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       ),
     );
   }
+
+  void _endGame() {
+    _timer?.cancel();
+    setState(() {
+      _isGameActive = false;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Game Complete!'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.emoji_events, size: 50, color: Colors.amber),
+            const SizedBox(height: 16),
+            Text('Final Score: $_score'),
+            Text('Level Reached: $_level'),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _stars,
+                (index) => const Icon(Icons.star, color: Colors.amber),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _level = 1;
+                _initializeGame();
+              });
+            },
+            child: const Text('Play Again'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _bounceController.dispose();
+    _rotationController.dispose();
+    super.dispose();
+  }
