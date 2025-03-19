@@ -347,7 +347,11 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
           'correctIndex': 2
         },
         {
-         
+          'question':
+              'What was Dr. Wong\'s core body temperature when rescued?',
+          'options': ['33.5°C', '34.2°C', '35.1°C', '35.7°C'],
+          'correctIndex': 1
+        },
         {
           'question':
               'How many ready-to-eat meal packs did the team have when stranded?',
