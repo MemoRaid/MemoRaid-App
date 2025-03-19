@@ -215,3 +215,52 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       );
     }
   }
+
+  // Show tutorial on first level
+  void _showTutorialIfNeeded() {
+    if (_level == 1) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => AlertDialog(
+            title: const Text(
+              'How to Play',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.touch_app, size: 40, color: Colors.blue),
+                SizedBox(height: 10),
+                Text(
+                  'Tap cards to flip them over and find matching pairs.',
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Match all cards before the timer runs out!',
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Level 1 is easy with extra time to learn the game.',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Got it!'),
+              ),
+            ],
+          ),
+        );
+      });
+    }
+  }
