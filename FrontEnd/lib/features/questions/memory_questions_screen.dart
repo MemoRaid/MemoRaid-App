@@ -20,6 +20,12 @@ class MemoryQuestionsScreen extends StatefulWidget {
 }
 
 class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
+  // Add these new state variables
+  List<String> _shuffledOptions = [];
+  int _shuffledCorrectIndex = 0;
+  int previousQuestionIndex = -1;
+  
+  // Existing variables...
   late Future<List<Question>> _questionsFuture;
   int _currentQuestionIndex = 0;
   int _score = 0;
@@ -32,6 +38,32 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   void initState() {
     super.initState();
     _questionsFuture = QuestionService().getMemoryQuestions(widget.memoryId);
+    
+    _questionsFuture.then((questions) {
+      if (questions.isNotEmpty) {
+        // Use post-frame callback to safely update state
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _shuffleOptions(questions[_currentQuestionIndex]);
+          setState(() {}); // Update UI after shuffling
+        });
+      }
+    });
+  }
+  
+  // Update this method - REMOVE setState() call
+  void _shuffleOptions(Question question) {
+    // Create a list of option indices
+    final indices = List<int>.generate(question.options.length, (i) => i);
+    
+    // Shuffle the indices
+    indices.shuffle();
+    
+    // Create newly ordered options list
+    _shuffledOptions = indices.map((i) => question.options[i]).toList();
+    
+    // Find where the correct answer ended up
+    _shuffledCorrectIndex = indices.indexOf(question.correctOptionIndex);
   }
   
   void _handleAnswer(int selectedIndex, Question question) {
@@ -42,8 +74,8 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
       _selectedAnswerIndex = selectedIndex;
       _showingFeedback = true;
       
-      // Update score if correct
-      if (selectedIndex == question.correctOptionIndex) {
+      // Check against shuffled index instead of original
+      if (selectedIndex == _shuffledCorrectIndex) {
         _score += question.points;
         _userAnswers.add(true);
       } else {
@@ -65,6 +97,21 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
               _quizComplete = true;
             }
           });
+        });
+      }
+    });
+  }
+  
+  void _moveToNextQuestion() {
+    _questionsFuture.then((questions) {
+      if (_currentQuestionIndex < questions.length - 1) {
+        setState(() {
+          _currentQuestionIndex++;
+          _shuffleOptions(questions[_currentQuestionIndex]);
+        });
+      } else {
+        setState(() {
+          _quizComplete = true;
         });
       }
     });
@@ -98,6 +145,12 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
           }
           
           final currentQuestion = questions[_currentQuestionIndex];
+          
+          if (_shuffledOptions.isEmpty || 
+              _currentQuestionIndex != previousQuestionIndex) {
+            _shuffleOptions(currentQuestion);
+            previousQuestionIndex = _currentQuestionIndex;
+          }
           
           return SingleChildScrollView(
             child: Column(
@@ -144,7 +197,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                 ),
                 
                 // Options
-                ...List.generate(currentQuestion.options.length, (index) {
+                ...List.generate(_shuffledOptions.length, (index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: ElevatedButton(
@@ -166,19 +219,9 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                                 : Colors.red[800])   // Wrong answer text
                             : null,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            currentQuestion.options[index],
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          if (_showingFeedback && index == currentQuestion.correctOptionIndex)
-                            Icon(Icons.check_circle, color: Colors.green[800]),
-                          if (_showingFeedback && _selectedAnswerIndex == index && 
-                              index != currentQuestion.correctOptionIndex)
-                            Icon(Icons.cancel, color: Colors.red[800]),
-                        ],
+                      child: Text(
+                        _shuffledOptions[index],  // Use shuffled options
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
                   );
