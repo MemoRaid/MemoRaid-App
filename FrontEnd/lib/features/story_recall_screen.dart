@@ -28,6 +28,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
   bool _isPlaying = false;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
+  Map<int, Duration> _storyAudioDurations = {};
 
   final List<Map<String, dynamic>> _stories = [
     {
@@ -555,6 +556,26 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     // Initialize with empty list since no story is selected yet
     _questionResults = [];
     _selectedOptions = [];
+    // Load durations for all story audio files
+    _loadAllStoryAudioDurations();
+  }
+
+  // Add this method to load audio durations for all stories
+  Future<void> _loadAllStoryAudioDurations() async {
+    for (int i = 0; i < _stories.length; i++) {
+      final story = _stories[i];
+      try {
+        await _audioService.preloadAudioDuration(story['title']);
+        final duration = await _audioService.getAudioDuration(story['title']);
+        if (duration != null) {
+          setState(() {
+            _storyAudioDurations[i] = duration;
+          });
+        }
+      } catch (e) {
+        print('Error preloading audio duration for ${story['title']}: $e');
+      }
+    }
   }
 
   @override
@@ -757,6 +778,13 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
         itemCount: _stories.length,
         itemBuilder: (context, index) {
           final story = _stories[index];
+
+          // Format the audio duration if available, otherwise use the default
+          String durationText = story['duration'];
+          if (_storyAudioDurations.containsKey(index)) {
+            durationText = _formatDuration(_storyAudioDurations[index]!);
+          }
+
           return Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: GestureDetector(
@@ -824,7 +852,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                                 ),
                                 SizedBox(width: 4),
                                 Text(
-                                  story['duration'],
+                                  durationText,
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.7),
                                     fontSize: 14,
@@ -1096,7 +1124,12 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
+
+    if (duration.inHours > 0) {
+      final hours = duration.inHours;
+      return "$hours:$minutes:$seconds";
+    }
+    return "$minutes:$seconds"; // Removed the " min" suffix to fix overflow
   }
 
   Widget _buildQuestionsView() {
