@@ -81,3 +81,57 @@ class LevelSelectionScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 30),
+
+                // Level cards
+                Expanded(
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    children: [
+                      // Level 1 - Hobbies
+                      _buildLevelCard(
+                        context,
+                        title: 'Level 1',
+                        theme: 'Hobbies',
+                        time: '90 sec',
+                        difficulty: 'Tutorial',
+                        icon: Icons.theater_comedy,
+                        color: Colors.green,
+                      ),
+
+                      // Level 2 - Places
+                      _buildLevelCard(
+                        context,
+                        title: 'Level 2',
+                        theme: 'Places',
+                        time: '75 sec',
+                        difficulty: 'Easy',
+                        icon: Icons.home_work,
+                        color: Colors.lightBlue,
+                      ),
+
+                      // Level 3 - Family
+                      _buildLevelCard(
+                        context,
+                        title: 'Level 3',
+                        theme: 'Family',
+                        time: '60 sec',
+                        difficulty: 'Medium',
+                        icon: Icons.family_restroom,
+                        color: Colors.orange,
+                      ),
+
+                      // Level 4 - Mixed
+                      _buildLevelCard(
+                        context,
+                        title: 'Level 4',
+                        theme: 'Mixed',
+                        time: '45 sec',
+                        difficulty: 'Hard',
+                        icon: Icons.shuffle,
+                        color: Colors.red,
+                      ),
+                    ],
+                  ),
+                ),
