@@ -43,7 +43,6 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
         '👧',
       ],
     ),
-
     'Places': custom_theme.Theme(
       name: 'Places',
       emojis: [
@@ -64,7 +63,6 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
         '⛪',
       ],
     ),
-
     'Hobbies': custom_theme.Theme(
       name: 'Hobbies',
       emojis: [
@@ -87,7 +85,7 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     ),
   };
 
-    String _currentTheme = 'Family';
+  String _currentTheme = 'Family';
   List<String> _gameImages = [];
   List<bool> _flippedCards = [];
   List<bool> _matchedCards = [];
@@ -621,3 +619,527 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     _rotationController.dispose();
     super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double cardSpacing = 6.0; // Increased spacing between cards
+    final double horizontalPadding = 10.0;
+    final double cardSize =
+        (screenWidth - (horizontalPadding * 2) - (cardSpacing * 5)) / 4;
+    final double aspectRatio = 1.0; // Keep cards square
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: _primaryColor,
+        elevation: 0,
+        title: Text('Level $_level - $_currentTheme'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Show confirmation dialog before navigating back
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                backgroundColor: Color(0xFF0A2836).withOpacity(0.95),
+                title: const Text('Leave Game?',
+                    style: TextStyle(color: Colors.white)),
+                content: const Text('Your progress will be lost.',
+                    style: TextStyle(color: Colors.white70)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.white70)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Leave',
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              _primaryColor,
+              _primaryColor.withOpacity(0.7),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding, vertical: 8.0),
+            child: Column(
+              children: [
+                if (_showSuccess)
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.green.withOpacity(0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 5,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.emoji_events, color: Colors.green.shade400),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Amazing Streak! +${(50 * _difficultyFactor).toInt()} bonus points! 🎉',
+                          style: TextStyle(
+                              color: Colors.green.shade400,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.all(12), // Reduced padding
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF185373), // Lighter blue shade
+                        Color(0xFF0A2836), // Darker variation
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Memory Master',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(1, 1),
+                                  blurRadius: 3,
+                                  color: Color.fromARGB(130, 0, 0, 0),
+                                )
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: !_timerStarted
+                                      ? Colors.grey.withOpacity(0.4)
+                                      : _timeLeft < 10
+                                          ? Colors.red.withOpacity(0.7)
+                                          : Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      !_timerStarted
+                                          ? Icons.hourglass_empty
+                                          : Icons.timer,
+                                      color: Colors.white,
+                                      size: _timeLeft < 10 ? 18 : 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      !_timerStarted ? 'Wait' : '$_timeLeft',
+                                      style: TextStyle(
+                                        fontSize: _timeLeft < 10 ? 18 : 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.emoji_events,
+                                      color: Colors.amber,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$_score',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: List.generate(
+                              3,
+                              (index) => Icon(
+                                index < _stars ? Icons.star : Icons.star_border,
+                                color: Colors.amber,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.trending_up,
+                                          color: Colors.amber, size: 14),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        '$_level',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'Moves: $_moves',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: _level > 5
+                                    ? Colors.red.withOpacity(0.2)
+                                    : _level > 3
+                                        ? Colors.orange.withOpacity(0.2)
+                                        : Colors.green.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _level > 5
+                                        ? Icons.warning
+                                        : Icons.auto_graph,
+                                    color: _level > 5
+                                        ? Colors.red
+                                        : _level > 3
+                                            ? Colors.orange
+                                            : Colors.green,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    _level > 5
+                                        ? 'Hard'
+                                        : _level > 3
+                                            ? 'Medium'
+                                            : _level == 1
+                                                ? 'Tutorial'
+                                                : 'Easy',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: _level > 5
+                                          ? Colors.red
+                                          : _level > 3
+                                              ? Colors.orange
+                                              : Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _level == 1
+                                  ? 'Learning mode'
+                                  : '${_difficultyFactor.toStringAsFixed(1)}x score multiplier',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Additional help text for level 1
+                if (_level == 1 && !_timerStarted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4, horizontal: 8), // Reduced padding
+                    margin: const EdgeInsets.only(top: 4), // Reduced margin
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.help_outline,
+                            color: Colors.white.withOpacity(0.8), size: 16),
+                        const SizedBox(width: 6),
+                        const Expanded(
+                          child: Text(
+                            'Tap cards to find matching pairs!',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (!_timerStarted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4, horizontal: 8), // Reduced padding
+                    margin: const EdgeInsets.only(top: 4), // Reduced margin
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.blue.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.touch_app,
+                            color: Colors.blue.withOpacity(0.8), size: 16),
+                        const SizedBox(width: 6),
+                        const Expanded(
+                          child: Text(
+                            'Tap any card to start the timer!',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 8), // Reduced spacing
+
+                // Theme selection buttons
+                SizedBox(
+                  height: 38, // Fixed height for buttons row
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _themes.keys
+                          .map(
+                            (theme) => Padding(
+                              padding: const EdgeInsets.only(
+                                  right: 4), // Reduced spacing
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _currentTheme = theme;
+                                    _updateThemeColors();
+                                    _level = 1;
+                                    _difficultyFactor = 1.0;
+                                    _initializeGame();
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _currentTheme == theme
+                                      ? _primaryColor
+                                      : _primaryColor.withOpacity(0.3),
+                                  foregroundColor: _currentTheme == theme
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.7),
+                                  elevation: _currentTheme == theme ? 4 : 1,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6), // Reduced padding
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Text(theme,
+                                    style: TextStyle(
+                                        fontSize: 12)), // Smaller font
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8), // Reduced spacing
+
+                Expanded(
+                  child: GridView.builder(
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Prevent grid scrolling
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: aspectRatio,
+                      crossAxisSpacing: cardSpacing, // Increased spacing
+                      mainAxisSpacing: cardSpacing, // Increased spacing
+                    ),
+                    itemCount: 20, // 4x5 = 20 cards
+                    itemBuilder: (context, index) {
+                      return AnimatedBuilder(
+                        animation: _rotationController,
+                        builder: (context, child) {
+                          return Transform(
+                            transform: Matrix4.identity()
+                              ..setEntry(3, 2, 0.001)
+                              ..rotateY(_flippedCards[index] ? 0 : pi),
+                            alignment: Alignment.center,
+                            child: GestureDetector(
+                              onTap: () => _handleCardTap(index),
+                              child: AnimatedBuilder(
+                                animation: _bounceController,
+                                builder: (context, child) {
+                                  return Transform.scale(
+                                    scale: _matchedCards[index]
+                                        ? 1.0 + _bounceController.value * 0.1
+                                        : 1.0,
+                                    child: Card(
+                                      margin: EdgeInsets.all(
+                                          1.5), // Small margin for better separation
+                                      elevation:
+                                          3, // Increased elevation for better depth
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            6), // Slightly increased radius
+                                      ),
+                                      color: _matchedCards[index]
+                                          ? _primaryColor.withOpacity(0.2)
+                                          : _flippedCards[index]
+                                              ? Colors.white
+                                              : _primaryColor,
+                                      child: Center(
+                                        child: FittedBox(
+                                          // Added FittedBox for better scaling
+                                          fit: BoxFit.contain,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(
+                                                4.0), // Added more padding
+                                            child: Text(
+                                              _flippedCards[index] ||
+                                                      _matchedCards[index]
+                                                  ? _gameImages[index]
+                                                  : '?',
+                                              style: TextStyle(
+                                                fontSize:
+                                                    32, // Increased font size from 26 to 32
+                                                color: _flippedCards[index] ||
+                                                        _matchedCards[index]
+                                                    ? _primaryColor
+                                                    : Colors.white,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
