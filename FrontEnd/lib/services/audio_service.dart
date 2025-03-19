@@ -63,6 +63,7 @@ class AudioService {
         developer.log('Loading Story5.mp3');
         await _player.setAsset('lib/assets/audio/Story5.mp3');
       } else if (storyTitle == 'Arctic Expedition Crisis') {
+        developer.log('Loading Story7.mp3');
         await _player.setAsset('lib/assets/audio/Story7.mp3');
       } else if (storyTitle == 'The Mars Mission Anomaly') {
         developer.log('Loading Story8.mp3');
