@@ -197,3 +197,21 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     _timer?.cancel();
     _timer = null;
   }
+
+  void _startTimer() {
+    if (!_timerStarted) {
+      _timerStarted = true;
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (timer) {
+          if (_timeLeft > 0) {
+            setState(() {
+              _timeLeft--;
+            });
+          } else {
+            _endGame();
+          }
+        },
+      );
+    }
+  }
