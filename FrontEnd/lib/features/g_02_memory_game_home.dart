@@ -43,3 +43,24 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
         '👧',
       ],
     ),
+
+    'Places': custom_theme.Theme(
+      name: 'Places',
+      emojis: [
+        '🏠',
+        '🏢',
+        '🏡',
+        '🏫',
+        '🏥',
+        '🏦',
+        '🏨',
+        '🏩',
+        '🏪',
+        '🏫',
+        '🏬',
+        '🏭',
+        '🏯', // Added more emojis for 4x5 grid
+        '🏰',
+        '⛪',
+      ],
+    ),
