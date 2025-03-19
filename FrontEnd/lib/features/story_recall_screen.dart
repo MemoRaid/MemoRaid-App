@@ -724,6 +724,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
       _readingStory = false;
       _showQuestions = false;
       _currentQuestionIndex = 0;
+      _questionTimer?.cancel();
     });
   }
 
