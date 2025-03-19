@@ -139,3 +139,27 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       _showTutorialIfNeeded();
     }
   }
+
+  void _updateThemeColors() {
+    // Update theme colors based on our primary color
+    switch (_currentTheme) {
+      case 'Family':
+        _themeColors = [
+          _primaryColor,
+          _primaryColor.withBlue((_primaryColor.blue * 0.8).round())
+        ];
+        break;
+      case 'Places':
+        _themeColors = [
+          _primaryColor.withGreen((_primaryColor.green * 1.1).round()),
+          _primaryColor
+        ];
+        break;
+      case 'Hobbies':
+        _themeColors = [
+          _primaryColor.withRed((_primaryColor.red * 1.2).round()),
+          _primaryColor
+        ];
+        break;
+    }
+  }
