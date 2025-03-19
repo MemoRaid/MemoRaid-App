@@ -168,7 +168,7 @@ class LevelSelectionScreen extends StatelessWidget {
     );
   }
 
-    Widget _buildLevelCard(
+  Widget _buildLevelCard(
     BuildContext context, {
     required String title,
     required String theme,
@@ -284,3 +284,19 @@ class LevelSelectionScreen extends StatelessWidget {
       ),
     );
   }
+
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'tutorial':
+        return Colors.green;
+      case 'easy':
+        return Colors.lightBlue;
+      case 'medium':
+        return Colors.orange;
+      case 'hard':
+        return Colors.red;
+      default:
+        return Colors.green;
+    }
+  }
+}
