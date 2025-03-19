@@ -779,10 +779,20 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
         itemBuilder: (context, index) {
           final story = _stories[index];
 
-          // Format the audio duration if available, otherwise use the default
-          String durationText = story['duration'];
+          // Use the same approach for all stories
+          String durationText;
           if (_storyAudioDurations.containsKey(index)) {
+            // If actual audio duration is loaded, use it
             durationText = _formatDuration(_storyAudioDurations[index]!);
+          } else {
+            // If audio duration isn't loaded yet, use story-specific default
+            if (story['title'] == 'The Rainforest Expedition') {
+              durationText = "04:17"; // Actual duration for Story9.mp3
+            } else {
+              // For other stories, convert "X min" to "0X:00" format
+              String mins = story['duration'].split(' ')[0];
+              durationText = "${mins.padLeft(2, '0')}:00";
+            }
           }
 
           return Padding(
