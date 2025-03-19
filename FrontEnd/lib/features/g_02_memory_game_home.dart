@@ -633,9 +633,18 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       appBar: AppBar(
         backgroundColor: _primaryColor,
         elevation: 0,
-        title: Text('Level $_level - $_currentTheme'),
+        iconTheme: const IconThemeData(
+            color: Colors.white), // Icon theme for all icons
+        title: Text(
+          'Level $_level - $_currentTheme',
+          style:
+              const TextStyle(color: Colors.white), // Set text color to white
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white, // Explicitly set back button color to white
+          ),
           onPressed: () {
             // Show confirmation dialog before navigating back
             showDialog(
