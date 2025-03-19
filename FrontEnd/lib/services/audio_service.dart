@@ -44,7 +44,6 @@ class AudioService {
   Future<void> loadStoryAudio(String storyTitle) async {
     try {
       // Clear any previous audio
-      await _player.stop();
 
       // Debug the story title being requested
       developer.log('Loading audio for story: "$storyTitle"');
