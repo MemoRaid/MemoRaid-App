@@ -21,11 +21,15 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
   int _remainingQuestionTime = 30; // seconds per question
   int _score = 0;
   List<bool?> _questionResults = [];
+  // Add a list to track selected option indexes
+  List<int?> _selectedOptions = [];
   late AnimationController _animationController;
   late AudioService _audioService;
   bool _isPlaying = false;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
+  Map<int, Duration> _storyAudioDurations = {};
+  bool _audioCompleted = false; // New variable to track if audio has finished
 
   final List<Map<String, dynamic>> _stories = [
     {
@@ -548,10 +552,43 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     _audioService.playingStream.listen((playing) {
       setState(() {
         _isPlaying = playing;
+        // If audio stops and we're at the end of the track (with some small tolerance)
+        if (!playing &&
+            _currentPosition.inMilliseconds >=
+                _totalDuration.inMilliseconds - 500) {
+          _audioCompleted = true;
+        }
+      });
+    });
+    // Listen for completion events
+    _audioService.completionStream.listen((_) {
+      setState(() {
+        _audioCompleted = true;
       });
     });
     // Initialize with empty list since no story is selected yet
     _questionResults = [];
+    _selectedOptions = [];
+    // Load durations for all story audio files
+    _loadAllStoryAudioDurations();
+  }
+
+  // Add this method to load audio durations for all stories
+  Future<void> _loadAllStoryAudioDurations() async {
+    for (int i = 0; i < _stories.length; i++) {
+      final story = _stories[i];
+      try {
+        await _audioService.preloadAudioDuration(story['title']);
+        final duration = await _audioService.getAudioDuration(story['title']);
+        if (duration != null) {
+          setState(() {
+            _storyAudioDurations[i] = duration;
+          });
+        }
+      } catch (e) {
+        print('Error preloading audio duration for ${story['title']}: $e');
+      }
+    }
   }
 
   @override
@@ -572,6 +609,9 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
       _score = 0;
       // Initialize question results with the correct length for the selected story
       _questionResults = List.filled(_stories[index]['questions'].length, null);
+      // Initialize selected options list with nulls
+      _selectedOptions = List.filled(_stories[index]['questions'].length, null);
+      _audioCompleted = false; // Reset audio completion status for new story
     });
 
     // Load audio for the selected story
@@ -597,6 +637,13 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     final position =
         Duration(milliseconds: (value * _totalDuration.inMilliseconds).round());
     _audioService.seek(position);
+
+    // Consider audio completed if user skips to near the end
+    if (position.inMilliseconds >= _totalDuration.inMilliseconds - 1000) {
+      setState(() {
+        _audioCompleted = true;
+      });
+    }
   }
 
   void _startQuestions() {
@@ -621,6 +668,8 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
           // Record as incorrect answer if time runs out
           if (_questionResults[_currentQuestionIndex] == null) {
             _questionResults[_currentQuestionIndex] = false;
+            // No option was selected if time ran out
+            _selectedOptions[_currentQuestionIndex] = null;
           }
 
           // Move to next question or results
@@ -644,6 +693,8 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     final correctIndex = questions[_currentQuestionIndex]['correctIndex'];
 
     setState(() {
+      // Store the selected option index
+      _selectedOptions[_currentQuestionIndex] = selectedOptionIndex;
       _questionResults[_currentQuestionIndex] =
           selectedOptionIndex == correctIndex;
       if (selectedOptionIndex == correctIndex) {
@@ -748,6 +799,23 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
         itemCount: _stories.length,
         itemBuilder: (context, index) {
           final story = _stories[index];
+
+          // Use the same approach for all stories
+          String durationText;
+          if (_storyAudioDurations.containsKey(index)) {
+            // If actual audio duration is loaded, use it
+            durationText = _formatDuration(_storyAudioDurations[index]!);
+          } else {
+            // If audio duration isn't loaded yet, use story-specific default
+            if (story['title'] == 'The Rainforest Expedition') {
+              durationText = "04:17"; // Actual duration for Story9.mp3
+            } else {
+              // For other stories, convert "X min" to "0X:00" format
+              String mins = story['duration'].split(' ')[0];
+              durationText = "${mins.padLeft(2, '0')}:00";
+            }
+          }
+
           return Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: GestureDetector(
@@ -815,7 +883,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                                 ),
                                 SizedBox(width: 4),
                                 Text(
-                                  story['duration'],
+                                  durationText,
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.7),
                                     fontSize: 14,
@@ -1055,24 +1123,35 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
               ),
             ),
           ),
-          // Start Questions button (moved to bottom)
+          // Start Questions button (modified to be enabled/disabled based on audio completion)
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _startQuestions,
+                onPressed: _audioCompleted ? _startQuestions : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF0D3445),
+                  backgroundColor:
+                      _audioCompleted ? Color(0xFF0D3445) : Colors.grey,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: Text(
-                  "Start Questions",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _audioCompleted
+                        ? Icon(Icons.question_answer, size: 20)
+                        : Icon(Icons.headphones, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      _audioCompleted ? "Start Questions" : "Start Questions",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1087,7 +1166,12 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
+
+    if (duration.inHours > 0) {
+      final hours = duration.inHours;
+      return "$hours:$minutes:$seconds";
+    }
+    return "$minutes:$seconds"; // Removed the " min" suffix to fix overflow
   }
 
   Widget _buildQuestionsView() {
@@ -1195,7 +1279,10 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                 bool isCorrectOption = index == correctIndex;
                 bool isAnswered =
                     _questionResults[_currentQuestionIndex] != null;
-                bool userSelectedThisOption = false; // We'll set this if needed
+
+                // Check if this is the option the user selected
+                bool userSelectedThisOption =
+                    _selectedOptions[_currentQuestionIndex] == index;
 
                 // Determine the container color based on various states
                 Color containerColor = Color(0xFF0D3445); // Default color
@@ -1204,8 +1291,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
                   if (isCorrectOption) {
                     // Always show correct option in green once answered
                     containerColor = Colors.green;
-                  } else if (_questionResults[_currentQuestionIndex] == false &&
-                      userSelectedThisOption) {
+                  } else if (userSelectedThisOption) {
                     // Show incorrect selected option in red
                     containerColor = Colors.red;
                   }
