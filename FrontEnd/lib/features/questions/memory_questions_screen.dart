@@ -246,6 +246,14 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   }
   
   Widget _buildResultsView(int totalQuestions) {
+    // Call this first to save results
+    QuestionService().saveQuizResults(
+      memoryId: widget.memoryId,
+      score: _score,
+      correctAnswers: _userAnswers.where((answer) => answer).length,
+      totalQuestions: totalQuestions,
+    );
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
