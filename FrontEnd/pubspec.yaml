@@ -72,3 +72,10 @@ flutter:
     - lib/assets/images/boy1.jpeg
     - lib/assets/images/boy2.jpeg
     - lib/assets/images/no.png
+    - lib/assets/audio/Story1.mp3
+    - lib/assets/audio/Story2.mp3
+    - lib/assets/audio/Story3.mp3
+    - lib/assets/audio/Story5.mp3
+    - lib/assets/audio/Story7.mp3
+    - lib/assets/audio/Story8.mp3
+    - lib/assets/audio/Story9.mp3
