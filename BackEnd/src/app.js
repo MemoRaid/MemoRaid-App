@@ -29,10 +29,12 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 const memoriesRoutes = require('./routes/memories');
 const questionsRoutes = require('./routes/questions');
+const quizRoutes = require('./routes/quiz');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/memories', memoriesRoutes);
 app.use('/api/questions', questionsRoutes);
+app.use('/api/quiz-results', quizRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
