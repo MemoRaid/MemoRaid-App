@@ -264,3 +264,199 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       });
     }
   }
+
+  void _handleCardTap(int index) {
+    if (!_canFlip ||
+        _flippedCards[index] ||
+        _matchedCards[index] ||
+        !_isGameActive) {
+      return;
+    }
+
+    // Start timer on first card tap
+    if (!_timerStarted) {
+      _startTimer();
+    }
+
+    _rotationController.forward(from: 0.0);
+
+    setState(() {
+      _flippedCards[index] = true;
+
+      if (_firstFlippedIndex == null) {
+        _firstFlippedIndex = index;
+      } else {
+        _canFlip = false;
+        _moves++;
+
+        if (_moves >= 20 && _stars == 3) {
+          _stars = 2;
+        } else if (_moves >= 30 && _stars == 2) {
+          _stars = 1;
+        }
+
+        if (_gameImages[_firstFlippedIndex!] == _gameImages[index]) {
+          _matchedCards[_firstFlippedIndex!] = true;
+          _matchedCards[index] = true;
+
+          _score += (10 * _level * _difficultyFactor).toInt();
+          _streak++;
+
+          if (_streak == 3) {
+            _score += (50 * _difficultyFactor).toInt();
+            setState(() {
+              _showSuccess = true;
+            });
+            Timer(const Duration(seconds: 2), () {
+              setState(() {
+                _showSuccess = false;
+              });
+            });
+            _streak = 0;
+          }
+
+          _bounceController.forward(from: 0.0);
+          _canFlip = true;
+          _firstFlippedIndex = null;
+
+          if (_matchedCards.every((matched) => matched)) {
+            _levelUp();
+          }
+        } else {
+          _streak = 0;
+          Timer(const Duration(seconds: 1), () {
+            setState(() {
+              _flippedCards[_firstFlippedIndex!] = false;
+              _flippedCards[index] = false;
+              _canFlip = true;
+              _firstFlippedIndex = null;
+            });
+          });
+        }
+      }
+    });
+  }
+
+  void _levelUp() {
+    // Store the points earned in this level before moving to the next
+    int pointsEarnedThisLevel = _score;
+
+    setState(() {
+      _level++;
+      Timer(const Duration(milliseconds: 800), () {
+        showLevelCompletionDialog(pointsEarnedThisLevel);
+      });
+    });
+  }
+
+  void showLevelCompletionDialog(int pointsEarnedThisLevel) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Color(0xFF185373).withOpacity(0.95),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: BorderSide(
+            color: Colors.white.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        title: const Text(
+          'Level Complete!',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.emoji_events, size: 50, color: Colors.amber),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _stars,
+                      (index) =>
+                          const Icon(Icons.star, color: Colors.amber, size: 30),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Points Earned: $pointsEarnedThisLevel',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Total Score: $_score',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Are you ready for the next challenge?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  showLevelUpDialog();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+                child: const Text('Next Level'),
+              ),
+              const SizedBox(width: 10),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _level = 1;
+                    _initializeGame();
+                  });
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white.withOpacity(0.8),
+                ),
+                child: const Text('Restart Game'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
