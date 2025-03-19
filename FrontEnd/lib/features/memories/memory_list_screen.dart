@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../models/memory.dart';
 import '../../services/memory_service.dart';
-
+import '../questions/memory_questions_screen.dart';
 class MemoryListScreen extends StatefulWidget {
   const MemoryListScreen({Key? key}) : super(key: key);
 
@@ -70,7 +70,16 @@ class MemoryCard extends StatelessWidget {
       margin: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
-          // Navigate to memory detail screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MemoryQuestionsScreen(
+                memoryId: memory.id,
+                photoUrl: memory.photoUrl,
+                briefDescription: memory.briefDescription,
+              ),
+            ),
+          );
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
