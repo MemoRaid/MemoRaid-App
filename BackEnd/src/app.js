@@ -7,19 +7,20 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration - With specific Flutter web port
+// Update existing CORS configuration for development
 app.use(cors({
-  origin: ['*',
-    'http://localhost:3000', 
-    'http://localhost:3001', 
-    'http://192.168.251.135:3000',
-    'http://localhost:49680',  // Add your Flutter web app port
-    'http://127.0.0.1:49680'   // Also add with 127.0.0.1
-  ],
+  origin: '*',  // Allow all origins during development
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Add preflight handler for OPTIONS requests
+app.options('*', (req, res) => {
+  res.status(204).end();
+});
 
 // Middleware
 app.use(express.json());

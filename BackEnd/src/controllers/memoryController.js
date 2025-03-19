@@ -38,7 +38,9 @@ const createContributor = async (req, res) => {
       }
       
       // For testing, we'll use a default UUID if no userId is provided
-      const actualUserId = userId || '00000000-0000-0000-0000-000000000000';
+      //const actualUserId = userId || '11111111-1111-1111-1111-111111111111';
+
+      const actualUserId = '11111111-1111-1111-1111-111111111111';
       
       // Create memory contributor without checking user existence first
       const { data: contributor, error } = await supabase

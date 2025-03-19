@@ -13,6 +13,7 @@ import 'features/password_security_screen.dart';
 import 'features/notifications_screen.dart';
 import 'features/privacy_policy_screen.dart';
 import 'features/terms_of_service_screen.dart';
+import 'features/test/memory_test_screen.dart'; // Import the memory test screen
 import 'config/api_config.dart'; // Import the API config
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,7 +54,8 @@ class MyApp extends StatelessWidget {
             '/password_security': (context) => const PasswordSecurityScreen(),
             '/notifications': (context) => const NotificationsScreen(),
             '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-            '/terms': (context) => const TermsOfServiceScreen()
+            '/terms': (context) => const TermsOfServiceScreen(),
+            '/test-memories': (context) => const MemoryTestScreen(),
           },
         );
       },
