@@ -555,9 +555,7 @@ class StoryRecallScreenState extends State<StoryRecallScreen>
         // If audio stops and we're at the end of the track (with some small tolerance)
         if (!playing &&
             _currentPosition.inMilliseconds >=
-                _totalDuration.inMilliseconds - 500) {
-          _audioCompleted = true;
-        }
+                _totalDuration.inMilliseconds - 500) {}
       });
     });
     // Listen for completion events
