@@ -25,6 +25,8 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   int _score = 0;
   bool _quizComplete = false;
   List<bool> _userAnswers = [];
+  int? _selectedAnswerIndex;
+  bool _showingFeedback = false;
   
   @override
   void initState() {
@@ -33,7 +35,14 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   }
   
   void _handleAnswer(int selectedIndex, Question question) {
+    // Don't allow selecting another answer while showing feedback
+    if (_showingFeedback) return;
+    
     setState(() {
+      _selectedAnswerIndex = selectedIndex;
+      _showingFeedback = true;
+      
+      // Update score if correct
       if (selectedIndex == question.correctOptionIndex) {
         _score += question.points;
         _userAnswers.add(true);
@@ -42,17 +51,22 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
       }
     });
     
-    // Move to next question or complete quiz
-    _questionsFuture.then((questions) {
-      Future.delayed(Duration(milliseconds: 500), () {
-        setState(() {
-          if (_currentQuestionIndex < questions.length - 1) {
-            _currentQuestionIndex++;
-          } else {
-            _quizComplete = true;
-          }
+    // Delay before moving to next question
+    Future.delayed(Duration(milliseconds: 1500), () {
+      if (mounted) {
+        _questionsFuture.then((questions) {
+          setState(() {
+            _showingFeedback = false;
+            _selectedAnswerIndex = null;
+            
+            if (_currentQuestionIndex < questions.length - 1) {
+              _currentQuestionIndex++;
+            } else {
+              _quizComplete = true;
+            }
+          });
         });
-      });
+      }
     });
   }
   
@@ -134,14 +148,37 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: ElevatedButton(
-                      onPressed: () => _handleAnswer(index, currentQuestion),
+                      onPressed: _showingFeedback ? null : () => _handleAnswer(index, currentQuestion),
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(double.infinity, 60),
                         padding: EdgeInsets.all(12),
+                        // Visual feedback based on selection
+                        backgroundColor: _selectedAnswerIndex == index 
+                            ? (index == currentQuestion.correctOptionIndex 
+                                ? Colors.green[100]  // Correct answer
+                                : Colors.red[100])   // Wrong answer
+                            : (_showingFeedback && index == currentQuestion.correctOptionIndex
+                                ? Colors.green[50]   // Highlight correct answer
+                                : null),
+                        foregroundColor: _selectedAnswerIndex == index 
+                            ? (index == currentQuestion.correctOptionIndex 
+                                ? Colors.green[800]  // Correct answer text
+                                : Colors.red[800])   // Wrong answer text
+                            : null,
                       ),
-                      child: Text(
-                        currentQuestion.options[index],
-                        style: TextStyle(fontSize: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            currentQuestion.options[index],
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          if (_showingFeedback && index == currentQuestion.correctOptionIndex)
+                            Icon(Icons.check_circle, color: Colors.green[800]),
+                          if (_showingFeedback && _selectedAnswerIndex == index && 
+                              index != currentQuestion.correctOptionIndex)
+                            Icon(Icons.cancel, color: Colors.red[800]),
+                        ],
                       ),
                     ),
                   );
