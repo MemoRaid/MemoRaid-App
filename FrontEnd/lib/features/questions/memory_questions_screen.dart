@@ -123,124 +123,255 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Memory Questions'),
+        title: const Text('Memory Questions',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Color(0xFF0D3445).withOpacity(0.7),
+        elevation: 0,
       ),
-      body: FutureBuilder<List<Question>>(
-        future: _questionsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No questions found for this memory'));
-          }
-          
-          final questions = snapshot.data!;
-          
-          if (_quizComplete) {
-            return _buildResultsView(questions.length);
-          }
-          
-          final currentQuestion = questions[_currentQuestionIndex];
-          
-          if (_shuffledOptions.isEmpty || 
-              _currentQuestionIndex != previousQuestionIndex) {
-            _shuffleOptions(currentQuestion);
-            previousQuestionIndex = _currentQuestionIndex;
-          }
-          
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Memory context
-                Container(
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Image.network(
-                        widget.photoUrl,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        widget.briefDescription,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Progress indicator
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: LinearProgressIndicator(
-                    value: (_currentQuestionIndex + 1) / questions.length,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                  ),
-                ),
-                
-                // Question
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    currentQuestion.question,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                
-                // Options
-                ...List.generate(_shuffledOptions.length, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: ElevatedButton(
-                      onPressed: _showingFeedback ? null : () => _handleAnswer(index, currentQuestion),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
-                          if (_showingFeedback) {
-                            if (index == _shuffledCorrectIndex) {
-                              return Colors.green[300]; // Brighter green for correct
-                            } else if (_selectedAnswerIndex == index) {
-                              return Colors.red[300]; // Brighter red for wrong answer
-                            }
-                          }
-                          return null; // Default color
-                        }),
-                        minimumSize: MaterialStateProperty.all(Size(double.infinity, 60)),
-                        padding: MaterialStateProperty.all(EdgeInsets.all(12)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _shuffledOptions[index],
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                          if (_showingFeedback && index == _shuffledCorrectIndex)
-                            Icon(Icons.check_circle, color: Colors.green[800], size: 24),
-                          if (_showingFeedback && _selectedAnswerIndex == index && index != _shuffledCorrectIndex)
-                            Icon(Icons.cancel, color: Colors.red[800], size: 24),
-                        ],
-                      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0D3445), Colors.white],
+          ),
+        ),
+        child: FutureBuilder<List<Question>>(
+          future: _questionsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+            
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No questions found for this memory'));
+            }
+            
+            final questions = snapshot.data!;
+            
+            if (_quizComplete) {
+              return _buildResultsView(questions.length);
+            }
+            
+            final currentQuestion = questions[_currentQuestionIndex];
+            
+            if (_shuffledOptions.isEmpty || 
+                _currentQuestionIndex != previousQuestionIndex) {
+              _shuffleOptions(currentQuestion);
+              previousQuestionIndex = _currentQuestionIndex;
+            }
+            
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Memory context
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                  );
-                }),
-              ],
-            ),
-          );
-        },
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30),
+                          ),
+                          child: Image.network(
+                            widget.photoUrl,
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                            widget.briefDescription,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF0D3445),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: 16),
+                  
+                  // Progress indicator with custom styling
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Question ${_currentQuestionIndex + 1} of ${questions.length}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF4E6077),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'Score: $_score',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: (_currentQuestionIndex + 1) / questions.length,
+                            backgroundColor: Colors.white.withOpacity(0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            minHeight: 6,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: 24),
+                  
+                  // Question card with styled design
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      currentQuestion.question,
+                      style: TextStyle(
+                        fontSize: 22, 
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0D3445),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  SizedBox(height: 20),
+                  
+                  // Restyled answer options
+                  ...List.generate(_shuffledOptions.length, (index) {
+                    bool isSelected = _selectedAnswerIndex == index;
+                    bool isCorrect = index == _shuffledCorrectIndex;
+                    
+                    return Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      child: MaterialButton(
+                        onPressed: _showingFeedback ? () {} : () => _handleAnswer(index, currentQuestion),
+                        elevation: isSelected ? 5 : 2,
+                        color: _showingFeedback
+                          ? (isCorrect 
+                              ? Colors.green[400] 
+                              : (isSelected ? Colors.red[400] : Colors.white))
+                          : Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: _showingFeedback && (isCorrect || isSelected)
+                            ? BorderSide(
+                                color: isCorrect ? Colors.green[800]! : Colors.red[800]!,
+                                width: 2.0,
+                              )
+                            : BorderSide.none,
+                        ),
+                        padding: EdgeInsets.zero,
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _showingFeedback
+                                    ? (isCorrect || isSelected ? Colors.white : Color(0xFF4E6077))
+                                    : Color(0xFF4E6077),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    String.fromCharCode(65 + index), // A, B, C, D
+                                    style: TextStyle(
+                                      color: _showingFeedback && (isCorrect || isSelected)
+                                        ? Color(0xFF0D3445)
+                                        : Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  _shuffledOptions[index],
+                                  style: TextStyle(
+                                    fontSize: 16, 
+                                    color: _showingFeedback && (isCorrect || isSelected) 
+                                      ? Colors.white 
+                                      : Color(0xFF0D3445),
+                                  ),
+                                ),
+                              ),
+                              if (_showingFeedback && isCorrect)
+                                Icon(Icons.check_circle, color: Colors.white),
+                              if (_showingFeedback && isSelected && !isCorrect)
+                                Icon(Icons.cancel, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
