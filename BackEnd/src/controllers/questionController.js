@@ -142,11 +142,11 @@ const getMemoryQuestions = async (req, res) => {
                 difficulty_level,
                 points,
                 memory_id,
-                correct_option_index,  // Add this
+                correct_option_index,  
                 memories (
                     photo_url,
                     brief_description,
-                    description      // Add this for context
+                    description    
                 )
             `)
             .eq('memory_id', memory_id)
