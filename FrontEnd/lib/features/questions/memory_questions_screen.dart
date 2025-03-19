@@ -67,6 +67,9 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   }
   
   void _handleAnswer(int selectedIndex, Question question) {
+    // Print added to debug
+    print("Handling answer: selected=$selectedIndex, correct=${_shuffledCorrectIndex}, showing=$_showingFeedback");
+    
     // Don't allow selecting another answer while showing feedback
     if (_showingFeedback) return;
     
@@ -202,26 +205,34 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: ElevatedButton(
                       onPressed: _showingFeedback ? null : () => _handleAnswer(index, currentQuestion),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 60),
-                        padding: EdgeInsets.all(12),
-                        // Visual feedback based on selection
-                        backgroundColor: _selectedAnswerIndex == index 
-                            ? (index == currentQuestion.correctOptionIndex 
-                                ? Colors.green[100]  // Correct answer
-                                : Colors.red[100])   // Wrong answer
-                            : (_showingFeedback && index == currentQuestion.correctOptionIndex
-                                ? Colors.green[50]   // Highlight correct answer
-                                : null),
-                        foregroundColor: _selectedAnswerIndex == index 
-                            ? (index == currentQuestion.correctOptionIndex 
-                                ? Colors.green[800]  // Correct answer text
-                                : Colors.red[800])   // Wrong answer text
-                            : null,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                          if (_showingFeedback) {
+                            if (index == _shuffledCorrectIndex) {
+                              return Colors.green[300]; // Brighter green for correct
+                            } else if (_selectedAnswerIndex == index) {
+                              return Colors.red[300]; // Brighter red for wrong answer
+                            }
+                          }
+                          return null; // Default color
+                        }),
+                        minimumSize: MaterialStateProperty.all(Size(double.infinity, 60)),
+                        padding: MaterialStateProperty.all(EdgeInsets.all(12)),
                       ),
-                      child: Text(
-                        _shuffledOptions[index],  // Use shuffled options
-                        style: TextStyle(fontSize: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _shuffledOptions[index],
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                          if (_showingFeedback && index == _shuffledCorrectIndex)
+                            Icon(Icons.check_circle, color: Colors.green[800], size: 24),
+                          if (_showingFeedback && _selectedAnswerIndex == index && index != _shuffledCorrectIndex)
+                            Icon(Icons.cancel, color: Colors.red[800], size: 24),
+                        ],
                       ),
                     ),
                   );
