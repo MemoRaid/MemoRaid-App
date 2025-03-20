@@ -341,7 +341,83 @@ class GameModesScreen extends StatelessWidget {
                 ),
               ),
 
+              const SizedBox(height: 32),
+              Text(
+                'Game Modes',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textLight,
+                    ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Select a mode that matches your skill level',
+                style: TextStyle(color: AppColors.textLight.withOpacity(0.8)),
+              ),
+              const SizedBox(height: 24),
+
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildGameModeCard(
+                      context: context,
+                      title: 'Beginner Mode',
+                      description:
+                          'Perfect for new players. More time to memorize images with helpful hints.',
+                      icon: Icons.lightbulb_outline,
+                      difficulty: 1,
+                      rewards: '5-15 points per correct answer',
+                      color: Colors.green,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(
+                            gameMode: 'Beginner',
+                            isDaily: false,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildGameModeCard(
+                      context: context,
+                      title: 'Expert Mode',
+                      description:
+                          'For memory masters. Quick glimpses of images with hints.',
+                      icon: Icons.psychology,
+                      difficulty: 3,
+                      rewards: '15-30 points per correct answer',
+                      color: Colors.red,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(
+                            gameMode: 'Expert',
+                            isDaily: false,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildGameModeCard(
+                      context: context,
+                      title: 'Speed Challenge',
+                      description:
+                          'Race against time! Earn bonus points for faster responses.',
+                      icon: Icons.timer,
+                      difficulty: 2,
+                      rewards: 'Up to 40 points with time bonus',
+                      color: Colors.blue,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(
+                            gameMode: 'Speed',
+                            isDaily: false,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
