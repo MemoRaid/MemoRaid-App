@@ -60,7 +60,7 @@ class ExerciseScreen extends StatelessWidget {
                             ),
                           ),
 
-                          // Grid of exercise cards - now with only 3 exercises
+                          // Grid of exercise cards - now with 4 exercises, including a locked one
                           GridView.count(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
@@ -86,8 +86,7 @@ class ExerciseScreen extends StatelessWidget {
                               ),
                               _buildExerciseCard(
                                 context: context,
-                                title:
-                                    'Cross Body Movement', // Moved to second position
+                                title: 'Cross Body Movement',
                                 rating: 4.4,
                                 onTap: () {
                                   Navigator.push(
@@ -101,8 +100,7 @@ class ExerciseScreen extends StatelessWidget {
                               ),
                               _buildExerciseCard(
                                 context: context,
-                                title:
-                                    'Brain Boosting Yoga', // Moved to third position
+                                title: 'Brain Boosting Yoga',
                                 rating: 4.2,
                                 onTap: () {
                                   Navigator.push(
@@ -114,7 +112,11 @@ class ExerciseScreen extends StatelessWidget {
                                   );
                                 },
                               ),
-                              // Fourth "Coming Soon" exercise card removed
+                              // Add back the locked "Coming Soon" exercise card
+                              _buildLockedExerciseCard(
+                                context: context,
+                                title: 'Coming Soon',
+                              ),
                             ],
                           ),
                         ],
@@ -277,6 +279,109 @@ class ExerciseScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // New method for locked exercise card
+  Widget _buildLockedExerciseCard({
+    required BuildContext context,
+    required String title,
+  }) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: ShapeDecoration(
+        color: Color(0xFFF4F7FB).withOpacity(0.7),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            width: 1,
+            color: Colors.white.withOpacity(0.3),
+          ),
+          borderRadius: BorderRadius.circular(22),
+        ),
+        shadows: [
+          BoxShadow(
+            color: Color(0x333B4056),
+            blurRadius: 40,
+            offset: Offset(0, 20),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Exercise image with darker overlay
+          Positioned(
+            left: 0,
+            top: 0,
+            right: 0,
+            child: Container(
+              height: 120,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage("https://placehold.co/155x120"),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5),
+                    BlendMode.darken,
+                  ),
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.lock_outline,
+                  size: 40,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+
+          // Title and locked status
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Color(0xFF0D3445),
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w700,
+                      height: 0.81,
+                      letterSpacing: 0.07,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.lock_clock,
+                        size: 14,
+                        color: Color(0xFF0D3445).withOpacity(0.7),
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        "Unlock Soon",
+                        style: TextStyle(
+                          color: Color(0xFF0D3445).withOpacity(0.7),
+                          fontSize: 12,
+                          fontFamily: 'M PLUS 1',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
