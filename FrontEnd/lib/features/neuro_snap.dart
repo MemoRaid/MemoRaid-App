@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'services/neuro_snap_stable_diffusion_service.dart';
-import 'services/neuro_snap_scoring_service.dart';
+import '/services/neuro_snap_scoring_service.dart';
 import 'neuro_snap_leaderboard_screen.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -130,9 +130,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   Text(
                     'NeuroSnap',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontSize: 46,
-                      color: AppColors.textLight,
-                    ),
+                          fontSize: 46,
+                          color: AppColors.textLight,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
@@ -149,13 +149,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     context: context,
                     label: 'Start Game',
                     icon: Icons.play_arrow_rounded,
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const GameModesScreen(),
-                          ),
-                        ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const GameModesScreen(),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _buildMenuButton(
@@ -323,11 +322,10 @@ class GameModesScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => const GameScreen(
-                                  gameMode: 'daily',
-                                  isDaily: true,
-                                ),
+                            builder: (context) => const GameScreen(
+                              gameMode: 'daily',
+                              isDaily: true,
+                            ),
                           ),
                         );
                       },
@@ -346,9 +344,9 @@ class GameModesScreen extends StatelessWidget {
               Text(
                 'Game Modes',
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textLight,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textLight,
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -369,17 +367,15 @@ class GameModesScreen extends StatelessWidget {
                       difficulty: 1,
                       rewards: '5-15 points per correct answer',
                       color: Colors.green,
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => const GameScreen(
-                                    gameMode: 'Beginner',
-                                    isDaily: false,
-                                  ),
-                            ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(
+                            gameMode: 'Beginner',
+                            isDaily: false,
                           ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildGameModeCard(
@@ -391,17 +387,15 @@ class GameModesScreen extends StatelessWidget {
                       difficulty: 3,
                       rewards: '15-30 points per correct answer',
                       color: Colors.red,
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => const GameScreen(
-                                    gameMode: 'Expert',
-                                    isDaily: false,
-                                  ),
-                            ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(
+                            gameMode: 'Expert',
+                            isDaily: false,
                           ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildGameModeCard(
@@ -413,17 +407,15 @@ class GameModesScreen extends StatelessWidget {
                       difficulty: 2,
                       rewards: 'Up to 40 points with time bonus',
                       color: Colors.blue,
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => const GameScreen(
-                                    gameMode: 'Speed',
-                                    isDaily: false,
-                                  ),
-                            ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(
+                            gameMode: 'Speed',
+                            isDaily: false,
                           ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -508,10 +500,9 @@ class GameModesScreen extends StatelessWidget {
                                   (index) => Icon(
                                     Icons.circle,
                                     size: 10,
-                                    color:
-                                        index < difficulty
-                                            ? color
-                                            : Colors.grey.withOpacity(0.3),
+                                    color: index < difficulty
+                                        ? color
+                                        : Colors.grey.withOpacity(0.3),
                                   ),
                                 ),
                               ),
@@ -520,8 +511,8 @@ class GameModesScreen extends StatelessWidget {
                                 difficulty == 1
                                     ? 'Easy'
                                     : difficulty == 2
-                                    ? 'Medium'
-                                    : 'Hard',
+                                        ? 'Medium'
+                                        : 'Hard',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 12,
@@ -1008,10 +999,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
 
     // Get the correct hidden image URL
-    final String hiddenImageUrl =
-        _imagePair!.hiddenImageIndex == 0
-            ? _imagePair!.firstImage
-            : _imagePair!.secondImage;
+    final String hiddenImageUrl = _imagePair!.hiddenImageIndex == 0
+        ? _imagePair!.firstImage
+        : _imagePair!.secondImage;
 
     // Check if the selected option is correct
     final selectedImageUrl = _imagePair!.optionImages[index];
@@ -1082,20 +1072,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color:
-                timeRemaining != null && timeRemaining > 0
-                    ? Colors.blue.withOpacity(0.2)
-                    : Colors.red.withOpacity(0.2),
+            color: timeRemaining != null && timeRemaining > 0
+                ? Colors.blue.withOpacity(0.2)
+                : Colors.red.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
               Icon(
                 Icons.timer,
-                color:
-                    timeRemaining != null && timeRemaining > 0
-                        ? Colors.blue
-                        : Colors.red,
+                color: timeRemaining != null && timeRemaining > 0
+                    ? Colors.blue
+                    : Colors.red,
                 size: 16,
               ),
               const SizedBox(width: 4),
@@ -1105,10 +1093,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     : 'Time\'s up!',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color:
-                      timeRemaining != null && timeRemaining > 0
-                          ? Colors.blue
-                          : Colors.red,
+                  color: timeRemaining != null && timeRemaining > 0
+                      ? Colors.blue
+                      : Colors.red,
                   fontSize: 12,
                 ),
               ),
@@ -1240,10 +1227,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final int maxPossibleAttempts = totalQuestionsAttempted * 3;
     final int attemptsUsed = _totalAttemptsMade;
 
-    final double questionAccuracy =
-        totalQuestionsAttempted > 0
-            ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
-            : 0;
+    final double questionAccuracy = totalQuestionsAttempted > 0
+        ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
+        : 0;
     final double attemptEfficiency =
         attemptsUsed > 0 ? (_totalCorrectAnswers / attemptsUsed) * 100 : 0;
     final double combinedAccuracy = (questionAccuracy + attemptEfficiency) / 2;
@@ -1264,107 +1250,106 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => WillPopScope(
-            // Prevent back button from dismissing the dialog
-            onWillPop: () async => false,
-            child: AlertDialog(
-              backgroundColor: AppColors.primaryDark,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                'Game Over!',
-                style: TextStyle(color: Colors.red, fontSize: 24),
-                textAlign: TextAlign.center,
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Game over message
-                    Text(
-                      'You\'ve used all your attempts for this question.',
-                      style: TextStyle(color: AppColors.textLight),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Results for session
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryMedium.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildResultRow(
-                            'Final Score',
-                            '$_score',
-                            isHeader: false,
-                            highlight: true,
-                          ),
-                          _buildResultRow(
-                            'Correct Answers',
-                            '$_totalCorrectAnswers/$_round',
-                            isHeader: false,
-                          ),
-                          _buildResultRow(
-                            'Accuracy',
-                            '${combinedAccuracy.toStringAsFixed(0)}%',
-                            isHeader: false,
-                            tooltip: 'Based on questions and attempts',
-                          ),
-                          _buildResultRow(
-                            'Attempts Used',
-                            '$attemptsUsed/${maxPossibleAttempts}',
-                            isHeader: false,
-                          ),
-                          _buildResultRow(
-                            'Max Streak',
-                            '$_maxStreak',
-                            isHeader: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Encouragement message
-                    Text(
-                      'Keep practicing to improve your memory skills!',
-                      style: TextStyle(
-                        color: AppColors.textLight,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+      builder: (context) => WillPopScope(
+        // Prevent back button from dismissing the dialog
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: AppColors.primaryDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Game Over!',
+            style: TextStyle(color: Colors.red, fontSize: 24),
+            textAlign: TextAlign.center,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Game over message
+                Text(
+                  'You\'ve used all your attempts for this question.',
+                  style: TextStyle(color: AppColors.textLight),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              actions: [
-                Center(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.home),
-                    label: const Text('Return to Menu'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentColor,
-                      foregroundColor: AppColors.primaryDark,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop(); // Return to game modes
-                    },
+                const SizedBox(height: 20),
+
+                // Results for session
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryMedium.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildResultRow(
+                        'Final Score',
+                        '$_score',
+                        isHeader: false,
+                        highlight: true,
+                      ),
+                      _buildResultRow(
+                        'Correct Answers',
+                        '$_totalCorrectAnswers/$_round',
+                        isHeader: false,
+                      ),
+                      _buildResultRow(
+                        'Accuracy',
+                        '${combinedAccuracy.toStringAsFixed(0)}%',
+                        isHeader: false,
+                        tooltip: 'Based on questions and attempts',
+                      ),
+                      _buildResultRow(
+                        'Attempts Used',
+                        '$attemptsUsed/${maxPossibleAttempts}',
+                        isHeader: false,
+                      ),
+                      _buildResultRow(
+                        'Max Streak',
+                        '$_maxStreak',
+                        isHeader: false,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Encouragement message
+                Text(
+                  'Keep practicing to improve your memory skills!',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
           ),
+          actions: [
+            Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.home),
+                label: const Text('Return to Menu'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentColor,
+                  foregroundColor: AppColors.primaryDark,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Return to game modes
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1374,20 +1359,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       return;
 
     // Get the correct answer
-    final String hiddenImageUrl =
-        _imagePair!.hiddenImageIndex == 0
-            ? _imagePair!.firstImage
-            : _imagePair!.secondImage;
+    final String hiddenImageUrl = _imagePair!.hiddenImageIndex == 0
+        ? _imagePair!.firstImage
+        : _imagePair!.secondImage;
 
     // Find index of correct answer
     int correctIndex = _imagePair!.optionImages.indexOf(hiddenImageUrl);
 
     // Choose which wrong answers to eliminate
-    List<int> wrongIndices =
-        List.generate(
-          _imagePair!.optionImages.length,
-          (i) => i,
-        ).where((i) => i != correctIndex).toList();
+    List<int> wrongIndices = List.generate(
+      _imagePair!.optionImages.length,
+      (i) => i,
+    ).where((i) => i != correctIndex).toList();
     wrongIndices.shuffle();
 
     // Keep only half (rounded up) of wrong answers
@@ -1419,10 +1402,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _imagePair!.firstImagePrompt != null &&
         _imagePair!.secondImagePrompt != null) {
       // Use the prompt from the hidden image
-      promptHint =
-          _imagePair!.hiddenImageIndex == 0
-              ? _imagePair!.firstImagePrompt!
-              : _imagePair!.secondImagePrompt!;
+      promptHint = _imagePair!.hiddenImageIndex == 0
+          ? _imagePair!.firstImagePrompt!
+          : _imagePair!.secondImagePrompt!;
     } else {
       // Fall back to regular hints if prompts aren't available
       promptHint =
@@ -1509,10 +1491,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
-                child:
-                    _isLoading
-                        ? _buildLoadingState()
-                        : _imagePair == null
+                child: _isLoading
+                    ? _buildLoadingState()
+                    : _imagePair == null
                         ? _buildErrorState()
                         : _buildGameContent(),
               ),
@@ -1640,8 +1621,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       physics: const BouncingScrollPhysics(),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight:
-              MediaQuery.of(context).size.height -
+          minHeight: MediaQuery.of(context).size.height -
               AppBar().preferredSize.height -
               MediaQuery.of(context).padding.top -
               MediaQuery.of(context).padding.bottom -
@@ -1760,10 +1740,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         children: [
           // Score with animation and updated colors
           ScaleTransition(
-            scale:
-                _score > 0
-                    ? _pulseAnimation
-                    : const AlwaysStoppedAnimation(1.0),
+            scale: _score > 0
+                ? _pulseAnimation
+                : const AlwaysStoppedAnimation(1.0),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
@@ -1799,10 +1778,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color:
-                  _streak > 0
-                      ? Colors.orange.withOpacity(0.2)
-                      : Colors.grey.withOpacity(0.1),
+              color: _streak > 0
+                  ? Colors.orange.withOpacity(0.2)
+                  : Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -1832,10 +1810,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color:
-                  _attemptsRemaining > 1
-                      ? AppColors.accentColor.withOpacity(0.2)
-                      : Colors.red.withOpacity(0.2),
+              color: _attemptsRemaining > 1
+                  ? AppColors.accentColor.withOpacity(0.2)
+                  : Colors.red.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -1847,10 +1824,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     child: Icon(
                       Icons.favorite,
                       size: 14,
-                      color:
-                          index < _attemptsRemaining
-                              ? Colors.red
-                              : Colors.grey.withOpacity(0.3),
+                      color: index < _attemptsRemaining
+                          ? Colors.red
+                          : Colors.grey.withOpacity(0.3),
                     ),
                   ),
                 ),
@@ -1988,10 +1964,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         child: Icon(
                           Icons.circle,
                           size: 10,
-                          color:
-                              i < _comboCount
-                                  ? Colors.indigo
-                                  : Colors.grey.withOpacity(0.3),
+                          color: i < _comboCount
+                              ? Colors.indigo
+                              : Colors.grey.withOpacity(0.3),
                         ),
                       ),
                     ),
@@ -2069,8 +2044,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(
-        maxHeight:
-            MediaQuery.of(context).size.height *
+        maxHeight: MediaQuery.of(context).size.height *
             0.35, // Limit height to percentage of screen
       ),
       child: Wrap(
@@ -2086,18 +2060,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               width: itemSize,
               height: itemSize,
               decoration: BoxDecoration(
-                color:
-                    _selectedOption == index
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                        : Colors.grey[200],
+                color: _selectedOption == index
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                    : Colors.grey[200],
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    _selectedOption == index
-                        ? Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 3,
-                        )
-                        : null,
+                border: _selectedOption == index
+                    ? Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 3,
+                      )
+                    : null,
               ),
               clipBehavior: Clip.hardEdge,
               child: _buildOptionImage(options[index]),
@@ -2178,10 +2150,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   Widget _buildAnswerRevealOverlay() {
     // Get the correct hidden image URL
-    final String correctImageUrl =
-        _imagePair!.hiddenImageIndex == 0
-            ? _imagePair!.firstImage
-            : _imagePair!.secondImage;
+    final String correctImageUrl = _imagePair!.hiddenImageIndex == 0
+        ? _imagePair!.firstImage
+        : _imagePair!.secondImage;
 
     // Determine if the selected answer was correct
     bool wasCorrect = false;
@@ -2298,12 +2269,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         border: Border.all(color: Colors.white, width: 3),
       ),
       clipBehavior: Clip.hardEdge,
-      child:
-          visible
-              ? _buildImage(imageUrl)
-              : const Center(
-                child: Icon(Icons.question_mark, size: 64, color: Colors.grey),
-              ),
+      child: visible
+          ? _buildImage(imageUrl)
+          : const Center(
+              child: Icon(Icons.question_mark, size: 64, color: Colors.grey),
+            ),
     );
   }
 
@@ -2314,20 +2284,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       return Image.memory(
         base64Decode(base64Str),
         fit: BoxFit.cover,
-        errorBuilder:
-            (context, error, stackTrace) => const Center(
-              child: Icon(Icons.broken_image, color: Colors.red),
-            ),
+        errorBuilder: (context, error, stackTrace) => const Center(
+          child: Icon(Icons.broken_image, color: Colors.red),
+        ),
       );
     } else {
       // Handle remote URLs
       return CachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
-        placeholder:
-            (context, url) => const Center(child: CircularProgressIndicator()),
-        errorWidget:
-            (context, url, error) => const Center(child: Icon(Icons.error)),
+        placeholder: (context, url) =>
+            const Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) =>
+            const Center(child: Icon(Icons.error)),
       );
     }
   }
@@ -2347,10 +2316,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final int attemptsUsed = _totalAttemptsMade;
 
     // Calculate two types of accuracy for better representation
-    final double questionAccuracy =
-        totalQuestionsAttempted > 0
-            ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
-            : 0;
+    final double questionAccuracy = totalQuestionsAttempted > 0
+        ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
+        : 0;
 
     // Calculate attempt efficiency - how many correct answers out of total attempts
     final double attemptEfficiency =
@@ -2375,119 +2343,118 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => WillPopScope(
-            // Prevent back button from dismissing the dialog
-            onWillPop: () async => false,
-            child: AlertDialog(
-              backgroundColor: AppColors.primaryDark,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Column(
-                children: [
-                  Text(
-                    'Challenge Complete!',
-                    style: TextStyle(
-                      color: AppColors.accentColor,
-                      fontSize: 24,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  // Show confetti animation in the dialog
-                  ConfettiWidget(
-                    confettiController: _confettiController,
-                    blastDirection: -pi / 2, // straight up
-                    emissionFrequency: 0.05,
-                    numberOfParticles: 20,
-                    shouldLoop: false,
-                    maxBlastForce: 20,
-                    minBlastForce: 8,
-                    gravity: 0.1,
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Results table
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryMedium.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildResultRow(
-                            'Score',
-                            '$_score points',
-                            isHeader: false,
-                            highlight: true,
-                          ),
-                          _buildResultRow(
-                            'Correct Answers',
-                            '$_totalCorrectAnswers/$totalQuestionsAttempted',
-                            isHeader: false,
-                          ),
-                          _buildResultRow(
-                            'Accuracy',
-                            '${combinedAccuracy.toStringAsFixed(0)}%',
-                            isHeader: false,
-                            tooltip: 'Based on questions and attempts',
-                          ),
-                          _buildResultRow(
-                            'Attempts Used',
-                            '$attemptsUsed/${maxPossibleAttempts}',
-                            isHeader: false,
-                          ),
-                          _buildResultRow(
-                            'Max Streak',
-                            '$_maxStreak',
-                            isHeader: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Performance feedback
-                    Text(
-                      _getPerformanceFeedback(combinedAccuracy),
-                      style: TextStyle(
-                        color: AppColors.textLight,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+      builder: (context) => WillPopScope(
+        // Prevent back button from dismissing the dialog
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: AppColors.primaryDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Column(
+            children: [
+              Text(
+                'Challenge Complete!',
+                style: TextStyle(
+                  color: AppColors.accentColor,
+                  fontSize: 24,
                 ),
+                textAlign: TextAlign.center,
               ),
-              actions: [
-                Center(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.home),
-                    label: const Text('Return to Menu'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentColor,
-                      foregroundColor: AppColors.primaryDark,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                    onPressed: () {
-                      _confettiController.stop();
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop(); // Return to game modes
-                    },
+              const SizedBox(height: 16),
+              // Show confetti animation in the dialog
+              ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: -pi / 2, // straight up
+                emissionFrequency: 0.05,
+                numberOfParticles: 20,
+                shouldLoop: false,
+                maxBlastForce: 20,
+                minBlastForce: 8,
+                gravity: 0.1,
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Results table
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryMedium.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildResultRow(
+                        'Score',
+                        '$_score points',
+                        isHeader: false,
+                        highlight: true,
+                      ),
+                      _buildResultRow(
+                        'Correct Answers',
+                        '$_totalCorrectAnswers/$totalQuestionsAttempted',
+                        isHeader: false,
+                      ),
+                      _buildResultRow(
+                        'Accuracy',
+                        '${combinedAccuracy.toStringAsFixed(0)}%',
+                        isHeader: false,
+                        tooltip: 'Based on questions and attempts',
+                      ),
+                      _buildResultRow(
+                        'Attempts Used',
+                        '$attemptsUsed/${maxPossibleAttempts}',
+                        isHeader: false,
+                      ),
+                      _buildResultRow(
+                        'Max Streak',
+                        '$_maxStreak',
+                        isHeader: false,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Performance feedback
+                Text(
+                  _getPerformanceFeedback(combinedAccuracy),
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
           ),
+          actions: [
+            Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.home),
+                label: const Text('Return to Menu'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentColor,
+                  foregroundColor: AppColors.primaryDark,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () {
+                  _confettiController.stop();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Return to game modes
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     // Play the confetti when dialog shows
