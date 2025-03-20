@@ -84,8 +84,8 @@ class GameScreen extends StatelessWidget {
                     children: [
                       _buildGameCard(
                         context,
-                        title: "Memory Match",
-                        subtitle: "Test your memory skills",
+                        title: "Path Quest",
+                        subtitle: "Remember the path to win",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
