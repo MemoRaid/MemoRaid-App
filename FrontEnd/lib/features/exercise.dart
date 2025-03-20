@@ -46,16 +46,18 @@ class ExerciseScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Heading for exercises
+                          // Heading for exercises - now centered
                           Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: 16.0, left: 4.0),
-                            child: Text(
-                              'Brain Training Exercises',
-                              style: TextStyle(
-                                color: Color(0xFF0D3445),
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Center(
+                              child: Text(
+                                'Brain Training Exercises',
+                                style: TextStyle(
+                                  color: Color(0xFF0D3445),
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
