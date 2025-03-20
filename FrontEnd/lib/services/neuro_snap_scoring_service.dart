@@ -51,3 +51,65 @@ class GameStats {
     );
   }
 }
+
+// Class to store individual game results
+class GameResult {
+  final String mode;
+  final int score;
+  final int correctAnswers;
+  final int totalQuestions;
+  final int totalAttempts; // Add this field to track attempts
+  final int maxStreak;
+  final DateTime timestamp;
+
+  GameResult({
+    required this.mode,
+    required this.score,
+    required this.correctAnswers,
+    required this.totalQuestions,
+    required this.maxStreak,
+    required this.totalAttempts, // Make this required
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
+
+  // Convert to JSON for storage
+  Map<String, dynamic> toJson() {
+    return {
+      'mode': mode,
+      'score': score,
+      'correctAnswers': correctAnswers,
+      'totalQuestions': totalQuestions,
+      'totalAttempts': totalAttempts, // Save total attempts
+      'maxStreak': maxStreak,
+      'timestamp': timestamp.millisecondsSinceEpoch,
+    };
+  }
+
+  // Create from JSON for retrieval
+  factory GameResult.fromJson(Map<String, dynamic> json) {
+    return GameResult(
+      mode: json['mode'] ?? 'unknown',
+      score: json['score'] ?? 0,
+      correctAnswers: json['correctAnswers'] ?? 0,
+      totalQuestions: json['totalQuestions'] ?? 0,
+      totalAttempts: json['totalAttempts'] ?? 0, // Load total attempts
+      maxStreak: json['maxStreak'] ?? 0,
+      timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp'] ?? 0),
+    );
+  }
+
+  // Calculate combined accuracy that matches the game screen calculation
+  double get accuracy {
+    if (totalQuestions == 0) return 0;
+
+    // Calculate question accuracy (% of questions answered correctly)
+    double questionAccuracy = (correctAnswers / totalQuestions) * 100;
+
+    // Calculate attempt efficiency (% of correct answers out of total attempts)
+    double attemptEfficiency =
+        totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
+
+    // Return the combined accuracy as used in the game
+    return (questionAccuracy + attemptEfficiency) / 2;
+  }
+}
