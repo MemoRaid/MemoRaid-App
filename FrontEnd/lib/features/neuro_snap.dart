@@ -592,3 +592,213 @@ class GameModesScreen extends StatelessWidget {
     );
   }
 }
+class GameScreen extends StatefulWidget {
+  final String gameMode;
+  final bool isDaily;
+
+  const GameScreen({super.key, required this.gameMode, this.isDaily = false});
+
+  @override
+  State<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
+  String _lastFeedbackMessage = '';
+  DateTime _lastFeedbackTime = DateTime.now();
+  late AnimationController _imageAnimationController;
+  bool _imageVisible = true;
+  int? _selectedOption;
+  late Animation<double> _imageAnimation;
+  bool _isLoading = true;
+  ImagePair? _imagePair;
+  final StableDiffusionService _stableDiffusionService =
+      StableDiffusionService();
+  final ScoringService _scoringService = ScoringService();
+  int _score = 0;
+  int _round = 0;
+
+  // Concepts to generate image pairs for - expanded list
+  final List<String> _concepts = [
+    'apple',
+    'cat',
+    'car',
+    'house',
+    'chair',
+    'tree',
+    'book',
+    'flower',
+    'bird',
+    'watch',
+    'coffee cup',
+    'banana',
+    'dog',
+    'bicycle',
+    'laptop',
+    'shoe',
+    'camera',
+    'guitar',
+    'umbrella',
+    'sunglasses',
+  ];
+
+  // Add a variable to track the last concept used
+  String? _lastUsedConcept;
+
+  // Add viewTime parameter based on difficulty
+  int get _viewTime {
+    switch (widget.gameMode) {
+      case 'Beginner':
+        return 7; // 7 seconds to view images
+      case 'Expert':
+        return 3; // Only 3 seconds to view images
+      case 'Speed':
+        return 2; // 2 seconds for speed challenge
+      case 'Daily':
+        return 5; // 5 seconds for daily challenge
+      default:
+        return 5;
+    }
+  }
+
+  // Adjust points based on game mode
+  int _calculatePoints(bool isCorrect) {
+    return _scoringService.calculatePoints(
+      isCorrect: isCorrect,
+      gameMode: widget.gameMode,
+      comboCount: _comboCount,
+      timeRemaining: _timeRemainingNotifier.value ?? 0,
+    );
+  }
+
+  // Add time tracking for speed mode
+  final ValueNotifier<int?> _timeRemainingNotifier = ValueNotifier<int?>(null);
+  Timer? _timer;
+
+  // Get view size based on difficulty
+  double get _imageSize {
+    switch (_difficultyLevels) {
+      case 1:
+        return 150.0; // Largest for beginners
+      case 2:
+        return 130.0; // Medium for intermediate
+      case 3:
+        return 110.0; // Small for experts
+      default:
+        return 130.0;
+    }
+  }
+
+  // Animation controllers for enhanced visual effects
+  late AnimationController _pulseAnimationController;
+  late Animation<double> _pulseAnimation;
+
+  // Confetti controller for celebration effects
+  late ConfettiController _confettiController;
+
+  // Game enhancement variables
+  int _comboCount = 0;
+  int _streak = 0;
+  int _maxStreak = 0;
+  bool _powerUpAvailable = false;
+  bool _hintUsed = false;
+  bool _isAnswerRevealing = false;
+  double _gameProgress = 0.0;
+
+  // For power-ups
+  final int _requiredComboForPowerUp = 3;
+  bool _isFiftyfiftyUsed = false;
+
+  // For hints
+  List<String> _hints = [];
+  bool _showHint = false;
+
+  // Game level configuration
+  int _level = 1;
+  int _attemptsRemaining = 3; // 3 attempts per question
+  int _totalCorrectAnswers = 0;
+
+  // Define rounds per level
+  int get _maxRounds {
+    // Daily challenge has fixed rounds
+    if (widget.isDaily) return 5;
+
+    // Regular game modes have level-based rounds
+    switch (_level) {
+      case 1:
+        return 3; // Level 1: 3 rounds
+      case 2:
+        return 4; // Level 2: 4 rounds
+      case 3:
+        return 5; // Level 3: 5 rounds
+      case 4:
+        return 5; // Level 4: 5 rounds
+      case 5:
+        return 5; // Level 5: 5 rounds
+      default:
+        return 3;
+    }
+  }
+
+  // Check if all rounds in current level are complete
+  bool get _isLevelComplete => _round >= _maxRounds;
+
+  // Define difficulty based on level rather than just game mode
+  int get _difficultyLevels {
+    // For daily challenge, keep existing random difficulty
+    if (widget.isDaily) {
+      return 1 + Random().nextInt(3);
+    }
+
+    // For beginner mode, difficulty increases more slowly
+    if (widget.gameMode == 'Beginner') {
+      return min((_level + 1) ~/ 2, 3); // 1,1,2,2,3
+    }
+
+    // For expert mode, always challenging
+    if (widget.gameMode == 'Expert') {
+      return 3;
+    }
+
+    // For speed mode, medium to hard difficulty
+    return min(_level, 3);
+  }
+
+  // Add a variable to track total attempts used throughout the game
+  int _totalAttemptsMade = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _imageAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _imageAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Initialize pulse animation
+    _pulseAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+        CurvedAnimation(
+            parent: _pulseAnimationController, curve: Curves.easeInOut));
+
+    // Initialize confetti
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
+
+    // Test API connectivity before loading images
+    _testApiAndLoadImages();
+
+    // Reset attempts when starting
+    _attemptsRemaining = 3;
+    _level = 1;
+    _round = 0;
+  }
+
