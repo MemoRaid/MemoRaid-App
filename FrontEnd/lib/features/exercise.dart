@@ -44,8 +44,23 @@ class ExerciseScreen extends StatelessWidget {
                     child: SingleChildScrollView(
                       padding: EdgeInsets.all(20),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Grid of exercise cards
+                          // Heading for exercises
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: 16.0, left: 4.0),
+                            child: Text(
+                              'Brain Training Exercises',
+                              style: TextStyle(
+                                color: Color(0xFF0D3445),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                          // Grid of exercise cards - now with only 3 exercises
                           GridView.count(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
@@ -97,12 +112,7 @@ class ExerciseScreen extends StatelessWidget {
                                   );
                                 },
                               ),
-                              _buildExerciseCard(
-                                context: context,
-                                title: 'Coming Soon',
-                                rating: 0.0,
-                                onTap: () {},
-                              ),
+                              // Fourth "Coming Soon" exercise card removed
                             ],
                           ),
                         ],
