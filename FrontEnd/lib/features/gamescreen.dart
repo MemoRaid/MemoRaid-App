@@ -5,6 +5,7 @@ import 'game.dart';
 import 'g_01_home_screen.dart';
 import 'spot_difference_game.dart';
 import 'g_02_memory_recovery_app.dart';
+import'neuro_snap.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
