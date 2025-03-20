@@ -113,9 +113,7 @@ class ExerciseScreen extends StatelessWidget {
                                 },
                               ),
                               // Add back the locked "Coming Soon" exercise card
-                              _buildLockedExerciseCard(
-                                context: context,
-                                title: 'Coming Soon',
+                              
                               ),
                             ],
                           ),
