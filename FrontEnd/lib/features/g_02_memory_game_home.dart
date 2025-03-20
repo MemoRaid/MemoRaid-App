@@ -126,7 +126,19 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     // Initialize with the passed level
     _level = widget.initialLevel;
 
-    // Initialize with the passed theme
+    // Set theme based on level
+    if (_level == 1) {
+      _currentTheme = 'Hobbies';
+    } else if (_level == 2) {
+      _currentTheme = 'Places';
+    } else if (_level == 3) {
+      _currentTheme = 'Family';
+    } else {
+      // For level 4 or any other level
+      _currentTheme = 'Hobbies'; // Use default theme
+    }
+
+    // Override with passed theme if specified
     if (_themes.containsKey(widget.initialTheme)) {
       _currentTheme = widget.initialTheme;
     }
