@@ -9,7 +9,7 @@ class AuthService extends ChangeNotifier {
   final ApiService _apiService = ApiService();
   final _storage = const FlutterSecureStorage();
 
-  
+  bool _isAuthenticated = false;
   Map<String, dynamic>? _userData;
 
   bool get isAuthenticated => _isAuthenticated;
