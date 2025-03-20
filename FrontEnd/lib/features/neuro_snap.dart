@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'services/neuro_snap_stable_diffusion_service.dart';
+import '/services/neuro_snap_stable_diffusion_service.dart';
 import '/services/neuro_snap_scoring_service.dart';
 import 'neuro_snap_leaderboard_screen.dart';
 import 'dart:convert';
