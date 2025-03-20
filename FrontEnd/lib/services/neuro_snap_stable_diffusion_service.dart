@@ -24,6 +24,7 @@ class ImagePair {
     this.secondImagePrompt, // New property for the second image prompt
   });
 }
+
 class StableDiffusionService {
   final String _baseUrl =
       'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0';
@@ -38,21 +39,21 @@ class StableDiffusionService {
 
       final response = await http
           .post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'inputs': prompt}),
-      )
+            Uri.parse(_baseUrl),
+            headers: {
+              'Authorization': 'Bearer $_apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'inputs': prompt}),
+          )
           .timeout(
-        // Add timeout to prevent hanging on slow responses
-        const Duration(seconds: 60),
-        onTimeout: () {
-          debugPrint('API request timed out after 60 seconds');
-          throw Exception('API request timed out - check your connection');
-        },
-      );
+            // Add timeout to prevent hanging on slow responses
+            const Duration(seconds: 60),
+            onTimeout: () {
+              debugPrint('API request timed out after 60 seconds');
+              throw Exception('API request timed out - check your connection');
+            },
+          );
 
       // Log the response status and headers for debugging
       debugPrint('Response status: ${response.statusCode}');
@@ -75,31 +76,36 @@ class StableDiffusionService {
       } else if (response.statusCode == 401 || response.statusCode == 403) {
         // Authentication error - this helps identify API key issues
         debugPrint(
-            'Authentication error: Check your API key: ${response.body}');
+          'Authentication error: Check your API key: ${response.body}',
+        );
         throw Exception(
-            'API key error: ${response.statusCode} - Check that your API key is valid');
+          'API key error: ${response.statusCode} - Check that your API key is valid',
+        );
       } else {
         // Other errors
         debugPrint(
-            'API Error: ${response.statusCode} - ${response.reasonPhrase}');
+          'API Error: ${response.statusCode} - ${response.reasonPhrase}',
+        );
         debugPrint('Error details: ${response.body}');
         throw Exception(
-            'Failed to generate image: ${response.statusCode} - ${response.reasonPhrase}');
+          'Failed to generate image: ${response.statusCode} - ${response.reasonPhrase}',
+        );
       }
     } catch (e) {
       debugPrint('Exception in generateImage: $e');
       throw Exception('Failed to generate image: $e');
     }
   }
- // Add a test method to check API connectivity
+
+  // Add a test method to check API connectivity
   Future<bool> testApiConnection() async {
     try {
-      final response = await http.get(
-        Uri.parse('https://api-inference.huggingface.co/status'),
-        headers: {
-          'Authorization': 'Bearer $_apiKey',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse('https://api-inference.huggingface.co/status'),
+            headers: {'Authorization': 'Bearer $_apiKey'},
+          )
+          .timeout(const Duration(seconds: 10));
 
       debugPrint('API connection test status: ${response.statusCode}');
       return response.statusCode >= 200 && response.statusCode < 300;
@@ -119,12 +125,14 @@ class StableDiffusionService {
   }) async {
     try {
       // Generate two distinctly different images of the same concept
-      final firstImage =
-          await _generateImage('$concept from front view, detailed');
+      final firstImage = await _generateImage(
+        '$concept from front view, detailed',
+      );
 
       // Make sure second image is distinctly different from first
       final secondImage = await _generateImage(
-          '$concept from different angle, with different lighting and background');
+        '$concept from different angle, with different lighting and background',
+      );
 
       // Randomly select which image to hide
       final random = Random();
@@ -170,6 +178,7 @@ class StableDiffusionService {
       throw Exception('Failed to generate images: $e');
     }
   }
+
   Future<List<String>> _generateSimilarImages({
     required String concept,
     required String targetImage,
@@ -222,3 +231,101 @@ class StableDiffusionService {
     return results;
   }
 
+  // ignore: unused_element
+  Future<List<String>> _generateDistractors(
+    String concept, {
+    required int count,
+    required int difficulty,
+  }) async {
+    // Get unrelated concepts
+    final unrelatedConcepts = _getUnrelatedConcepts(
+      concept,
+      count: count,
+      difficulty: difficulty,
+    );
+
+    final random = Random();
+
+    // Define prompts for the distractors with more variation
+    List<String> prompts = [];
+
+    for (int i = 0; i < unrelatedConcepts.length; i++) {
+      String currentConcept = unrelatedConcepts[i];
+
+      // For higher difficulties, mix similar and distinct distractors in random order
+      if (difficulty >= 3) {
+        // For expert mode, randomly decide whether to make it similar or not
+        if (random.nextBool()) {
+          // Create similar distractor
+          List<String> similarPrompts = [
+            'A photorealistic image of a ${currentConcept} that looks somewhat similar to a $concept, on a plain white background, studio lighting, high quality',
+            'A high quality photo of a ${currentConcept} with characteristics that resemble a $concept, isolated on white',
+          ];
+          prompts.add(similarPrompts[random.nextInt(similarPrompts.length)]);
+        } else {
+          // Create standard distractor
+          prompts.add(
+            'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality',
+          );
+        }
+      } else if (difficulty >= 2) {
+        // For medium difficulty, mix similar and standard distractors
+        if (i % 2 == 0) {
+          prompts.add(
+            'A photorealistic image of a ${currentConcept} with some similar features to a $concept, on a plain white background, studio lighting, high quality',
+          );
+        } else {
+          prompts.add(
+            'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality',
+          );
+        }
+      } else {
+        // Standard distractor for beginners
+        prompts.add(
+          'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality',
+        );
+      }
+    }
+
+    // Shuffle prompts to make the order unpredictable
+    prompts.shuffle();
+
+    // Generate distractor images in parallel
+    final futures = await Future.wait(
+      prompts.map((prompt) => generateImage(prompt)),
+    );
+    return futures;
+  }
+
+  List<String> _getUnrelatedConcepts(
+    String concept, {
+    required int count,
+    required int difficulty,
+  }) {
+    // A list of various concepts to choose distractors from
+    final List<String> allConcepts = [
+      // Easy distinguishable items for beginners
+      'apple',
+      'banana',
+      'car',
+    ];
+
+    // For higher difficulties, add some similar concepts to make it harder
+    if (difficulty >= 2) {
+      if (concept == 'apple')
+        allConcepts.addAll(['pear', 'peach', 'red ball']);
+      else if (concept == 'banana')
+        allConcepts.addAll(['plantain', 'yellow pepper']);
+      else if (concept == 'car')
+        allConcepts.addAll(['truck', 'van', 'bus']);
+      // Add more similar items for other concepts
+    }
+
+    // Remove the current concept from possible distractors
+    final availableConcepts = allConcepts.where((c) => c != concept).toList();
+    availableConcepts.shuffle();
+
+    // Take requested number of concepts
+    return availableConcepts.take(count).toList();
+  }
+}
