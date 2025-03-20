@@ -170,3 +170,55 @@ class StableDiffusionService {
       throw Exception('Failed to generate images: $e');
     }
   }
+  Future<List<String>> _generateSimilarImages({
+    required String concept,
+    required String targetImage,
+    required int numberOfImages,
+    required int similarity,
+  }) async {
+    List<String> results = [];
+
+    // Adjust prompt modifiers based on similarity level
+    List<String> variations = [];
+
+    // Add variations based on difficulty/similarity level
+    switch (similarity) {
+      case 1: // Easy - clearly different but same concept
+        variations = [
+          'different angle of $concept',
+          '$concept with different colors',
+          'different style of $concept',
+          '$concept in different setting',
+        ];
+        break;
+      case 2: // Medium - somewhat similar
+        variations = [
+          'similar $concept with minor differences',
+          'slightly different version of $concept',
+          '$concept with subtle changes',
+          'slightly modified $concept',
+        ];
+        break;
+      case 3: // Hard - very similar
+        variations = [
+          'nearly identical $concept with tiny differences',
+          'extremely similar $concept with subtle variation',
+          '$concept with minimal alterations',
+          'almost indistinguishable variation of $concept',
+        ];
+        break;
+    }
+
+    // Shuffle variations to get different ones each time
+    variations.shuffle();
+
+    // Generate the distractor images
+    for (int i = 0; i < numberOfImages; i++) {
+      String variation = variations[i % variations.length];
+      String image = await _generateImage(variation);
+      results.add(image);
+    }
+
+    return results;
+  }
+
