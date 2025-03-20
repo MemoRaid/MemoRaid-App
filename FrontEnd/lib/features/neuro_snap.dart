@@ -2007,3 +2007,186 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+ Widget _buildEnhancedOptionGrid(List<String> options) {
+    // Calculate appropriate grid dimensions based on number of options
+    double itemSize = options.length <= 4 ? 130.0 : 100.0;
+
+    // Use a fixed height container for the grid to prevent overflow
+    return Container(
+      width: double.infinity,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height *
+            0.35, // Limit height to percentage of screen
+      ),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        alignment: WrapAlignment.center,
+        children: List.generate(
+          options.length,
+          (index) => GestureDetector(
+            onTap: () => _selectOption(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: itemSize,
+              height: itemSize,
+              decoration: BoxDecoration(
+                color: _selectedOption == index
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                    : Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+                border: _selectedOption == index
+                    ? Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 3,
+                      )
+                    : null,
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: _buildOptionImage(options[index]),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Add this property to store the current hint text
+  String _currentHintText = "";
+
+  Widget _buildHintOverlay() {
+    return Positioned(
+      bottom: MediaQuery.of(context).size.height * 0.3,
+      left: 40,
+      right: 40,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.amber.shade800,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.lightbulb, color: Colors.white),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'IMAGE PROMPT',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'HINT',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _currentHintText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnswerRevealOverlay() {
+    // Get the correct hidden image URL
+    final String correctImageUrl = _imagePair!.hiddenImageIndex == 0
+        ? _imagePair!.firstImage
+        : _imagePair!.secondImage;
+
+    // Determine if the selected answer was correct
+    bool wasCorrect = false;
+    if (_selectedOption != null && _selectedOption! >= 0) {
+      wasCorrect =
+          _imagePair!.optionImages[_selectedOption!] == correctImageUrl;
+    }
+
+    return Container(
+      color: Colors.black.withOpacity(0.7),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Result header
+            Text(
+              wasCorrect ? "Correct!" : "Incorrect!",
+              style: TextStyle(
+                color: wasCorrect ? Colors.green : Colors.red,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Show the correct image
+            Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: wasCorrect ? Colors.green : Colors.red, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: (wasCorrect ? Colors.green : Colors.red)
+                        .withOpacity(0.5),
+                    blurRadius: 15,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: _buildImage(correctImageUrl),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Explanation text
+            Text(
+              wasCorrect
+                  ? "Great job! You remembered correctly."
+                  : "This was the correct image to select.",
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
