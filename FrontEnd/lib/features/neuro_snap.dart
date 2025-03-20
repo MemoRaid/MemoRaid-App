@@ -1064,3 +1064,156 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       }
     });
   }
+ // Add a new method to build the timer display
+  Widget _buildTimerDisplay() {
+    return ValueListenableBuilder<int?>(
+      valueListenable: _timeRemainingNotifier,
+      builder: (context, timeRemaining, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: timeRemaining != null && timeRemaining > 0
+                ? Colors.blue.withOpacity(0.2)
+                : Colors.red.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.timer,
+                color: timeRemaining != null && timeRemaining > 0
+                    ? Colors.blue
+                    : Colors.red,
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                timeRemaining != null && timeRemaining > 0
+                    ? '$timeRemaining s'
+                    : 'Time\'s up!',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: timeRemaining != null && timeRemaining > 0
+                      ? Colors.blue
+                      : Colors.red,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Add a new method to resume the timer without resetting
+  void _resumeTimer(int timeRemaining) {
+    // Set the time remaining to continue from where it was paused
+    _timeRemainingNotifier.value = timeRemaining;
+
+    // Create a new timer to continue countdown
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_timeRemainingNotifier.value! > 0) {
+        // Update only the timer value, don't rebuild everything
+        _timeRemainingNotifier.value = _timeRemainingNotifier.value! - 1;
+      } else {
+        timer.cancel();
+
+        // Show feedback when time's up
+        _showFeedback('Time\'s up!', false);
+
+        setState(() {
+          _selectedOption = -1; // Use -1 to indicate timeout
+          _attemptsRemaining = 0; // Use all attempts when time runs out
+        });
+
+        // Immediately show game over for timed mode
+        Future.delayed(const Duration(seconds: 1), () {
+          _showGameOverDialog();
+        });
+      }
+    });
+  }
+
+  void _revealAnswer(bool wasCorrect) {
+    // Store current timer value to potentially resume after the reveal
+    final currentTimerValue =
+        widget.gameMode == 'Speed' ? _timeRemainingNotifier.value : null;
+
+    setState(() {
+      _isAnswerRevealing = true;
+
+      // Pause timer display during the reveal but don't reset it
+      if (_timer != null) {
+        _timer!.cancel();
+      }
+    });
+
+    // After showing the answer, determine next action
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isAnswerRevealing = false;
+        });
+
+        // Check if attempts are exhausted and it's not a correct answer
+        if (!wasCorrect && _attemptsRemaining <= 0) {
+          // Show game over dialog if all attempts were used
+          _showGameOverDialog();
+          return;
+        }
+
+        // Check if this was the last round
+        bool isLastRound = _round >= _maxRounds;
+
+        // For correct answers, proceed to next question or level complete
+        if (wasCorrect) {
+          if (isLastRound && !widget.isDaily) {
+            // If it's the final round, show level complete
+            _showLevelCompleteDialog();
+          } else {
+            // Otherwise load next image
+            _loadImages();
+          }
+        }
+        // For incorrect answers with remaining attempts, resume the timer
+        else if (widget.gameMode == 'Speed' &&
+            currentTimerValue != null &&
+            currentTimerValue > 0) {
+          _resumeTimer(currentTimerValue);
+        }
+      }
+    });
+  }
+
+  void _startTimer() {
+    // First cancel any existing timer
+    _timer?.cancel();
+
+    if (widget.gameMode == 'Speed') {
+      // Start a new timer (only for new rounds, not for retries)
+      _timeRemainingNotifier.value = 15; // 15 seconds to answer
+
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_timeRemainingNotifier.value! > 0) {
+          // Update only the timer value, don't rebuild everything
+          _timeRemainingNotifier.value = _timeRemainingNotifier.value! - 1;
+        } else {
+          timer.cancel();
+
+          // Show feedback when time's up
+          _showFeedback('Time\'s up!', false);
+
+          setState(() {
+            _selectedOption = -1; // Use -1 to indicate timeout
+            _attemptsRemaining = 0; // Use all attempts when time runs out
+          });
+
+          // Immediately show game over for timed mode
+          Future.delayed(const Duration(seconds: 1), () {
+            _showGameOverDialog();
+          });
+        }
+      });
+    }
+  }
