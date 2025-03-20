@@ -367,7 +367,34 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     int pointsEarnedThisLevel = _score;
 
     setState(() {
-      _level++;
+      // Make sure timer is stopped
+      _timer?.cancel();
+      _timerStarted = false;
+
+      // Check if we've reached level 4, which is the maximum level
+      if (_level < 4) {
+        _level++;
+
+        // Update theme based on the new level
+        if (_level == 1) {
+          _currentTheme = 'Hobbies';
+        } else if (_level == 2) {
+          _currentTheme = 'Places';
+        } else if (_level == 3) {
+          _currentTheme = 'Family';
+        } else {
+          // Level 4
+          _currentTheme =
+              'Mixed'; // For level 4, you might want a mix of themes
+        }
+
+        _updateThemeColors(); // Update colors based on new theme
+      } else {
+        // Player has completed all levels, show game completion
+        _endGame(completed: true);
+        return;
+      }
+
       Timer(const Duration(milliseconds: 800), () {
         showLevelCompletionDialog(pointsEarnedThisLevel);
       });
@@ -492,6 +519,28 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
 
     int timeForNextLevel = max(30, 90 - ((_level - 1) * 7));
     double multiplierForNextLevel = 1.0 + ((_level - 1) * 0.1);
+
+    // Get theme-specific information for display
+    String themeDescription = '';
+    IconData themeIcon = Icons.category;
+
+    switch (_currentTheme) {
+      case 'Hobbies':
+        themeDescription = 'Match hobby items!';
+        themeIcon = Icons.theater_comedy;
+        break;
+      case 'Places':
+        themeDescription = 'Find building pairs!';
+        themeIcon = Icons.home_work;
+        break;
+      case 'Family':
+        themeDescription = 'Match family members!';
+        themeIcon = Icons.family_restroom;
+        break;
+      default:
+        themeDescription = 'Mixed theme challenge!';
+        themeIcon = Icons.shuffle;
+    }
 
     showDialog(
       context: context,
