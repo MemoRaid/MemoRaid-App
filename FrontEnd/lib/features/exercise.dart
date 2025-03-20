@@ -9,6 +9,24 @@ class ExerciseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Modify AppBar to move back button lower
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 80, // Increase toolbar height
+        leading: Padding(
+          padding: EdgeInsets.only(
+              top: 16.0, left: 8.0), // Add top padding to move down
+          child: IconButton(
+            icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
+            onPressed: () {
+              // Navigate to homescreen2 instead of just popping
+              Navigator.pushReplacementNamed(context, '/homescreen2');
+            },
+          ),
+        ),
+      ),
+      extendBodyBehindAppBar: true, // Allow content to flow behind AppBar
       body: Container(
         width: double.infinity,
         clipBehavior: Clip.antiAlias,
@@ -36,8 +54,8 @@ class ExerciseScreen extends StatelessWidget {
             SafeArea(
               child: Column(
                 children: [
-                  // Status bar space
-                  SizedBox(height: 12),
+                  // Status bar space - reduced since we now have an AppBar
+                  SizedBox(height: 0),
 
                   // Main content
                   Expanded(
