@@ -158,7 +158,7 @@ class AuthService extends ChangeNotifier {
       }
       return false;
     } catch (e) {
-     
+      print('Email verification error: $e');
       return false;
     }
   }
