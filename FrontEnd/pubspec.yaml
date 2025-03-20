@@ -27,7 +27,7 @@ dependencies:
   just_audio: ^0.9.36
   video_player: ^2.7.0
   cached_network_image: ^3.2.3
-
+  lottie: ^2.6.0
 
 dev_dependencies:
   flutter_test:
