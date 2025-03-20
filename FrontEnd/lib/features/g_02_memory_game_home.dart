@@ -343,6 +343,8 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
           _firstFlippedIndex = null;
 
           if (_matchedCards.every((matched) => matched)) {
+            // Stop the timer all cards are matched.
+            _timer?.cancel();
             _levelUp();
           }
         } else {
