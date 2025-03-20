@@ -4,6 +4,7 @@ import 'bottomnavbar.dart'; // Import the custom bottom navbar
 import 'game.dart';
 import 'g_01_home_screen.dart';
 import 'spot_difference_game.dart';
+import 'g_02_memory_recovery_app.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -130,7 +131,12 @@ class GameScreen extends StatelessWidget {
                         subtitle: "Test your reaction speed",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
-                          // Navigate to Reaction Test Game
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const MemoryRecoveryApp()),
+                          );
                         },
                       ),
                     ],
