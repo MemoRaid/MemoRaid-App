@@ -191,7 +191,7 @@ class ExerciseScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Exercise image - now with conditional image source
+            // Exercise image with improved fit
             Positioned(
               left: 0,
               top: 0,
@@ -204,7 +204,8 @@ class ExerciseScreen extends StatelessWidget {
                         ? AssetImage(imagePath)
                         : NetworkImage("https://placehold.co/155x120")
                             as ImageProvider,
-                    fit: BoxFit.cover,
+                    fit:
+                        BoxFit.fill, // Changed from BoxFit.cover to BoxFit.fill
                   ),
                 ),
               ),
