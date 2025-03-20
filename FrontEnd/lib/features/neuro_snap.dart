@@ -941,5 +941,126 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           ),
         );
       }
+    }2
+  }
+ void _generateHints(String concept) {
+    // Generate helpful hints based on the concept
+    _hints = [
+      "Look for unique details that stand out",
+      "Pay attention to the shape and color of the $concept",
+      "Try to remember the position and orientation",
+      "Notice any distinctive features of this particular $concept"
+    ];
+    _hints.shuffle();
+  }
+
+  void _hideImage() {
+    _imageAnimationController.forward().then((_) {
+      if (mounted) {
+        setState(() {
+          _imageVisible = false;
+        });
+      }
+    });
+  }
+
+  void _handleCorrectAnswer(int points) {
+    setState(() {
+      _score += points;
+      _comboCount++;
+      _streak++;
+      _maxStreak = max(_streak, _maxStreak);
+      _powerUpAvailable = _comboCount >= _requiredComboForPowerUp;
+    });
+
+    _showFeedback('Correct! +$points points', true);
+    _confettiController.play();
+    _revealAnswer(true);
+  }
+
+  void _selectOption(int index) {
+    // Handle incorrect answer
+    void _handleIncorrectAnswer() {
+      setState(() {
+        _comboCount = 0;
+        _streak = 0;
+      });
+      _showFeedback('Incorrect! Try again.', false);
     }
+
+    // Don't allow selection if already selected, timer is up, or no attempts left
+    if (_selectedOption != null ||
+        (_timeRemainingNotifier.value != null &&
+            _timeRemainingNotifier.value == 0) ||
+        _attemptsRemaining <= 0) {
+      return;
+    }
+
+    setState(() {
+      _selectedOption = index;
+    });
+
+    // Get the correct hidden image URL
+    final String hiddenImageUrl = _imagePair!.hiddenImageIndex == 0
+        ? _imagePair!.firstImage
+        : _imagePair!.secondImage;
+
+    // Check if the selected option is correct
+    final selectedImageUrl = _imagePair!.optionImages[index];
+    final isCorrect = selectedImageUrl == hiddenImageUrl;
+
+    // Calculate points based on game mode and combos
+    int points = _calculatePoints(isCorrect);
+
+    // Apply combo bonus
+    if (isCorrect && _comboCount > 0) {
+      points = (points * (1 + _comboCount * 0.1)).toInt();
+    }
+
+    // Store current timer value for Speed mode to restore it later if needed
+    final currentTimerValue = _timeRemainingNotifier.value;
+
+    // Pause timer temporarily while showing feedback
+    if (widget.gameMode == 'Speed' && _timer != null) {
+      _timer!.cancel();
+    }
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (isCorrect) {
+        // Handle correct answer - increment total correct answers
+        _totalCorrectAnswers++;
+        // Always count a correct answer as one attempt
+        _totalAttemptsMade++;
+        _handleCorrectAnswer(points);
+      } else {
+        // Decrease attempts remaining
+        setState(() {
+          _attemptsRemaining--;
+          // Increment total attempts counter when an attempt is used
+          _totalAttemptsMade++;
+        });
+
+        if (_attemptsRemaining <= 0) {
+          // Out of attempts - show correct answer and game over
+          _showFeedback('No attempts remaining!', false);
+          _revealAnswer(
+              false); // This will trigger _showGameOverDialog() after revealing answer
+        } else {
+          // Still have attempts left - allow another try
+          _handleIncorrectAnswer();
+
+          // Reset selection so user can select again
+          setState(() {
+            _selectedOption = null;
+          });
+
+          // For Speed mode, resume the timer from where it left off
+          if (widget.gameMode == 'Speed' &&
+              currentTimerValue != null &&
+              currentTimerValue > 0) {
+            _resumeTimer(currentTimerValue);
+          }
+        }
+      }
+    });
   }
