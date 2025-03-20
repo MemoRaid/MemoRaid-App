@@ -1696,3 +1696,314 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
+
+  Widget _buildEnhancedStatusBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryDark.withOpacity(0.7),
+            AppColors.primaryMedium.withOpacity(0.5),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Score with animation and updated colors
+          ScaleTransition(
+            scale: _score > 0
+                ? _pulseAnimation
+                : const AlwaysStoppedAnimation(1.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.accentColor.withOpacity(0.7),
+                    AppColors.accentColor,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.star,
+                      color: Theme.of(context).colorScheme.primary, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$_score',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Streak counter
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _streak > 0
+                  ? Colors.orange.withOpacity(0.2)
+                  : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.local_fire_department,
+                  color: _streak > 0 ? Colors.orange : Colors.grey,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Streak: $_streak',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: _streak > 0 ? Colors.orange : Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Timer display - only show for Speed mode
+          if (widget.gameMode == 'Speed') _buildTimerDisplay(),
+
+          // Attempts remaining indicator
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _attemptsRemaining > 1
+                  ? AppColors.accentColor.withOpacity(0.2)
+                  : Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                ...List.generate(
+                  3,
+                  (index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Icon(
+                      Icons.favorite,
+                      size: 14,
+                      color: index < _attemptsRemaining
+                          ? Colors.red
+                          : Colors.grey.withOpacity(0.3),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+ Widget _buildProgressBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Progress:',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textLight,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Round $_round/${_maxRounds}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textLight,
+                  ),
+                ),
+              ],
+            ),
+            if (!widget.isDaily) ...[
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.accentColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Level $_level',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.accentColor,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: _gameProgress,
+            backgroundColor: AppColors.primaryDark.withOpacity(0.3),
+            color: AppColors.accentColor,
+            minHeight: 8,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPowerUpBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryDark.withOpacity(0.2),
+            Colors.indigo.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.indigo.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Left side: Power-ups or combo progress
+          Row(
+            children: [
+              // 50/50 Power-up
+              if (_powerUpAvailable)
+                ScaleTransition(
+                  scale: _pulseAnimation,
+                  child: GestureDetector(
+                    onTap: _useFiftyFifty,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _isFiftyfiftyUsed ? Colors.grey : Colors.indigo,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.indigo.withOpacity(0.4),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.filter_2,
+                          color: Colors.white, size: 20),
+                    ),
+                  ),
+                )
+              else if (_comboCount > 0)
+                // Combo progress
+                Row(
+                  children: [
+                    const Text(
+                      'Combo: ',
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                    ...List.generate(
+                      _requiredComboForPowerUp,
+                      (i) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: Icon(
+                          Icons.circle,
+                          size: 10,
+                          color: i < _comboCount
+                              ? Colors.indigo
+                              : Colors.grey.withOpacity(0.3),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                // Placeholder text when no powerups available
+                const Text(
+                  'Use hints to help remember',
+                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                ),
+            ],
+          ),
+
+          // Right side: Hint button
+          Column(
+            children: [
+              GestureDetector(
+                onTap: _showHintToUser,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _hintUsed ? Colors.grey : Colors.amber.shade600,
+                        _hintUsed
+                            ? Colors.grey.shade600
+                            : Colors.amber.shade800,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amber.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.lightbulb_outline,
+                          color: Colors.white, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        _hintUsed ? 'Used' : 'Hint',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
