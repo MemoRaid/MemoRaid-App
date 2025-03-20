@@ -80,14 +80,17 @@ class ExerciseScreen extends StatelessWidget {
                             ),
                           ),
 
-                          // Grid of exercise cards - now with 4 exercises, including a locked one
+                          // Grid of exercise cards - updated size parameters
                           GridView.count(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
                             crossAxisCount: 2,
-                            mainAxisSpacing: 20,
-                            crossAxisSpacing: 20,
-                            childAspectRatio: 155 / 205,
+                            mainAxisSpacing:
+                                15, // Reduced for more space for cards
+                            crossAxisSpacing:
+                                15, // Reduced for more space for cards
+                            childAspectRatio: 150 /
+                                220, // Modified to make cards larger/taller
                             children: [
                               _buildExerciseCard(
                                 context: context,
@@ -215,22 +218,18 @@ class ExerciseScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Exercise image with improved fit
-            Positioned(
-              left: 0,
-              top: 0,
-              right: 0,
-              child: Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: imagePath != null
-                        ? AssetImage(imagePath)
-                        : NetworkImage("https://placehold.co/155x120")
-                            as ImageProvider,
-                    fit:
-                        BoxFit.fill, // Changed from BoxFit.cover to BoxFit.fill
-                  ),
+            // Exercise image - increased height
+            Container(
+              height: 180, // Increased from 120 to make images larger
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imagePath != null
+                      ? AssetImage(imagePath)
+                      : NetworkImage("https://placehold.co/155x120")
+                          as ImageProvider,
+                  fit: BoxFit
+                      .cover, // Changed back to cover with proper dimensions
                 ),
               ),
             ),
@@ -308,29 +307,25 @@ class ExerciseScreen extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Exercise image with darker overlay
-          Positioned(
-            left: 0,
-            top: 0,
-            right: 0,
-            child: Container(
-              height: 120,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage("https://placehold.co/155x120"),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5),
-                    BlendMode.darken,
-                  ),
+          // Exercise image with darker overlay - fixed coverage
+          Container(
+            height: 140, // Increased from 120 to match other cards
+            width: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage("https://placehold.co/155x120"),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.5),
+                  BlendMode.darken,
                 ),
               ),
-              child: Center(
-                child: Icon(
-                  Icons.lock_outline,
-                  size: 40,
-                  color: Colors.white,
-                ),
+            ),
+            child: Center(
+              child: Icon(
+                Icons.lock_outline,
+                size: 40,
+                color: Colors.white,
               ),
             ),
           ),
