@@ -548,7 +548,7 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF0A2836).withOpacity(0.95),
         title: Text(
-          'Level $_level',
+          'Level $_level - $_currentTheme',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -558,8 +558,9 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(_level <= 3 ? Icons.arrow_upward : Icons.warning,
-                color: _level <= 3 ? Colors.green : Colors.orange, size: 50),
+            Icon(themeIcon, // Use theme-specific icon
+                color: _level <= 3 ? Colors.green : Colors.orange,
+                size: 50),
             const SizedBox(height: 10),
             Text(
               'Get ready for Level $_level!',
@@ -568,6 +569,15 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
                 color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              themeDescription, // Use theme-specific description
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                color: Colors.white.withOpacity(0.9),
               ),
             ),
             const SizedBox(height: 6),
