@@ -241,12 +241,13 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
                       ),
                       SizedBox(height: 16),
 
-                      // Video player instead of static icon
+                      // Static image container
                       Container(
                         height: 220,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
+                          color: Color(0xFF0D3445).withOpacity(0.1),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -255,10 +256,26 @@ class _HandCoordinationExerciseState extends State<HandCoordinationExercise> {
                             )
                           ],
                         ),
-                        child: ExerciseVideoPlayer(
-                          videoUrl: currentExercise['videoUrl'],
-                          autoplay: false,
-                          looping: true,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.pan_tool_alt,
+                                size: 70,
+                                color: Color(0xFF0D3445).withOpacity(0.5),
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                currentExercise['title'],
+                                style: TextStyle(
+                                  color: Color(0xFF0D3445),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 16),
