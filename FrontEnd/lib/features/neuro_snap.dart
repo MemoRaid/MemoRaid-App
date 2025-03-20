@@ -592,6 +592,7 @@ class GameModesScreen extends StatelessWidget {
     );
   }
 }
+
 class GameScreen extends StatefulWidget {
   final String gameMode;
   final bool isDaily;
@@ -786,12 +787,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-        CurvedAnimation(
-            parent: _pulseAnimationController, curve: Curves.easeInOut));
+      CurvedAnimation(
+        parent: _pulseAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     // Initialize confetti
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
 
     // Test API connectivity before loading images
     _testApiAndLoadImages();
@@ -802,7 +807,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _round = 0;
   }
 
- // New method to test API before loading images
+  // New method to test API before loading images
   Future<void> _testApiAndLoadImages() async {
     setState(() {
       _isLoading = true;
@@ -930,7 +935,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Error: ${errorMessage.length > 100 ? errorMessage.substring(0, 100) + '...' : errorMessage}'),
+              'Error: ${errorMessage.length > 100 ? errorMessage.substring(0, 100) + '...' : errorMessage}',
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
@@ -941,15 +947,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           ),
         );
       }
-    }2
+    }
   }
- void _generateHints(String concept) {
+
+  void _generateHints(String concept) {
     // Generate helpful hints based on the concept
     _hints = [
       "Look for unique details that stand out",
       "Pay attention to the shape and color of the $concept",
       "Try to remember the position and orientation",
-      "Notice any distinctive features of this particular $concept"
+      "Notice any distinctive features of this particular $concept",
     ];
     _hints.shuffle();
   }
@@ -1001,9 +1008,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
 
     // Get the correct hidden image URL
-    final String hiddenImageUrl = _imagePair!.hiddenImageIndex == 0
-        ? _imagePair!.firstImage
-        : _imagePair!.secondImage;
+    final String hiddenImageUrl =
+        _imagePair!.hiddenImageIndex == 0
+            ? _imagePair!.firstImage
+            : _imagePair!.secondImage;
 
     // Check if the selected option is correct
     final selectedImageUrl = _imagePair!.optionImages[index];
@@ -1044,7 +1052,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           // Out of attempts - show correct answer and game over
           _showFeedback('No attempts remaining!', false);
           _revealAnswer(
-              false); // This will trigger _showGameOverDialog() after revealing answer
+            false,
+          ); // This will trigger _showGameOverDialog() after revealing answer
         } else {
           // Still have attempts left - allow another try
           _handleIncorrectAnswer();
@@ -1064,7 +1073,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       }
     });
   }
- // Add a new method to build the timer display
+
+  // Add a new method to build the timer display
   Widget _buildTimerDisplay() {
     return ValueListenableBuilder<int?>(
       valueListenable: _timeRemainingNotifier,
@@ -1072,18 +1082,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: timeRemaining != null && timeRemaining > 0
-                ? Colors.blue.withOpacity(0.2)
-                : Colors.red.withOpacity(0.2),
+            color:
+                timeRemaining != null && timeRemaining > 0
+                    ? Colors.blue.withOpacity(0.2)
+                    : Colors.red.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
               Icon(
                 Icons.timer,
-                color: timeRemaining != null && timeRemaining > 0
-                    ? Colors.blue
-                    : Colors.red,
+                color:
+                    timeRemaining != null && timeRemaining > 0
+                        ? Colors.blue
+                        : Colors.red,
                 size: 16,
               ),
               const SizedBox(width: 4),
@@ -1093,9 +1105,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     : 'Time\'s up!',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: timeRemaining != null && timeRemaining > 0
-                      ? Colors.blue
-                      : Colors.red,
+                  color:
+                      timeRemaining != null && timeRemaining > 0
+                          ? Colors.blue
+                          : Colors.red,
                   fontSize: 12,
                 ),
               ),
@@ -1217,7 +1230,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       });
     }
   }
- // New method to show game over dialog when attempts are exhausted
+
+  // New method to show game over dialog when attempts are exhausted
   void _showGameOverDialog() {
     if (!mounted) return;
 
@@ -1226,9 +1240,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final int maxPossibleAttempts = totalQuestionsAttempted * 3;
     final int attemptsUsed = _totalAttemptsMade;
 
-    final double questionAccuracy = totalQuestionsAttempted > 0
-        ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
-        : 0;
+    final double questionAccuracy =
+        totalQuestionsAttempted > 0
+            ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
+            : 0;
     final double attemptEfficiency =
         attemptsUsed > 0 ? (_totalCorrectAnswers / attemptsUsed) * 100 : 0;
     final double combinedAccuracy = (questionAccuracy + attemptEfficiency) / 2;
@@ -1249,108 +1264,130 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        // Prevent back button from dismissing the dialog
-        onWillPop: () async => false,
-        child: AlertDialog(
-          backgroundColor: AppColors.primaryDark,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            'Game Over!',
-            style: TextStyle(color: Colors.red, fontSize: 24),
-            textAlign: TextAlign.center,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Game over message
-                Text(
-                  'You\'ve used all your attempts for this question.',
-                  style: TextStyle(color: AppColors.textLight),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
+      builder:
+          (context) => WillPopScope(
+            // Prevent back button from dismissing the dialog
+            onWillPop: () async => false,
+            child: AlertDialog(
+              backgroundColor: AppColors.primaryDark,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                'Game Over!',
+                style: TextStyle(color: Colors.red, fontSize: 24),
+                textAlign: TextAlign.center,
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Game over message
+                    Text(
+                      'You\'ve used all your attempts for this question.',
+                      style: TextStyle(color: AppColors.textLight),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
 
-                // Results for session
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryMedium.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _buildResultRow('Final Score', '$_score',
-                          isHeader: false, highlight: true),
-                      _buildResultRow(
-                          'Correct Answers', '$_totalCorrectAnswers/$_round',
-                          isHeader: false),
-                      _buildResultRow(
-                          'Accuracy', '${combinedAccuracy.toStringAsFixed(0)}%',
-                          isHeader: false,
-                          tooltip: 'Based on questions and attempts'),
-                      _buildResultRow('Attempts Used',
-                          '$attemptsUsed/${maxPossibleAttempts}',
-                          isHeader: false),
-                      _buildResultRow('Max Streak', '$_maxStreak',
-                          isHeader: false),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
+                    // Results for session
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryMedium.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _buildResultRow(
+                            'Final Score',
+                            '$_score',
+                            isHeader: false,
+                            highlight: true,
+                          ),
+                          _buildResultRow(
+                            'Correct Answers',
+                            '$_totalCorrectAnswers/$_round',
+                            isHeader: false,
+                          ),
+                          _buildResultRow(
+                            'Accuracy',
+                            '${combinedAccuracy.toStringAsFixed(0)}%',
+                            isHeader: false,
+                            tooltip: 'Based on questions and attempts',
+                          ),
+                          _buildResultRow(
+                            'Attempts Used',
+                            '$attemptsUsed/${maxPossibleAttempts}',
+                            isHeader: false,
+                          ),
+                          _buildResultRow(
+                            'Max Streak',
+                            '$_maxStreak',
+                            isHeader: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-                // Encouragement message
-                Text(
-                  'Keep practicing to improve your memory skills!',
-                  style: TextStyle(
-                      color: AppColors.textLight, fontStyle: FontStyle.italic),
-                  textAlign: TextAlign.center,
+                    // Encouragement message
+                    Text(
+                      'Keep practicing to improve your memory skills!',
+                      style: TextStyle(
+                        color: AppColors.textLight,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Center(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.home),
+                    label: const Text('Return to Menu'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accentColor,
+                      foregroundColor: AppColors.primaryDark,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(); // Return to game modes
+                    },
+                  ),
                 ),
               ],
             ),
           ),
-          actions: [
-            Center(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.home),
-                label: const Text('Return to Menu'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accentColor,
-                  foregroundColor: AppColors.primaryDark,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Return to game modes
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
-// Use 50/50 power-up to eliminate half of incorrect options
+
+  // Use 50/50 power-up to eliminate half of incorrect options
   void _useFiftyFifty() {
     if (!_powerUpAvailable || _isFiftyfiftyUsed || _selectedOption != null)
       return;
 
     // Get the correct answer
-    final String hiddenImageUrl = _imagePair!.hiddenImageIndex == 0
-        ? _imagePair!.firstImage
-        : _imagePair!.secondImage;
+    final String hiddenImageUrl =
+        _imagePair!.hiddenImageIndex == 0
+            ? _imagePair!.firstImage
+            : _imagePair!.secondImage;
 
     // Find index of correct answer
     int correctIndex = _imagePair!.optionImages.indexOf(hiddenImageUrl);
 
     // Choose which wrong answers to eliminate
     List<int> wrongIndices =
-        List.generate(_imagePair!.optionImages.length, (i) => i)
-            .where((i) => i != correctIndex)
-            .toList();
+        List.generate(
+          _imagePair!.optionImages.length,
+          (i) => i,
+        ).where((i) => i != correctIndex).toList();
     wrongIndices.shuffle();
 
     // Keep only half (rounded up) of wrong answers
@@ -1382,9 +1419,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _imagePair!.firstImagePrompt != null &&
         _imagePair!.secondImagePrompt != null) {
       // Use the prompt from the hidden image
-      promptHint = _imagePair!.hiddenImageIndex == 0
-          ? _imagePair!.firstImagePrompt!
-          : _imagePair!.secondImagePrompt!;
+      promptHint =
+          _imagePair!.hiddenImageIndex == 0
+              ? _imagePair!.firstImagePrompt!
+              : _imagePair!.secondImagePrompt!;
     } else {
       // Fall back to regular hints if prompts aren't available
       promptHint =
@@ -1471,9 +1509,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _imagePair == null
+                child:
+                    _isLoading
+                        ? _buildLoadingState()
+                        : _imagePair == null
                         ? _buildErrorState()
                         : _buildGameContent(),
               ),
@@ -1541,7 +1580,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-    Widget _buildErrorState() {
+  Widget _buildErrorState() {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(24),
@@ -1560,11 +1599,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.redAccent,
-            ),
+            const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
             const SizedBox(height: 16),
             Text(
               'Failed to generate images',
@@ -1580,8 +1615,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accentColor,
                 foregroundColor: AppColors.primaryDark,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1603,7 +1640,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       physics: const BouncingScrollPhysics(),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height -
+          minHeight:
+              MediaQuery.of(context).size.height -
               AppBar().preferredSize.height -
               MediaQuery.of(context).padding.top -
               MediaQuery.of(context).padding.bottom -
@@ -1696,7 +1734,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-
   Widget _buildEnhancedStatusBar() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1723,9 +1760,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         children: [
           // Score with animation and updated colors
           ScaleTransition(
-            scale: _score > 0
-                ? _pulseAnimation
-                : const AlwaysStoppedAnimation(1.0),
+            scale:
+                _score > 0
+                    ? _pulseAnimation
+                    : const AlwaysStoppedAnimation(1.0),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
@@ -1739,8 +1777,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.star,
-                      color: Theme.of(context).colorScheme.primary, size: 16),
+                  Icon(
+                    Icons.star,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 16,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '$_score',
@@ -1758,9 +1799,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _streak > 0
-                  ? Colors.orange.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.1),
+              color:
+                  _streak > 0
+                      ? Colors.orange.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -1790,9 +1832,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _attemptsRemaining > 1
-                  ? AppColors.accentColor.withOpacity(0.2)
-                  : Colors.red.withOpacity(0.2),
+              color:
+                  _attemptsRemaining > 1
+                      ? AppColors.accentColor.withOpacity(0.2)
+                      : Colors.red.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -1804,9 +1847,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     child: Icon(
                       Icons.favorite,
                       size: 14,
-                      color: index < _attemptsRemaining
-                          ? Colors.red
-                          : Colors.grey.withOpacity(0.3),
+                      color:
+                          index < _attemptsRemaining
+                              ? Colors.red
+                              : Colors.grey.withOpacity(0.3),
                     ),
                   ),
                 ),
@@ -1817,7 +1861,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
- Widget _buildProgressBar() {
+
+  Widget _buildProgressBar() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1837,17 +1882,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 const SizedBox(width: 8),
                 Text(
                   'Round $_round/${_maxRounds}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textLight,
-                  ),
+                  style: TextStyle(fontSize: 12, color: AppColors.textLight),
                 ),
               ],
             ),
             if (!widget.isDaily) ...[
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.accentColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -1918,8 +1962,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.filter_2,
-                          color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.filter_2,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 )
@@ -1929,8 +1976,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   children: [
                     const Text(
                       'Combo: ',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     ...List.generate(
                       _requiredComboForPowerUp,
@@ -1939,9 +1988,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         child: Icon(
                           Icons.circle,
                           size: 10,
-                          color: i < _comboCount
-                              ? Colors.indigo
-                              : Colors.grey.withOpacity(0.3),
+                          color:
+                              i < _comboCount
+                                  ? Colors.indigo
+                                  : Colors.grey.withOpacity(0.3),
                         ),
                       ),
                     ),
@@ -1986,8 +2036,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.lightbulb_outline,
-                          color: Colors.white, size: 18),
+                      const Icon(
+                        Icons.lightbulb_outline,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         _hintUsed ? 'Used' : 'Hint',
@@ -2007,7 +2060,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
- Widget _buildEnhancedOptionGrid(List<String> options) {
+
+  Widget _buildEnhancedOptionGrid(List<String> options) {
     // Calculate appropriate grid dimensions based on number of options
     double itemSize = options.length <= 4 ? 130.0 : 100.0;
 
@@ -2015,7 +2069,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height *
+        maxHeight:
+            MediaQuery.of(context).size.height *
             0.35, // Limit height to percentage of screen
       ),
       child: Wrap(
@@ -2031,16 +2086,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               width: itemSize,
               height: itemSize,
               decoration: BoxDecoration(
-                color: _selectedOption == index
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                    : Colors.grey[200],
+                color:
+                    _selectedOption == index
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                        : Colors.grey[200],
                 borderRadius: BorderRadius.circular(12),
-                border: _selectedOption == index
-                    ? Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 3,
-                      )
-                    : null,
+                border:
+                    _selectedOption == index
+                        ? Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 3,
+                        )
+                        : null,
               ),
               clipBehavior: Clip.hardEdge,
               child: _buildOptionImage(options[index]),
@@ -2092,8 +2149,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   ],
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -2108,10 +2167,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             const SizedBox(height: 12),
             Text(
               _currentHintText,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               textAlign: TextAlign.center,
             ),
           ],
@@ -2122,9 +2178,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   Widget _buildAnswerRevealOverlay() {
     // Get the correct hidden image URL
-    final String correctImageUrl = _imagePair!.hiddenImageIndex == 0
-        ? _imagePair!.firstImage
-        : _imagePair!.secondImage;
+    final String correctImageUrl =
+        _imagePair!.hiddenImageIndex == 0
+            ? _imagePair!.firstImage
+            : _imagePair!.secondImage;
 
     // Determine if the selected answer was correct
     bool wasCorrect = false;
@@ -2157,11 +2214,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                    color: wasCorrect ? Colors.green : Colors.red, width: 4),
+                  color: wasCorrect ? Colors.green : Colors.red,
+                  width: 4,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: (wasCorrect ? Colors.green : Colors.red)
-                        .withOpacity(0.5),
+                    color: (wasCorrect ? Colors.green : Colors.red).withOpacity(
+                      0.5,
+                    ),
                     blurRadius: 15,
                     spreadRadius: 5,
                   ),
@@ -2179,10 +2239,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               wasCorrect
                   ? "Great job! You remembered correctly."
                   : "This was the correct image to select.",
-              style: TextStyle(
-                color: AppColors.textLight,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: AppColors.textLight, fontSize: 16),
               textAlign: TextAlign.center,
             ),
           ],
@@ -2218,8 +2275,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAnimatedImageContainer(String imageUrl, bool visible,
-      {double size = 150.0}) {
+  Widget _buildAnimatedImageContainer(
+    String imageUrl,
+    bool visible, {
+    double size = 150.0,
+  }) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
@@ -2238,11 +2298,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         border: Border.all(color: Colors.white, width: 3),
       ),
       clipBehavior: Clip.hardEdge,
-      child: visible
-          ? _buildImage(imageUrl)
-          : const Center(
-              child: Icon(Icons.question_mark, size: 64, color: Colors.grey),
-            ),
+      child:
+          visible
+              ? _buildImage(imageUrl)
+              : const Center(
+                child: Icon(Icons.question_mark, size: 64, color: Colors.grey),
+              ),
     );
   }
 
@@ -2253,19 +2314,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       return Image.memory(
         base64Decode(base64Str),
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => const Center(
-          child: Icon(Icons.broken_image, color: Colors.red),
-        ),
+        errorBuilder:
+            (context, error, stackTrace) => const Center(
+              child: Icon(Icons.broken_image, color: Colors.red),
+            ),
       );
     } else {
       // Handle remote URLs
       return CachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
-        placeholder: (context, url) =>
-            const Center(child: CircularProgressIndicator()),
-        errorWidget: (context, url, error) =>
-            const Center(child: Icon(Icons.error)),
+        placeholder:
+            (context, url) => const Center(child: CircularProgressIndicator()),
+        errorWidget:
+            (context, url, error) => const Center(child: Icon(Icons.error)),
       );
     }
   }
@@ -2285,9 +2347,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final int attemptsUsed = _totalAttemptsMade;
 
     // Calculate two types of accuracy for better representation
-    final double questionAccuracy = totalQuestionsAttempted > 0
-        ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
-        : 0;
+    final double questionAccuracy =
+        totalQuestionsAttempted > 0
+            ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
+            : 0;
 
     // Calculate attempt efficiency - how many correct answers out of total attempts
     final double attemptEfficiency =
@@ -2312,105 +2375,133 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        // Prevent back button from dismissing the dialog
-        onWillPop: () async => false,
-        child: AlertDialog(
-          backgroundColor: AppColors.primaryDark,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Column(
-            children: [
-              Text(
-                'Challenge Complete!',
-                style: TextStyle(color: AppColors.accentColor, fontSize: 24),
-                textAlign: TextAlign.center,
+      builder:
+          (context) => WillPopScope(
+            // Prevent back button from dismissing the dialog
+            onWillPop: () async => false,
+            child: AlertDialog(
+              backgroundColor: AppColors.primaryDark,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 16),
-              // Show confetti animation in the dialog
-              ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: -pi / 2, // straight up
-                emissionFrequency: 0.05,
-                numberOfParticles: 20,
-                shouldLoop: false,
-                maxBlastForce: 20,
-                minBlastForce: 8,
-                gravity: 0.1,
+              title: Column(
+                children: [
+                  Text(
+                    'Challenge Complete!',
+                    style: TextStyle(
+                      color: AppColors.accentColor,
+                      fontSize: 24,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  // Show confetti animation in the dialog
+                  ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirection: -pi / 2, // straight up
+                    emissionFrequency: 0.05,
+                    numberOfParticles: 20,
+                    shouldLoop: false,
+                    maxBlastForce: 20,
+                    minBlastForce: 8,
+                    gravity: 0.1,
+                  ),
+                ],
               ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Results table
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryMedium.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _buildResultRow('Score', '$_score points',
-                          isHeader: false, highlight: true),
-                      _buildResultRow('Correct Answers',
-                          '$_totalCorrectAnswers/$totalQuestionsAttempted',
-                          isHeader: false),
-                      _buildResultRow(
-                          'Accuracy', '${combinedAccuracy.toStringAsFixed(0)}%',
-                          isHeader: false,
-                          tooltip: 'Based on questions and attempts'),
-                      _buildResultRow('Attempts Used',
-                          '$attemptsUsed/${maxPossibleAttempts}',
-                          isHeader: false),
-                      _buildResultRow('Max Streak', '$_maxStreak',
-                          isHeader: false),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Results table
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryMedium.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _buildResultRow(
+                            'Score',
+                            '$_score points',
+                            isHeader: false,
+                            highlight: true,
+                          ),
+                          _buildResultRow(
+                            'Correct Answers',
+                            '$_totalCorrectAnswers/$totalQuestionsAttempted',
+                            isHeader: false,
+                          ),
+                          _buildResultRow(
+                            'Accuracy',
+                            '${combinedAccuracy.toStringAsFixed(0)}%',
+                            isHeader: false,
+                            tooltip: 'Based on questions and attempts',
+                          ),
+                          _buildResultRow(
+                            'Attempts Used',
+                            '$attemptsUsed/${maxPossibleAttempts}',
+                            isHeader: false,
+                          ),
+                          _buildResultRow(
+                            'Max Streak',
+                            '$_maxStreak',
+                            isHeader: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-                // Performance feedback
-                Text(
-                  _getPerformanceFeedback(combinedAccuracy),
-                  style: TextStyle(
-                      color: AppColors.textLight, fontWeight: FontWeight.w500),
-                  textAlign: TextAlign.center,
+                    // Performance feedback
+                    Text(
+                      _getPerformanceFeedback(combinedAccuracy),
+                      style: TextStyle(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Center(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.home),
+                    label: const Text('Return to Menu'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accentColor,
+                      foregroundColor: AppColors.primaryDark,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    onPressed: () {
+                      _confettiController.stop();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(); // Return to game modes
+                    },
+                  ),
                 ),
               ],
             ),
           ),
-          actions: [
-            Center(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.home),
-                label: const Text('Return to Menu'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accentColor,
-                  foregroundColor: AppColors.primaryDark,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                onPressed: () {
-                  _confettiController.stop();
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Return to game modes
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
     );
 
     // Play the confetti when dialog shows
     _confettiController.play();
   }
-// Helper method to build a result row
-  Widget _buildResultRow(String label, String value,
-      {bool isHeader = false, bool highlight = false, String? tooltip}) {
+
+  // Helper method to build a result row
+  Widget _buildResultRow(
+    String label,
+    String value, {
+    bool isHeader = false,
+    bool highlight = false,
+    String? tooltip,
+  }) {
     Widget row = Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -2430,8 +2521,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 const SizedBox(width: 4),
                 Tooltip(
                   message: tooltip,
-                  child: const Icon(Icons.info_outline,
-                      size: 14, color: AppColors.textLight),
+                  child: const Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: AppColors.textLight,
+                  ),
                 ),
               ],
             ],
