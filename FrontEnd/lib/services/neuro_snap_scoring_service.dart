@@ -113,3 +113,158 @@ class GameResult {
     return (questionAccuracy + attemptEfficiency) / 2;
   }
 }
+
+class ScoringService {
+  // Singleton pattern
+  static final ScoringService _instance = ScoringService._internal();
+  factory ScoringService() => _instance;
+  ScoringService._internal();
+
+  // Game stats
+  late GameStats _stats;
+  bool _isInitialized = false;
+
+  // Stream controller for score updates
+  final _statsController = StreamController<GameStats>.broadcast();
+  Stream<GameStats> get statsStream => _statsController.stream;
+
+  // Key for storing leaderboard data in SharedPreferences
+  static const String _leaderboardKey = 'neurosnap_leaderboard';
+
+  // Initialize and load stored data
+  Future<void> initialize() async {
+    if (!_isInitialized) {
+      await _loadStats();
+      _isInitialized = true;
+    }
+  }
+
+  // Load stats from SharedPreferences
+  Future<void> _loadStats() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? statsJson = prefs.getString('gameStats');
+
+      if (statsJson != null) {
+        _stats = GameStats.fromJson(jsonDecode(statsJson));
+      } else {
+        _stats = GameStats();
+      }
+
+      _statsController.add(_stats);
+    } catch (e) {
+      print('Error loading game stats: $e');
+      _stats = GameStats();
+    }
+  }
+
+  // Save stats to SharedPreferences
+  Future<void> _saveStats() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('gameStats', jsonEncode(_stats.toJson()));
+    } catch (e) {
+      print('Error saving game stats: $e');
+    }
+  }
+
+  // Get current stats
+  GameStats get stats {
+    if (!_isInitialized) {
+      throw Exception(
+        'ScoringService not initialized. Call initialize() first.',
+      );
+    }
+    return _stats;
+  }
+
+  // Calculate score for a correct answer
+  int calculatePoints({
+    required bool isCorrect,
+    required String gameMode,
+    int comboCount = 0,
+    int timeRemaining = 0,
+  }) {
+    if (!isCorrect) return 0;
+
+    int basePoints;
+    switch (gameMode.toLowerCase()) {
+      case 'beginner':
+        basePoints = 5;
+        break;
+      case 'expert':
+        basePoints = 15;
+        break;
+      case 'speed':
+        // For speed mode, add time bonus
+        basePoints = 10 + (timeRemaining * 2);
+        break;
+      case 'daily':
+        basePoints = 20; // Daily challenges give more points
+        break;
+      default:
+        basePoints = 10;
+    }
+
+    // Apply combo bonus
+    if (comboCount > 0) {
+      basePoints = (basePoints * (1 + comboCount * 0.1)).toInt();
+    }
+
+    return basePoints;
+  }
+
+  // Save result of a game session
+  Future<void> saveGameResult({
+    required String mode,
+    required int score,
+    required int correctAnswers,
+    required int totalQuestions,
+    required int maxStreak,
+    required int totalAttempts, // Add this parameter
+  }) async {
+    if (!_isInitialized) await initialize();
+
+    // Create new result
+    final result = GameResult(
+      mode: mode,
+      score: score,
+      correctAnswers: correctAnswers,
+      totalQuestions: totalQuestions,
+      totalAttempts: totalAttempts, // Pass the total attempts
+      maxStreak: maxStreak,
+    );
+
+    // Update stats
+    _stats.totalGamesPlayed++;
+    _stats.totalScore += score;
+
+    // Update high score if needed
+    if (score > _stats.highScore) {
+      _stats.highScore = score;
+    }
+
+    // Update mode-specific high score
+    if (!_stats.modeHighScores.containsKey(mode)) {
+      _stats.modeHighScores[mode] = 0;
+    }
+    if (score > _stats.modeHighScores[mode]!) {
+      _stats.modeHighScores[mode] = score;
+    }
+
+    // Update max streak if needed
+    if (maxStreak > _stats.maxStreak) {
+      _stats.maxStreak = maxStreak;
+    }
+
+    // Add to recent results (keep only 10 most recent)
+    _stats.recentResults.insert(0, result);
+    if (_stats.recentResults.length > 10) {
+      _stats.recentResults = _stats.recentResults.sublist(0, 10);
+    }
+
+    // Save changes
+    await _saveStats();
+    _statsController.add(_stats);
+  }
+}
