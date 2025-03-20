@@ -267,4 +267,96 @@ class ScoringService {
     await _saveStats();
     _statsController.add(_stats);
   }
+
+  // Get performance feedback based on accuracy
+  String getPerformanceFeedback(double accuracy) {
+    if (accuracy >= 90) {
+      return 'Excellent work! Your memory is exceptional!';
+    } else if (accuracy >= 70) {
+      return 'Great job! Your memory skills are strong.';
+    } else if (accuracy >= 50) {
+      return 'Good effort! Keep practicing to improve further.';
+    } else {
+      return 'Keep trying! Memory skills improve with practice.';
+    }
+  }
+
+  // Get leaderboard entries - this is the missing method that's causing the error
+  Future<List<Map<String, dynamic>>> getLeaderboardEntries() async {
+    if (!_isInitialized) await initialize();
+
+    // Convert stats into a format suitable for the leaderboard
+    List<Map<String, dynamic>> entries = [];
+
+    // Add an entry for overall stats
+    entries.add({
+      'type': 'stats',
+      'highScore': _stats.highScore,
+      'totalGamesPlayed': _stats.totalGamesPlayed,
+      'totalScore': _stats.totalScore,
+      'maxStreak': _stats.maxStreak,
+      'modeHighScores': _stats.modeHighScores,
+    });
+
+    // Add entries for recent games
+    for (final result in _stats.recentResults) {
+      entries.add({
+        'type': 'game',
+        'mode': result.mode,
+        'score': result.score,
+        'correctAnswers': result.correctAnswers,
+        'totalQuestions': result.totalQuestions,
+        'accuracy': result.accuracy,
+        'maxStreak': result.maxStreak,
+        'timestamp': result.timestamp,
+      });
+    }
+
+    return entries;
+  }
+
+  // Get high score for a specific game mode
+  int getHighScore(String mode) {
+    if (!_isInitialized) {
+      throw Exception(
+        'ScoringService not initialized. Call initialize() first.',
+      );
+    }
+    return _stats.modeHighScores[mode] ?? 0;
+  }
+
+  // Clear all stats (for testing/reset)
+  Future<void> resetStats() async {
+    _stats = GameStats();
+    await _saveStats();
+    _statsController.add(_stats);
+  }
+
+  // Add new method to clear all saved data
+  Future<void> clearAllData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Clear leaderboard data
+      await prefs.remove(_leaderboardKey);
+
+      // Clear game stats data - this was missing before
+      await prefs.remove('gameStats');
+
+      // Reset the in-memory stats object
+      _stats = GameStats();
+      _statsController.add(_stats);
+
+      // Optional: Add a small delay to ensure data is cleared
+      await Future.delayed(const Duration(milliseconds: 300));
+    } catch (e) {
+      // Handle any errors during the clearing process
+      throw Exception('Failed to clear game data: $e');
+    }
+  }
+
+  // Dispose resources
+  void dispose() {
+    _statsController.close();
+  }
 }
