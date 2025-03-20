@@ -74,6 +74,8 @@ class ExerciseScreen extends StatelessWidget {
                                 title: 'Hand Coordination',
                                 rating: 4.6,
                                 isHighlighted: true,
+                                imagePath:
+                                    'lib/assets/images/hand.webp', // Add hand image
                                 onTap: () {
                                   Navigator.push(
                                     context,
