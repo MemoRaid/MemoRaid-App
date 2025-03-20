@@ -5,6 +5,7 @@ import 'game.dart';
 import 'g_01_home_screen.dart';
 import 'spot_difference_game.dart';
 import 'g_02_memory_recovery_app.dart';
+import'neuro_snap.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -83,8 +84,8 @@ class GameScreen extends StatelessWidget {
                     children: [
                       _buildGameCard(
                         context,
-                        title: "Memory Match",
-                        subtitle: "Test your memory skills",
+                        title: "Path Quest",
+                        subtitle: "Remember the path to win",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -97,8 +98,8 @@ class GameScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildGameCard(
                         context,
-                        title: "Puzzle Solver",
-                        subtitle: "Solve challenging puzzles",
+                        title: "Daily Task Sequencer",
+                        subtitle: "Reorder the jumbled tasks",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -112,8 +113,8 @@ class GameScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildGameCard(
                         context,
-                        title: "Reaction Test",
-                        subtitle: "Test your reaction speed",
+                        title: "Spot the Difference",
+                        subtitle: "Find whats different on the image",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -127,8 +128,8 @@ class GameScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildGameCard(
                         context,
-                        title: "Reaction Test",
-                        subtitle: "Test your reaction speed",
+                        title: "Memory Master",
+                        subtitle: "Remember the Flipped cards ",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
@@ -139,6 +140,23 @@ class GameScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      const SizedBox(height: 24),
+                      _buildGameCard(
+                        context,
+                        title: "Neuro Snap",
+                        subtitle: "Test your memory skills",
+                        image: "lib/assets/images/memoraid.png",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const WelcomeScreen()),
+                          );
+                        },
+                      ),
+
+
                     ],
                   ),
                 ),

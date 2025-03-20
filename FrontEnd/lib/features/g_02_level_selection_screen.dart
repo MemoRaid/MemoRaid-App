@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/g_02_memory_game_home.dart';
+import 'gamescreen.dart';
 
 class LevelSelectionScreen extends StatelessWidget {
   const LevelSelectionScreen({Key? key}) : super(key: key);
@@ -9,6 +10,20 @@ class LevelSelectionScreen extends StatelessWidget {
     final Color primaryColor = const Color(0xFF0D3445);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const GameScreen()),
+            );
+          },
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

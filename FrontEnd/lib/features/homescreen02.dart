@@ -4,6 +4,8 @@ import 'bottomnavbar.dart';
 import 'gamescreen.dart';
 import 'note.dart';
 import 'story_recall_screen.dart';
+import 'exercise.dart';
+import 'homescreen01.dart';
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -19,7 +21,10 @@ class HomeScreen2 extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          ),
         ),
         title: Text(
           "Memory Training",
@@ -97,13 +102,13 @@ class HomeScreen2 extends StatelessWidget {
                     Expanded(
                       child: _buildSmallCard(
                         context,
-                        title: "Personal\nDiary",
+                        title: "Excercises",
                         icon: Icons.book,
                         image: 'lib/assets/images/reminder.png',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TaskSchedulerScreen()),
+                              builder: (context) => ExerciseScreen()),
                         ),
                       ),
                     ),
