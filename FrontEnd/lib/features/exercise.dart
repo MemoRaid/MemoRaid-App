@@ -162,7 +162,8 @@ class ExerciseScreen extends StatelessWidget {
   Widget _buildExerciseCard({
     required BuildContext context,
     required String title,
-    required double rating,
+    required double
+        rating, // Keep this parameter to avoid changing method signatures
     bool isHighlighted = false,
     required VoidCallback onTap,
   }) {
@@ -226,7 +227,7 @@ class ExerciseScreen extends StatelessWidget {
               ),
             ),
 
-            // Title and rating
+            // Title and category instead of rating
             Positioned(
               left: 0,
               right: 0,
@@ -248,30 +249,15 @@ class ExerciseScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 12),
-                    Row(
-                      children: [
-                        ...List.generate(
-                          5,
-                          (index) => Padding(
-                            padding: EdgeInsets.only(right: 2),
-                            child: Icon(
-                              Icons.star,
-                              size: 14,
-                              color: Color(0xFF0D3445),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          rating.toString(),
-                          style: TextStyle(
-                            color: Color(0xFF0D3445),
-                            fontSize: 12,
-                            fontFamily: 'M PLUS 1',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                    // Replace stars with category text
+                    Text(
+                      "Brain Training",
+                      style: TextStyle(
+                        color: Color(0xFF0D3445),
+                        fontSize: 12,
+                        fontFamily: 'M PLUS 1',
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
@@ -358,6 +344,7 @@ class ExerciseScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 12),
+                  // Keep the lock icon but remove stars
                   Row(
                     children: [
                       Icon(
