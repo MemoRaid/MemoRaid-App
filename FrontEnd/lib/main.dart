@@ -14,8 +14,19 @@ import 'features/notifications_screen.dart';
 import 'features/privacy_policy_screen.dart';
 import 'features/terms_of_service_screen.dart';
 import 'config/api_config.dart';
-import 'features/note.dart';
-// Import the API config
+
+// Import Code1 auth files
+import 'features/loginorsignup.dart';
+import 'features/login.dart';
+import 'features/signup.dart';
+import 'features/verification_screen.dart';
+import 'features/share_link.dart';
+import 'services/auth_service.dart';
+
+// Ad screens from Code2
+import 'features/ad1.dart';
+import 'features/ad2.dart';
+import 'features/ad3.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +36,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(
+            create: (_) => AuthService()), // Add AuthService provider
       ],
       child: const MyApp(),
     ),
@@ -36,6 +49,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize auth service when app starts
+    final authService = Provider.of<AuthService>(context, listen: false);
+    authService.init();
+
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
@@ -45,11 +62,24 @@ class MyApp extends StatelessWidget {
           initialRoute: '/',
           routes: {
             '/': (context) => const SplashScreen(),
+
+            // Auth routes from Code1
+            '/login_or_signup': (context) => const LoginSignupScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/signup': (context) => const SignUpScreen(),
+            '/verification': (context) => const VerificationScreen(email: ''),
+
+            // Onboarding flow
+            '/ad1': (context) => const AdScreen(),
+            '/ad2': (context) => const AdScreen2(),
+            '/ad3': (context) => const AdScreen3(),
+            '/share_link': (context) => const ShareLinkScreen(),
+
+            // Code2 existing routes
             '/home': (context) => const HomeScreen(),
             '/chatbot': (context) => const ChatScreen(),
-            '/progress': (context) => const LeaderboardScreen(),
+            '/achievements': (context) => const LeaderboardScreen(),
             '/settings': (context) => const SettingsScreen(),
-            '/notebook': (context) => const TaskSchedulerScreen(),
 
             // Settings sub-screens
             '/help_center': (context) => const HelpCenterScreen(),
