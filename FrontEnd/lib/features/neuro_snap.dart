@@ -18,6 +18,7 @@ class AppColors {
   static const Color textLight = Color(0xFFF8FBFF);
   static const Color textDark = Color(0xFF0A2730);
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -129,17 +130,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   Text(
                     'NeuroSnap',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontSize: 46,
-                          color: AppColors.textLight,
-                        ),
+                      fontSize: 46,
+                      color: AppColors.textLight,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Memory Recall Game for Rehabilitation',
                     style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textLight.withOpacity(0.8)),
+                      fontSize: 16,
+                      color: AppColors.textLight.withOpacity(0.8),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 60),
@@ -147,12 +149,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     context: context,
                     label: 'Start Game',
                     icon: Icons.play_arrow_rounded,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const GameModesScreen(),
-                      ),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GameModesScreen(),
+                          ),
+                        ),
                   ),
                   const SizedBox(height: 16),
                   _buildMenuButton(
@@ -176,3 +179,56 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       ),
     );
   }
+
+  Widget _buildMenuButton({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.accentColor,
+            AppColors.accentColor.withOpacity(0.8),
+          ],
+        ),
+      ),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          minimumSize: const Size(double.infinity, 60),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: AppColors.primaryDark),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryDark,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
