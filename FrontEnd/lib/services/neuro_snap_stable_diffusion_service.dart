@@ -91,3 +91,82 @@ class StableDiffusionService {
       throw Exception('Failed to generate image: $e');
     }
   }
+ // Add a test method to check API connectivity
+  Future<bool> testApiConnection() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://api-inference.huggingface.co/status'),
+        headers: {
+          'Authorization': 'Bearer $_apiKey',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      debugPrint('API connection test status: ${response.statusCode}');
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (e) {
+      debugPrint('API connection test failed: $e');
+      return false;
+    }
+  }
+
+  Future<String> _generateImage(String prompt) async {
+    return await generateImage(prompt);
+  }
+
+  Future<ImagePair> generateImagePair(
+    String concept, {
+    int difficulty = 1,
+  }) async {
+    try {
+      // Generate two distinctly different images of the same concept
+      final firstImage =
+          await _generateImage('$concept from front view, detailed');
+
+      // Make sure second image is distinctly different from first
+      final secondImage = await _generateImage(
+          '$concept from different angle, with different lighting and background');
+
+      // Randomly select which image to hide
+      final random = Random();
+      final hiddenImageIndex = random.nextInt(2);
+
+      // Get the image that will be hidden
+      final targetImage = hiddenImageIndex == 0 ? firstImage : secondImage;
+
+      // Generate distractor images that are similar to the target image
+      final distractorImages = await _generateSimilarImages(
+        concept: concept,
+        targetImage: targetImage,
+        numberOfImages: 3, // Generate 3 distractor images
+        similarity: difficulty, // Higher difficulty = more similar images
+      );
+
+      // Combine the target image with distractors to create options
+      final List<String> options = [...distractorImages];
+
+      // Insert the real target at a random position
+      final correctPosition = random.nextInt(options.length + 1);
+      options.insert(correctPosition, targetImage);
+
+      // Create a meaningful description
+      String description = 'Remember this ${concept}';
+
+      // Store the prompts used to generate images
+      String prompt1 = "$concept from front view, detailed";
+      String prompt2 =
+          "$concept from different angle, with different lighting and background";
+
+      return ImagePair(
+        firstImage: firstImage,
+        secondImage: secondImage,
+        hiddenImageIndex: hiddenImageIndex,
+        description: description,
+        optionImages: options,
+        difficulty: difficulty,
+        firstImagePrompt: prompt1, // Include the prompt for the first image
+        secondImagePrompt: prompt2, // Include the prompt for the second image
+      );
+    } catch (e) {
+      throw Exception('Failed to generate images: $e');
+    }
+  }
