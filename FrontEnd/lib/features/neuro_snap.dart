@@ -1217,3 +1217,119 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       });
     }
   }
+ // New method to show game over dialog when attempts are exhausted
+  void _showGameOverDialog() {
+    if (!mounted) return;
+
+    // Calculate the same accuracy metrics as in level complete
+    final int totalQuestionsAttempted = _round;
+    final int maxPossibleAttempts = totalQuestionsAttempted * 3;
+    final int attemptsUsed = _totalAttemptsMade;
+
+    final double questionAccuracy = totalQuestionsAttempted > 0
+        ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
+        : 0;
+    final double attemptEfficiency =
+        attemptsUsed > 0 ? (_totalCorrectAnswers / attemptsUsed) * 100 : 0;
+    final double combinedAccuracy = (questionAccuracy + attemptEfficiency) / 2;
+
+    // Cancel any active timers
+    _timer?.cancel();
+
+    // Save game result to persistent storage
+    _scoringService.saveGameResult(
+      mode: widget.gameMode,
+      score: _score,
+      correctAnswers: _totalCorrectAnswers,
+      totalQuestions: _round,
+      maxStreak: _maxStreak,
+      totalAttempts: _totalAttemptsMade, // Add this parameter
+    );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        // Prevent back button from dismissing the dialog
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: AppColors.primaryDark,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Game Over!',
+            style: TextStyle(color: Colors.red, fontSize: 24),
+            textAlign: TextAlign.center,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Game over message
+                Text(
+                  'You\'ve used all your attempts for this question.',
+                  style: TextStyle(color: AppColors.textLight),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+
+                // Results for session
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryMedium.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildResultRow('Final Score', '$_score',
+                          isHeader: false, highlight: true),
+                      _buildResultRow(
+                          'Correct Answers', '$_totalCorrectAnswers/$_round',
+                          isHeader: false),
+                      _buildResultRow(
+                          'Accuracy', '${combinedAccuracy.toStringAsFixed(0)}%',
+                          isHeader: false,
+                          tooltip: 'Based on questions and attempts'),
+                      _buildResultRow('Attempts Used',
+                          '$attemptsUsed/${maxPossibleAttempts}',
+                          isHeader: false),
+                      _buildResultRow('Max Streak', '$_maxStreak',
+                          isHeader: false),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Encouragement message
+                Text(
+                  'Keep practicing to improve your memory skills!',
+                  style: TextStyle(
+                      color: AppColors.textLight, fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.home),
+                label: const Text('Return to Menu'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentColor,
+                  foregroundColor: AppColors.primaryDark,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Return to game modes
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
