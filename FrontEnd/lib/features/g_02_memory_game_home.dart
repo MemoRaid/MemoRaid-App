@@ -706,10 +706,7 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              setState(() {
-                _level = 1;
-                _initializeGame();
-              });
+              _resetGame(); // Use the new method to completely reset the game
             },
             child: const Text('Play Again'),
           ),
