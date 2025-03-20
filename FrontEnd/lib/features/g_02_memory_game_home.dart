@@ -185,12 +185,14 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
 
     _flippedCards = List.generate(_gameImages.length, (_) => false);
     _matchedCards = List.generate(_gameImages.length, (_) => false);
-    _score = _score; // Preserve the score from previous levels
+
+    // On
     _firstFlippedIndex = null;
     _canFlip = true;
 
     // Set time based on level if not already set
     if (_timeLeft == widget.initialTimeSeconds) {
+      // Calculate time based on level
       _timeLeft = max(30, 90 - ((_level - 1) * 7));
     }
 
