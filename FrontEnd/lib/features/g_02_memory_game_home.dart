@@ -656,7 +656,7 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     );
   }
 
-  void _endGame() {
+  void _endGame({bool completed = false}) {
     _timer?.cancel();
     setState(() {
       _isGameActive = false;
@@ -666,7 +666,7 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Game Complete!'),
+        title: Text(completed ? 'Game Complete!' : 'Game Over!'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -682,6 +682,24 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
                 (index) => const Icon(Icons.star, color: Colors.amber),
               ),
             ),
+            if (completed) const SizedBox(height: 12),
+            if (completed)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green),
+                ),
+                child: const Text(
+                  'Congratulations! You completed all levels!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         ),
         actions: [
