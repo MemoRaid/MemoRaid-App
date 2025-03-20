@@ -323,10 +323,11 @@ class GameModesScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const GameScreen(
-                              gameMode: 'daily',
-                              isDaily: true,
-                            ),
+                            builder:
+                                (context) => const GameScreen(
+                                  gameMode: 'daily',
+                                  isDaily: true,
+                                ),
                           ),
                         );
                       },
@@ -345,9 +346,9 @@ class GameModesScreen extends StatelessWidget {
               Text(
                 'Game Modes',
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textLight,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textLight,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -368,15 +369,17 @@ class GameModesScreen extends StatelessWidget {
                       difficulty: 1,
                       rewards: '5-15 points per correct answer',
                       color: Colors.green,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GameScreen(
-                            gameMode: 'Beginner',
-                            isDaily: false,
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const GameScreen(
+                                    gameMode: 'Beginner',
+                                    isDaily: false,
+                                  ),
+                            ),
                           ),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildGameModeCard(
@@ -388,15 +391,17 @@ class GameModesScreen extends StatelessWidget {
                       difficulty: 3,
                       rewards: '15-30 points per correct answer',
                       color: Colors.red,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GameScreen(
-                            gameMode: 'Expert',
-                            isDaily: false,
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const GameScreen(
+                                    gameMode: 'Expert',
+                                    isDaily: false,
+                                  ),
+                            ),
                           ),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildGameModeCard(
@@ -408,15 +413,17 @@ class GameModesScreen extends StatelessWidget {
                       difficulty: 2,
                       rewards: 'Up to 40 points with time bonus',
                       color: Colors.blue,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GameScreen(
-                            gameMode: 'Speed',
-                            isDaily: false,
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const GameScreen(
+                                    gameMode: 'Speed',
+                                    isDaily: false,
+                                  ),
+                            ),
                           ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -427,3 +434,161 @@ class GameModesScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildGameModeCard({
+    required BuildContext context,
+    required String title,
+    required String description,
+    required IconData icon,
+    required int difficulty,
+    required String rewards,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 6,
+      shadowColor: Colors.black.withOpacity(0.3),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: AppColors.primaryDark.withOpacity(0.4),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryMedium.withOpacity(0.7),
+              AppColors.primaryDark.withOpacity(0.9),
+            ],
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          splashColor: color.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [color.withOpacity(0.8), color],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: AppColors.textLight, size: 32),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              // Difficulty indicator
+                              Row(
+                                children: List.generate(
+                                  3,
+                                  (index) => Icon(
+                                    Icons.circle,
+                                    size: 10,
+                                    color:
+                                        index < difficulty
+                                            ? color
+                                            : Colors.grey.withOpacity(0.3),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                difficulty == 1
+                                    ? 'Easy'
+                                    : difficulty == 2
+                                    ? 'Medium'
+                                    : 'Hard',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  description,
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.emoji_events, size: 14, color: color),
+                      const SizedBox(width: 4),
+                      Text(
+                        rewards,
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: onTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text('START'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
