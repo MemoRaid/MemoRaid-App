@@ -104,6 +104,8 @@ class ExerciseScreen extends StatelessWidget {
                                 context: context,
                                 title: 'Brain Boosting Yoga',
                                 rating: 4.2,
+                                imagePath:
+                                    'lib/assets/images/yoga.jpeg', // Add yoga image
                                 onTap: () {
                                   Navigator.push(
                                     context,
