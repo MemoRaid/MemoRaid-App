@@ -190,11 +190,8 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     _firstFlippedIndex = null;
     _canFlip = true;
 
-    // Set time based on level if not already set
-    if (_timeLeft == widget.initialTimeSeconds) {
-      // Calculate time based on level
-      _timeLeft = max(30, 90 - ((_level - 1) * 7));
-    }
+    // Calculate time based on level
+    _timeLeft = max(30, 90 - ((_level - 1) * 7));
 
     // Set difficulty based on level
     _difficultyFactor = 1.0 + ((_level - 1) * 0.1);
@@ -210,6 +207,17 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
     // Cancel any existing timer
     _timer?.cancel();
     _timer = null;
+  }
+
+  // Add a method to fully reset the game (including score)
+  void _resetGame() {
+    setState(() {
+      _level = 1;
+      _score = 0; // Reset score to 0
+      _currentTheme = 'Hobbies'; // Reset to level 1 theme
+      _updateThemeColors();
+      _initializeGame();
+    });
   }
 
   // Start timer when first card is tapped
