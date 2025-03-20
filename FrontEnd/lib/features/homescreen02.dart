@@ -4,6 +4,7 @@ import 'bottomnavbar.dart';
 import 'gamescreen.dart';
 import 'note.dart';
 import 'story_recall_screen.dart';
+import 'exercise.dart';
 
 class HomeScreen2 extends StatelessWidget {
   const HomeScreen2({super.key});
@@ -97,13 +98,13 @@ class HomeScreen2 extends StatelessWidget {
                     Expanded(
                       child: _buildSmallCard(
                         context,
-                        title: "Personal\nDiary",
+                        title: "Excercises",
                         icon: Icons.book,
                         image: 'lib/assets/images/reminder.png',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TaskSchedulerScreen()),
+                              builder: (context) => ExerciseScreen()),
                         ),
                       ),
                     ),
