@@ -25,6 +25,7 @@ dependencies:
   google_generative_ai: ^0.2.0
   confetti: ^0.7.0
   just_audio: ^0.9.36
+  video_player: ^2.7.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,9 @@ flutter:
     - lib/assets/images/boy1.jpeg
     - lib/assets/images/boy2.jpeg
     - lib/assets/images/no.png
+    - lib/assets/images/CrossBody.webp
+    - lib/assets/images/yoga.jpeg
+    - lib/assets/images/hand.webp
     - lib/assets/audio/Story1.mp3
     - lib/assets/audio/Story2.mp3
     - lib/assets/audio/Story3.mp3
