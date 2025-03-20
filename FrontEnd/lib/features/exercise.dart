@@ -88,6 +88,8 @@ class ExerciseScreen extends StatelessWidget {
                                 context: context,
                                 title: 'Cross Body Movement',
                                 rating: 4.4,
+                                imagePath:
+                                    'lib/assets/images/CrossBody.webp', // Add specific image
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -112,7 +114,6 @@ class ExerciseScreen extends StatelessWidget {
                                   );
                                 },
                               ),
-                              // Add back the locked "Coming Soon" exercise card
                               _buildLockedExerciseCard(
                                 context: context,
                                 title: 'Coming Soon',
@@ -123,34 +124,34 @@ class ExerciseScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                ],
+              ),
+            ),
 
-                  // Bottom navigation indicator
-                  Container(
-                    height: 85,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0D3445),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x1C000000),
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 133,
-                        height: 6,
-                        decoration: ShapeDecoration(
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        ),
-                      ),
-                    ),
+            // Bottom navigation indicator
+            Container(
+              height: 85,
+              decoration: BoxDecoration(
+                color: Color(0xFF0D3445),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x1C000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
                   ),
                 ],
+              ),
+              child: Center(
+                child: Container(
+                  width: 133,
+                  height: 6,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -165,6 +166,7 @@ class ExerciseScreen extends StatelessWidget {
     required double rating,
     bool isHighlighted = false,
     required VoidCallback onTap,
+    String? imagePath,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -189,7 +191,7 @@ class ExerciseScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Exercise image
+            // Exercise image - now with conditional image source
             Positioned(
               left: 0,
               top: 0,
@@ -198,7 +200,10 @@ class ExerciseScreen extends StatelessWidget {
                 height: 120,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage("https://placehold.co/155x120"),
+                    image: imagePath != null
+                        ? AssetImage(imagePath)
+                        : NetworkImage("https://placehold.co/155x120")
+                            as ImageProvider,
                     fit: BoxFit.cover,
                   ),
                 ),
