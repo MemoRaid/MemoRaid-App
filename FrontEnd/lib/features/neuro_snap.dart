@@ -1540,3 +1540,159 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+    Widget _buildErrorState() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.primaryDark.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.redAccent,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to generate images',
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _loadImages,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accentColor,
+                foregroundColor: AppColors.primaryDark,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Try Again',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameContent() {
+    // Replace Column with SingleChildScrollView + Column to make content scrollable
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height -
+              AppBar().preferredSize.height -
+              MediaQuery.of(context).padding.top -
+              MediaQuery.of(context).padding.bottom -
+              48, // account for padding
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Top content (status bar, progress)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Game status bar
+                _buildEnhancedStatusBar(),
+
+                const SizedBox(height: 16),
+
+                // Progress indicator
+                _buildProgressBar(),
+
+                const SizedBox(height: 24),
+              ],
+            ),
+
+            // Middle content (images and options)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Description text
+                Text(
+                  _imagePair!.description,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textLight,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Image row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildAnimatedImageContainer(
+                      _imagePair!.firstImage,
+                      _imageVisible || _imagePair!.hiddenImageIndex != 0,
+                      size: _imageSize,
+                    ),
+                    _buildAnimatedImageContainer(
+                      _imagePair!.secondImage,
+                      _imageVisible || _imagePair!.hiddenImageIndex != 1,
+                      size: _imageSize,
+                    ),
+                  ],
+                ),
+
+                // Power-up and options section - always show the hint when images are hidden
+                if (!_imageVisible && !_isAnswerRevealing) ...[
+                  const SizedBox(height: 24),
+
+                  // Always show the power-up bar since it now contains the hint button
+                  _buildPowerUpBar(),
+
+                  const SizedBox(height: 16),
+
+                  // Options section
+                  const Text(
+                    'Select the missing image',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnhancedOptionGrid(_imagePair!.optionImages),
+                ],
+              ],
+            ),
+
+            // Bottom content (control buttons)
+            Padding(
+              padding: const EdgeInsets.only(top: 24.0, bottom: 16.0),
+              child: _buildGameControlButtons(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
