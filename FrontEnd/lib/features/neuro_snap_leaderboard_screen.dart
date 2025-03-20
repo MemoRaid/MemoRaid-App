@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'services/neuro_snap_scoring_service.dart';
+import '/services/neuro_snap_scoring_service.dart';
 import 'neuro_snap.dart';
 
 /// Screen that displays leaderboard information and player statistics
@@ -190,25 +190,24 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             ],
           ),
         ),
-        child:
-            _isLoading
-                ? const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.accentColor,
-                    ),
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.accentColor,
                   ),
-                )
-                : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // High Scores Tab
-                    _buildHighScoresTab(),
-
-                    // Recent Games Tab
-                    _buildRecentGamesTab(),
-                  ],
                 ),
+              )
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  // High Scores Tab
+                  _buildHighScoresTab(),
+
+                  // Recent Games Tab
+                  _buildRecentGamesTab(),
+                ],
+              ),
       ),
     );
   }
