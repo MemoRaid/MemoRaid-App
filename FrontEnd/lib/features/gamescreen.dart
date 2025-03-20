@@ -140,6 +140,9 @@ class GameScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      const SizedBox(height: 24),
+
+
                     ],
                   ),
                 ),
