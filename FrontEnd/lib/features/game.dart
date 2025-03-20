@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game_data.dart';
+import 'homescreen02.dart';
 
 //------------------------------------------------------------------------------
 // GAME SCREENS
@@ -461,6 +462,15 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen2()),
+            );
+          },
+        ),
       ),
 
       // Reset progress button with fade-in animation
@@ -2330,6 +2340,10 @@ class GameOverScreen extends StatelessWidget {
   final VoidCallback onRetry;
   // Callback function for when player chooses to exit to menu
   final VoidCallback onExit;
+
+  // Constructor requiring score and callback functions
+  // Callback function for when player chooses to exit to menu
+  
 
   // Constructor requiring score and callback functions
   const GameOverScreen({
