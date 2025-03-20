@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'services/neuro_snap_scoring_service.dart';
@@ -28,6 +30,120 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadLeaderboardData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final entries = await _scoringService.getLeaderboardEntries();
+      setState(() {
+        _leaderboardEntries = entries;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Show error if data loading fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading leaderboard data: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _showResetConfirmationDialog() async {
+    // Show warning dialog asking for confirmation
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.primaryDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Reset Progress',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 48),
+              const SizedBox(height: 16),
+              const Text(
+                'Warning: This will permanently delete all your game progress and leaderboard data. This action cannot be undone.',
+                style: TextStyle(color: AppColors.textLight),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.accentColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Reset All Data'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed, proceed with reset
+    if (confirmed == true) {
+      await _resetAllData();
+    }
+  }
+
+  Future<void> _resetAllData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Clear all saved data
+      await _scoringService.clearAllData();
+
+      // Reload the (now empty) leaderboard
+      await _loadLeaderboardData();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All progress has been reset successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error resetting data: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
