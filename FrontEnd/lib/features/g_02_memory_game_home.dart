@@ -585,11 +585,9 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
               difficultyText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontStyle: _level > 3 ? FontStyle.italic : FontStyle.normal,
                 color: Colors.white.withOpacity(0.9),
               ),
             ),
-            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -638,27 +636,9 @@ class _MemoryGameHomeState extends State<MemoryGameHome>
             child: ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Calculate the correct time for the next level
-                int nextLevelTime = max(30, 90 - ((_level - 1) * 7));
 
+                // Initialize game with the new level settings
                 setState(() {
-                  // Update the time left for the next level
-                  _timeLeft = nextLevelTime;
-
-                  // Reset game state for the new level
-                  _firstFlippedIndex = null;
-                  _canFlip = true;
-                  _streak = 0;
-                  _moves = 0;
-                  _stars = 3;
-                  _showSuccess = false;
-                  _timerStarted = false;
-
-                  // Cancel any existing timer
-                  _timer?.cancel();
-                  _timer = null;
-
-                  // Re-initialize the game with new level
                   _initializeGame();
                 });
               },
