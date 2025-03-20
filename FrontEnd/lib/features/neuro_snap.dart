@@ -2408,3 +2408,51 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Play the confetti when dialog shows
     _confettiController.play();
   }
+// Helper method to build a result row
+  Widget _buildResultRow(String label, String value,
+      {bool isHeader = false, bool highlight = false, String? tooltip}) {
+    Widget row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isHeader ? 16 : 14,
+                  fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+                  color: AppColors.textLight,
+                ),
+              ),
+              if (tooltip != null) ...[
+                const SizedBox(width: 4),
+                Tooltip(
+                  message: tooltip,
+                  child: const Icon(Icons.info_outline,
+                      size: 14, color: AppColors.textLight),
+                ),
+              ],
+            ],
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: isHeader ? 16 : 14,
+              fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+              color: highlight ? AppColors.accentColor : AppColors.textLight,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return row;
+  }
+
+  // Get feedback based on performance
+  String _getPerformanceFeedback(double accuracy) {
+    return _scoringService.getPerformanceFeedback(accuracy);
+  }
+}
