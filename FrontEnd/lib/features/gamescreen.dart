@@ -98,8 +98,8 @@ class GameScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildGameCard(
                         context,
-                        title: "Puzzle Solver",
-                        subtitle: "Solve challenging puzzles",
+                        title: "Daily Task Sequencer",
+                        subtitle: "Reorder the jumbled tasks",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
