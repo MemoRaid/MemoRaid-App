@@ -79,6 +79,7 @@ flutter:
     - lib/assets/images/CrossBody.webp
     - lib/assets/images/yoga.jpeg
     - lib/assets/images/hand.webp
+    - lib/assets/images/relax.png
     - lib/assets/audio/Story1.mp3
     - lib/assets/audio/Story2.mp3
     - lib/assets/audio/Story3.mp3

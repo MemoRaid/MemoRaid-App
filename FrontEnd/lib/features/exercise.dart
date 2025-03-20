@@ -3,6 +3,7 @@ import 'hand_coordination_exercise.dart';
 import 'brain_boosting_yoga_exercise.dart';
 import 'cross_body_movement_exercise.dart';
 import 'homescreen02.dart';
+import 'bottomnavbar.dart'; // Add this import
 
 class ExerciseScreen extends StatelessWidget {
   const ExerciseScreen({super.key});
@@ -17,12 +18,14 @@ class ExerciseScreen extends StatelessWidget {
         toolbarHeight: 80, // Increase toolbar height
         leading: Padding(
           padding: EdgeInsets.only(
-              top: 16.0, left: 8.0), // Add top padding to move down
+              top: 10.0, left: 8.0), // Add top padding to move down
           child: IconButton(
             icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
             onPressed: () {
-              // Navigate to homescreen2 instead of just popping
-              Navigator.pushReplacementNamed(context, '/homescreen2');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen2()),
+              );
             },
           ),
         ),
@@ -56,18 +59,19 @@ class ExerciseScreen extends StatelessWidget {
               child: Column(
                 children: [
                   // Status bar space - reduced since we now have an AppBar
-                  SizedBox(height: 0),
+                  SizedBox(height: 10),
 
                   // Main content
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.all(20),
+                      padding: EdgeInsets.all(10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Heading for exercises - now centered
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
+                            padding:
+                                const EdgeInsets.only(bottom: 5.0, top: 0.9),
                             child: Center(
                               child: Text(
                                 'Brain Training Exercises',
@@ -155,35 +159,12 @@ class ExerciseScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Bottom navigation indicator
-            Container(
-              height: 85,
-              decoration: BoxDecoration(
-                color: Color(0xFF0D3445),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x1C000000),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Container(
-                  width: 133,
-                  height: 6,
-                  decoration: ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: 0, // Set the appropriate index
+        onTap: (index) {}, // Handle taps if needed
       ),
     );
   }
@@ -308,13 +289,14 @@ class ExerciseScreen extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Exercise image with darker overlay - fixed coverage
+          // Exercise image with darker overlay - updated with local image
           Container(
-            height: 140, // Increased from 120 to match other cards
+            height: 180,
             width: double.infinity,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage("https://placehold.co/155x120"),
+                image: AssetImage(
+                    'lib/assets/images/relax.png'), // Update with your image path
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5),
