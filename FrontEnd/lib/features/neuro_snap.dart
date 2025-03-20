@@ -802,3 +802,144 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _round = 0;
   }
 
+ // New method to test API before loading images
+  Future<void> _testApiAndLoadImages() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // First test API connectivity
+      await _stableDiffusionService.testApiConnection();
+
+      // if (!isConnected) {
+      //   throw Exception(
+      //       "Cannot connect to image generation API. Check your internet connection and API key.");
+      // }
+
+      // If connection is good, proceed with loading images
+      _loadImages();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show error with more helpful message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('API Connection Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _testApiAndLoadImages,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // Modify existing loading method to include more error details
+  Future<void> _loadImages() async {
+    // If level is complete, show level completion screen
+    if (_isLevelComplete && !widget.isDaily) {
+      _showLevelCompleteDialog();
+      return;
+    }
+
+    // Reset attempts when loading new question
+    _attemptsRemaining = 3;
+
+    _timer?.cancel();
+
+    setState(() {
+      _isLoading = true;
+      _imageVisible = true;
+      _selectedOption = null;
+      _imageAnimationController.reset();
+    });
+
+    try {
+      // Choose a random concept that's different from the last one used
+      final random = Random();
+      String concept;
+
+      do {
+        // Randomly select a concept from the list
+        concept = _concepts[random.nextInt(_concepts.length)];
+      } while (concept == _lastUsedConcept && _concepts.length > 1);
+
+      // Update the last used concept tracker
+      _lastUsedConcept = concept;
+
+      // Increment round counter - only increment if not already at max rounds
+      if (_round < _maxRounds) {
+        _round++;
+      }
+
+      // Pass the difficulty level to the image generation service
+      _imagePair = await _stableDiffusionService.generateImagePair(
+        concept,
+        difficulty: _difficultyLevels,
+      );
+
+      // Generate hints based on the concept
+      _generateHints(concept);
+
+      // Reset game state for new round
+      setState(() {
+        _hintUsed = false;
+        _showHint = false;
+        if (_isFiftyfiftyUsed) _isFiftyfiftyUsed = false;
+
+        // Update game progress based on rounds in current level
+        _gameProgress = _round / _maxRounds;
+      });
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show both images for 5 seconds, then hide the second one
+        Future.delayed(Duration(seconds: _viewTime), () {
+          if (mounted) {
+            _hideImage();
+
+            // Start timer after images are hidden for speed mode
+            if (widget.gameMode == 'Speed') {
+              _startTimer();
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        // Improve error logging
+        String errorMessage = e.toString();
+        debugPrint('Detailed error loading images: $errorMessage');
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        // More informative error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Error: ${errorMessage.length > 100 ? errorMessage.substring(0, 100) + '...' : errorMessage}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _loadImages,
+            ),
+          ),
+        );
+      }
+    }
+  }
