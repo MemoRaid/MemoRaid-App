@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:my_flutter_app/features/homescreen02.dart';
 import '/services/neuro_snap_stable_diffusion_service.dart';
 import '/services/neuro_snap_scoring_service.dart';
 import 'neuro_snap_leaderboard_screen.dart';
@@ -7,6 +8,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
 import 'package:confetti/confetti.dart';
+import 'homescreen02.dart';
 
 // Custom app theme colors
 class AppColors {
@@ -242,6 +244,15 @@ class GameModesScreen extends StatelessWidget {
         title: const Text('Choose Your Challenge'),
         backgroundColor: AppColors.primaryDark,
         foregroundColor: AppColors.textLight,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen2()),
+            );
+          },
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
