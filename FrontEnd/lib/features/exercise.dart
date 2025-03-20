@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'hand_coordination_exercise.dart';
+import 'brain_boosting_yoga_exercise.dart';
+import 'cross_body_movement_exercise.dart';
 
 class ExerciseScreen extends StatelessWidget {
   const ExerciseScreen({super.key});
@@ -52,21 +55,53 @@ class ExerciseScreen extends StatelessWidget {
                             childAspectRatio: 155 / 205,
                             children: [
                               _buildExerciseCard(
-                                title: 'Exercise 01',
+                                context: context,
+                                title: 'Hand Coordination',
                                 rating: 4.6,
                                 isHighlighted: true,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          HandCoordinationExercise(),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildExerciseCard(
-                                title: 'Exercise 02',
-                                rating: 4.6,
+                                context: context,
+                                title: 'Brain Boosting Yoga',
+                                rating: 4.2,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          BrainBoostingYogaExercise(),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildExerciseCard(
-                                title: 'Exercise 03',
-                                rating: 4.6,
+                                context: context,
+                                title: 'Cross Body Movement',
+                                rating: 4.4,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          CrossBodyMovementExercise(),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildExerciseCard(
-                                title: 'Exercise 04',
-                                rating: 4.6,
+                                context: context,
+                                title: 'Coming Soon',
+                                rating: 0.0,
+                                onTap: () {},
                               ),
                             ],
                           ),
@@ -111,120 +146,125 @@ class ExerciseScreen extends StatelessWidget {
   }
 
   Widget _buildExerciseCard({
+    required BuildContext context,
     required String title,
     required double rating,
     bool isHighlighted = false,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: ShapeDecoration(
-        color: isHighlighted ? Color(0xFFFCFFFC) : Color(0xFFF4F7FB),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            width: 1,
-            color: Colors.white.withOpacity(isHighlighted ? 1 : 0.5),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: ShapeDecoration(
+          color: isHighlighted ? Color(0xFFFCFFFC) : Color(0xFFF4F7FB),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: 1,
+              color: Colors.white.withOpacity(isHighlighted ? 1 : 0.5),
+            ),
+            borderRadius: BorderRadius.circular(22),
           ),
-          borderRadius: BorderRadius.circular(22),
+          shadows: [
+            BoxShadow(
+              color: Color(0x333B4056),
+              blurRadius: 40,
+              offset: Offset(0, 20),
+            ),
+          ],
         ),
-        shadows: [
-          BoxShadow(
-            color: Color(0x333B4056),
-            blurRadius: 40,
-            offset: Offset(0, 20),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Exercise image
-          Positioned(
-            left: 0,
-            top: 0,
-            right: 0,
-            child: Container(
-              height: 120,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage("https://placehold.co/155x120"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-
-          // Bookmark button
-          Positioned(
-            right: 8,
-            top: 8,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: ShapeDecoration(
-                color: Colors.black.withOpacity(0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Icon(
-                Icons.bookmark_border,
-                size: 14,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-          // Title and rating
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Color(0xFF0D3445),
-                      fontSize: 16,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w700,
-                      height: 0.81,
-                      letterSpacing: 0.07,
-                    ),
+        child: Stack(
+          children: [
+            // Exercise image
+            Positioned(
+              left: 0,
+              top: 0,
+              right: 0,
+              child: Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage("https://placehold.co/155x120"),
+                    fit: BoxFit.cover,
                   ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      ...List.generate(
-                        5,
-                        (index) => Padding(
-                          padding: EdgeInsets.only(right: 2),
-                          child: Icon(
-                            Icons.star,
-                            size: 14,
-                            color: Color(0xFF0D3445),
+                ),
+              ),
+            ),
+
+            // Bookmark button
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: ShapeDecoration(
+                  color: Colors.black.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Icon(
+                  Icons.bookmark_border,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
+            // Title and rating
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Color(0xFF0D3445),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w700,
+                        height: 0.81,
+                        letterSpacing: 0.07,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        ...List.generate(
+                          5,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(right: 2),
+                            child: Icon(
+                              Icons.star,
+                              size: 14,
+                              color: Color(0xFF0D3445),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        rating.toString(),
-                        style: TextStyle(
-                          color: Color(0xFF0D3445),
-                          fontSize: 12,
-                          fontFamily: 'M PLUS 1',
-                          fontWeight: FontWeight.w500,
+                        SizedBox(width: 4),
+                        Text(
+                          rating.toString(),
+                          style: TextStyle(
+                            color: Color(0xFF0D3445),
+                            fontSize: 12,
+                            fontFamily: 'M PLUS 1',
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
