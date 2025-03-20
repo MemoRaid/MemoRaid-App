@@ -2190,3 +2190,221 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _buildGameControlButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Only show Next button if an option was selected
+        // Skip option (when _imageVisible is true) has been removed
+        if (_selectedOption != null)
+          ElevatedButton(
+            onPressed: _loadImages,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_forward),
+                const SizedBox(width: 8),
+                const Text('Next Challenge'),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedImageContainer(String imageUrl, bool visible,
+      {double size = 150.0}) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.white, width: 3),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: visible
+          ? _buildImage(imageUrl)
+          : const Center(
+              child: Icon(Icons.question_mark, size: 64, color: Colors.grey),
+            ),
+    );
+  }
+
+  Widget _buildImage(String imageUrl) {
+    if (imageUrl.startsWith('data:image')) {
+      // Handle base64 encoded images
+      final base64Str = imageUrl.substring(imageUrl.indexOf(',') + 1);
+      return Image.memory(
+        base64Decode(base64Str),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Center(
+          child: Icon(Icons.broken_image, color: Colors.red),
+        ),
+      );
+    } else {
+      // Handle remote URLs
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) =>
+            const Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) =>
+            const Center(child: Icon(Icons.error)),
+      );
+    }
+  }
+
+  Widget _buildOptionImage(String imageUrl) {
+    return _buildImage(imageUrl);
+  }
+
+  // Show level complete dialog with enhanced results and navigation
+  void _showLevelCompleteDialog() {
+    if (!mounted) return;
+
+    // Calculate accuracy percentage - taking attempts into account
+    final int totalQuestionsAttempted = _round;
+    final int maxPossibleAttempts =
+        totalQuestionsAttempted * 3; // 3 attempts per question
+    final int attemptsUsed = _totalAttemptsMade;
+
+    // Calculate two types of accuracy for better representation
+    final double questionAccuracy = totalQuestionsAttempted > 0
+        ? (_totalCorrectAnswers / totalQuestionsAttempted) * 100
+        : 0;
+
+    // Calculate attempt efficiency - how many correct answers out of total attempts
+    final double attemptEfficiency =
+        attemptsUsed > 0 ? (_totalCorrectAnswers / attemptsUsed) * 100 : 0;
+
+    // Average of both metrics for a balanced accuracy measure
+    final double combinedAccuracy = (questionAccuracy + attemptEfficiency) / 2;
+
+    // Cancel any active timers
+    _timer?.cancel();
+
+    // Save game result to persistent storage
+    _scoringService.saveGameResult(
+      mode: widget.gameMode,
+      score: _score,
+      correctAnswers: _totalCorrectAnswers,
+      totalQuestions: totalQuestionsAttempted,
+      maxStreak: _maxStreak,
+      totalAttempts: _totalAttemptsMade, // Add this parameter
+    );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        // Prevent back button from dismissing the dialog
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: AppColors.primaryDark,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Column(
+            children: [
+              Text(
+                'Challenge Complete!',
+                style: TextStyle(color: AppColors.accentColor, fontSize: 24),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              // Show confetti animation in the dialog
+              ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: -pi / 2, // straight up
+                emissionFrequency: 0.05,
+                numberOfParticles: 20,
+                shouldLoop: false,
+                maxBlastForce: 20,
+                minBlastForce: 8,
+                gravity: 0.1,
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Results table
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryMedium.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildResultRow('Score', '$_score points',
+                          isHeader: false, highlight: true),
+                      _buildResultRow('Correct Answers',
+                          '$_totalCorrectAnswers/$totalQuestionsAttempted',
+                          isHeader: false),
+                      _buildResultRow(
+                          'Accuracy', '${combinedAccuracy.toStringAsFixed(0)}%',
+                          isHeader: false,
+                          tooltip: 'Based on questions and attempts'),
+                      _buildResultRow('Attempts Used',
+                          '$attemptsUsed/${maxPossibleAttempts}',
+                          isHeader: false),
+                      _buildResultRow('Max Streak', '$_maxStreak',
+                          isHeader: false),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Performance feedback
+                Text(
+                  _getPerformanceFeedback(combinedAccuracy),
+                  style: TextStyle(
+                      color: AppColors.textLight, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.home),
+                label: const Text('Return to Menu'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentColor,
+                  foregroundColor: AppColors.primaryDark,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                onPressed: () {
+                  _confettiController.stop();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Return to game modes
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Play the confetti when dialog shows
+    _confettiController.play();
+  }
