@@ -22,7 +22,7 @@ class LevelSelectionScreen extends StatelessWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -80,7 +80,7 @@ class LevelSelectionScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 35),
 
                 // Level cards
                 Expanded(
