@@ -22,30 +22,57 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
   bool _isInitialized = false;
   bool _showControls = true;
   bool _isPlaying = false;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() {
-          _isInitialized = true;
-          if (widget.autoplay) {
-            _controller.play();
-            _isPlaying = true;
-          }
-        });
-        _controller.setLooping(widget.looping);
+    _initializeVideoPlayer();
+  }
+
+  void _initializeVideoPlayer() {
+    try {
+      _controller = VideoPlayerController.network(widget.videoUrl);
+      _controller.initialize().then((_) {
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+            if (widget.autoplay) {
+              _controller.play();
+              _isPlaying = true;
+            }
+          });
+          _controller.setLooping(widget.looping);
+        }
+      }).catchError((error) {
+        print("Error initializing video player: $error");
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+          });
+        }
       });
+    } catch (e) {
+      print("Exception creating video player: $e");
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (!_hasError) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
   void _togglePlay() {
+    if (_hasError || !_isInitialized) return;
+
     setState(() {
       if (_controller.value.isPlaying) {
         _controller.pause();
@@ -67,6 +94,10 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    if (_hasError) {
+      return _buildErrorPlaceholder();
+    }
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -78,24 +109,16 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Video content
-            if (_isInitialized)
-              AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              )
-            else
-              Container(
-                color: Colors.black,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            // Video content or loading indicator
+            _isInitialized
+                ? AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
+                  )
+                : _buildLoadingPlaceholder(),
 
             // Play/Pause overlay
-            if (_showControls || !_isPlaying)
+            if ((_showControls || !_isPlaying) && _isInitialized)
               GestureDetector(
                 onTap: _togglePlay,
                 child: Container(
@@ -143,6 +166,67 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingPlaceholder() {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              color: Colors.white,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Loading video...',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorPlaceholder() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        color: Color(0xFF0D3445).withOpacity(0.1),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.video_library,
+                size: 70,
+                color: Color(0xFF0D3445).withOpacity(0.5),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Video not available',
+                style: TextStyle(
+                  color: Color(0xFF0D3445),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Please check your internet connection and try again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF0D3445),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
