@@ -141,6 +141,20 @@ class GameScreen extends StatelessWidget {
                         },
                       ),
                       const SizedBox(height: 24),
+                      _buildGameCard(
+                        context,
+                        title: "Reaction Test",
+                        subtitle: "Test your reaction speed",
+                        image: "lib/assets/images/memoraid.png",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const WelcomeScreen()),
+                          );
+                        },
+                      ),
 
 
                     ],
