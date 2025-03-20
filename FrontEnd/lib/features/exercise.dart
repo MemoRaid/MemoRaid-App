@@ -86,21 +86,8 @@ class ExerciseScreen extends StatelessWidget {
                               ),
                               _buildExerciseCard(
                                 context: context,
-                                title: 'Brain Boosting Yoga',
-                                rating: 4.2,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          BrainBoostingYogaExercise(),
-                                    ),
-                                  );
-                                },
-                              ),
-                              _buildExerciseCard(
-                                context: context,
-                                title: 'Cross Body Movement',
+                                title:
+                                    'Cross Body Movement', // Moved to second position
                                 rating: 4.4,
                                 onTap: () {
                                   Navigator.push(
@@ -108,6 +95,21 @@ class ExerciseScreen extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           CrossBodyMovementExercise(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              _buildExerciseCard(
+                                context: context,
+                                title:
+                                    'Brain Boosting Yoga', // Moved to third position
+                                rating: 4.2,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          BrainBoostingYogaExercise(),
                                     ),
                                   );
                                 },
