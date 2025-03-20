@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'services/neuro_snap_scoring_service.dart';
 import 'neuro_snap.dart';
 
+/// Screen that displays leaderboard information and player statistics
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
 
@@ -14,11 +15,13 @@ class LeaderboardScreen extends StatefulWidget {
 
 class _LeaderboardScreenState extends State<LeaderboardScreen>
     with SingleTickerProviderStateMixin {
+  // Controller & Data Properties
   late TabController _tabController;
   final ScoringService _scoringService = ScoringService();
   List<Map<String, dynamic>> _leaderboardEntries = [];
   bool _isLoading = true;
 
+  // Lifecycle Methods
   @override
   void initState() {
     super.initState();
@@ -32,6 +35,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     super.dispose();
   }
 
+  // Data Loading & Management Methods
+
+  /// Loads leaderboard data from the scoring service
   Future<void> _loadLeaderboardData() async {
     setState(() {
       _isLoading = true;
@@ -57,6 +63,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     }
   }
 
+  /// Shows a confirmation dialog before resetting all data
   Future<void> _showResetConfirmationDialog() async {
     // Show warning dialog asking for confirmation
     final bool? confirmed = await showDialog<bool>(
@@ -114,6 +121,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     }
   }
 
+  /// Resets all leaderboard and game data
   Future<void> _resetAllData() async {
     setState(() {
       _isLoading = true;
@@ -146,6 +154,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     }
   }
 
+  // Main Build Method
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,6 +213,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
+  // Tab Content Builders
+
+  /// Builds the high scores tab showing overall and per-mode statistics
   Widget _buildHighScoresTab() {
     // Get stats
     final stats = _scoringService.stats;
@@ -253,6 +265,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
+  /// Builds the recent games tab showing detailed history of gameplay
   Widget _buildRecentGamesTab() {
     // Get recent games
     final recentGames = _scoringService.stats.recentResults;
@@ -354,7 +367,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  // Helper method to build a result row - matches the style in game results
+  // Helper UI Components
+
+  /// Builds a row for displaying result information
   Widget _buildResultRow(
     String label,
     String value, {
@@ -387,6 +402,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
+  /// Builds a card for displaying grouped statistics
   Widget _buildStatsCard(String title, List<Map<String, String>> items) {
     return Card(
       color: AppColors.primaryMedium.withOpacity(0.7),

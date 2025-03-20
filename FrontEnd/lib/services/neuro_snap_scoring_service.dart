@@ -2,6 +2,69 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+/// Class to store individual game results
+class GameResult {
+  final String mode;
+  final int score;
+  final int correctAnswers;
+  final int totalQuestions;
+  final int totalAttempts;
+  final int maxStreak;
+  final DateTime timestamp;
+
+  GameResult({
+    required this.mode,
+    required this.score,
+    required this.correctAnswers,
+    required this.totalQuestions,
+    required this.maxStreak,
+    required this.totalAttempts,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
+
+  // Convert to JSON for storage
+  Map<String, dynamic> toJson() {
+    return {
+      'mode': mode,
+      'score': score,
+      'correctAnswers': correctAnswers,
+      'totalQuestions': totalQuestions,
+      'totalAttempts': totalAttempts,
+      'maxStreak': maxStreak,
+      'timestamp': timestamp.millisecondsSinceEpoch,
+    };
+  }
+
+  // Create from JSON for retrieval
+  factory GameResult.fromJson(Map<String, dynamic> json) {
+    return GameResult(
+      mode: json['mode'] ?? 'unknown',
+      score: json['score'] ?? 0,
+      correctAnswers: json['correctAnswers'] ?? 0,
+      totalQuestions: json['totalQuestions'] ?? 0,
+      totalAttempts: json['totalAttempts'] ?? 0,
+      maxStreak: json['maxStreak'] ?? 0,
+      timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp'] ?? 0),
+    );
+  }
+
+  // Calculate combined accuracy that matches the game screen calculation
+  double get accuracy {
+    if (totalQuestions == 0) return 0;
+
+    // Calculate question accuracy (% of questions answered correctly)
+    double questionAccuracy = (correctAnswers / totalQuestions) * 100;
+
+    // Calculate attempt efficiency (% of correct answers out of total attempts)
+    double attemptEfficiency =
+        totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
+
+    // Return the combined accuracy as used in the game
+    return (questionAccuracy + attemptEfficiency) / 2;
+  }
+}
+
+/// Class to store overall game statistics
 class GameStats {
   int highScore;
   int totalGamesPlayed;
@@ -52,68 +115,7 @@ class GameStats {
   }
 }
 
-// Class to store individual game results
-class GameResult {
-  final String mode;
-  final int score;
-  final int correctAnswers;
-  final int totalQuestions;
-  final int totalAttempts; // Add this field to track attempts
-  final int maxStreak;
-  final DateTime timestamp;
-
-  GameResult({
-    required this.mode,
-    required this.score,
-    required this.correctAnswers,
-    required this.totalQuestions,
-    required this.maxStreak,
-    required this.totalAttempts, // Make this required
-    DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
-
-  // Convert to JSON for storage
-  Map<String, dynamic> toJson() {
-    return {
-      'mode': mode,
-      'score': score,
-      'correctAnswers': correctAnswers,
-      'totalQuestions': totalQuestions,
-      'totalAttempts': totalAttempts, // Save total attempts
-      'maxStreak': maxStreak,
-      'timestamp': timestamp.millisecondsSinceEpoch,
-    };
-  }
-
-  // Create from JSON for retrieval
-  factory GameResult.fromJson(Map<String, dynamic> json) {
-    return GameResult(
-      mode: json['mode'] ?? 'unknown',
-      score: json['score'] ?? 0,
-      correctAnswers: json['correctAnswers'] ?? 0,
-      totalQuestions: json['totalQuestions'] ?? 0,
-      totalAttempts: json['totalAttempts'] ?? 0, // Load total attempts
-      maxStreak: json['maxStreak'] ?? 0,
-      timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp'] ?? 0),
-    );
-  }
-
-  // Calculate combined accuracy that matches the game screen calculation
-  double get accuracy {
-    if (totalQuestions == 0) return 0;
-
-    // Calculate question accuracy (% of questions answered correctly)
-    double questionAccuracy = (correctAnswers / totalQuestions) * 100;
-
-    // Calculate attempt efficiency (% of correct answers out of total attempts)
-    double attemptEfficiency =
-        totalAttempts > 0 ? (correctAnswers / totalAttempts) * 100 : 0;
-
-    // Return the combined accuracy as used in the game
-    return (questionAccuracy + attemptEfficiency) / 2;
-  }
-}
-
+/// Service class for handling game scoring, statistics, and leaderboard
 class ScoringService {
   // Singleton pattern
   static final ScoringService _instance = ScoringService._internal();
@@ -130,8 +132,11 @@ class ScoringService {
 
   // Key for storing leaderboard data in SharedPreferences
   static const String _leaderboardKey = 'neurosnap_leaderboard';
+  static const String _statsKey = 'gameStats';
 
-  // Initialize and load stored data
+  // Initialization methods
+
+  /// Initialize and load stored data
   Future<void> initialize() async {
     if (!_isInitialized) {
       await _loadStats();
@@ -139,11 +144,11 @@ class ScoringService {
     }
   }
 
-  // Load stats from SharedPreferences
+  /// Load stats from SharedPreferences
   Future<void> _loadStats() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      String? statsJson = prefs.getString('gameStats');
+      String? statsJson = prefs.getString(_statsKey);
 
       if (statsJson != null) {
         _stats = GameStats.fromJson(jsonDecode(statsJson));
@@ -158,27 +163,19 @@ class ScoringService {
     }
   }
 
-  // Save stats to SharedPreferences
+  /// Save stats to SharedPreferences
   Future<void> _saveStats() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('gameStats', jsonEncode(_stats.toJson()));
+      await prefs.setString(_statsKey, jsonEncode(_stats.toJson()));
     } catch (e) {
       print('Error saving game stats: $e');
     }
   }
 
-  // Get current stats
-  GameStats get stats {
-    if (!_isInitialized) {
-      throw Exception(
-        'ScoringService not initialized. Call initialize() first.',
-      );
-    }
-    return _stats;
-  }
+  // Scoring and calculation methods
 
-  // Calculate score for a correct answer
+  /// Calculate score for an answer
   int calculatePoints({
     required bool isCorrect,
     required String gameMode,
@@ -214,14 +211,29 @@ class ScoringService {
     return basePoints;
   }
 
-  // Save result of a game session
+  /// Get performance feedback based on accuracy
+  String getPerformanceFeedback(double accuracy) {
+    if (accuracy >= 90) {
+      return 'Excellent work! Your memory is exceptional!';
+    } else if (accuracy >= 70) {
+      return 'Great job! Your memory skills are strong.';
+    } else if (accuracy >= 50) {
+      return 'Good effort! Keep practicing to improve further.';
+    } else {
+      return 'Keep trying! Memory skills improve with practice.';
+    }
+  }
+
+  // Game result and stats methods
+
+  /// Save result of a game session
   Future<void> saveGameResult({
     required String mode,
     required int score,
     required int correctAnswers,
     required int totalQuestions,
     required int maxStreak,
-    required int totalAttempts, // Add this parameter
+    required int totalAttempts,
   }) async {
     if (!_isInitialized) await initialize();
 
@@ -231,7 +243,7 @@ class ScoringService {
       score: score,
       correctAnswers: correctAnswers,
       totalQuestions: totalQuestions,
-      totalAttempts: totalAttempts, // Pass the total attempts
+      totalAttempts: totalAttempts,
       maxStreak: maxStreak,
     );
 
@@ -268,20 +280,19 @@ class ScoringService {
     _statsController.add(_stats);
   }
 
-  // Get performance feedback based on accuracy
-  String getPerformanceFeedback(double accuracy) {
-    if (accuracy >= 90) {
-      return 'Excellent work! Your memory is exceptional!';
-    } else if (accuracy >= 70) {
-      return 'Great job! Your memory skills are strong.';
-    } else if (accuracy >= 50) {
-      return 'Good effort! Keep practicing to improve further.';
-    } else {
-      return 'Keep trying! Memory skills improve with practice.';
+  /// Get current stats
+  GameStats get stats {
+    if (!_isInitialized) {
+      throw Exception(
+        'ScoringService not initialized. Call initialize() first.',
+      );
     }
+    return _stats;
   }
 
-  // Get leaderboard entries - this is the missing method that's causing the error
+  // Leaderboard methods
+
+  /// Get leaderboard entries
   Future<List<Map<String, dynamic>>> getLeaderboardEntries() async {
     if (!_isInitialized) await initialize();
 
@@ -315,7 +326,7 @@ class ScoringService {
     return entries;
   }
 
-  // Get high score for a specific game mode
+  /// Get high score for a specific game mode
   int getHighScore(String mode) {
     if (!_isInitialized) {
       throw Exception(
@@ -325,14 +336,16 @@ class ScoringService {
     return _stats.modeHighScores[mode] ?? 0;
   }
 
-  // Clear all stats (for testing/reset)
+  // Data management methods
+
+  /// Reset all stats (for testing/reset)
   Future<void> resetStats() async {
     _stats = GameStats();
     await _saveStats();
     _statsController.add(_stats);
   }
 
-  // Add new method to clear all saved data
+  /// Clear all saved data
   Future<void> clearAllData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -340,8 +353,8 @@ class ScoringService {
       // Clear leaderboard data
       await prefs.remove(_leaderboardKey);
 
-      // Clear game stats data - this was missing before
-      await prefs.remove('gameStats');
+      // Clear game stats data
+      await prefs.remove(_statsKey);
 
       // Reset the in-memory stats object
       _stats = GameStats();
@@ -355,7 +368,7 @@ class ScoringService {
     }
   }
 
-  // Dispose resources
+  /// Dispose resources
   void dispose() {
     _statsController.close();
   }

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'dart:math';
 
+/// Class to store a pair of related images with their metadata
 class ImagePair {
   final String firstImage;
   final String secondImage;
@@ -10,8 +11,8 @@ class ImagePair {
   final List<String> optionImages;
   final int hiddenImageIndex;
   final int difficulty;
-  final String? firstImagePrompt; // New property for the first image prompt
-  final String? secondImagePrompt; // New property for the second image prompt
+  final String? firstImagePrompt;
+  final String? secondImagePrompt;
 
   ImagePair({
     required this.firstImage,
@@ -20,21 +21,39 @@ class ImagePair {
     required this.optionImages,
     required this.hiddenImageIndex,
     required this.difficulty,
-    this.firstImagePrompt, // New property for the first image prompt
-    this.secondImagePrompt, // New property for the second image prompt
+    this.firstImagePrompt,
+    this.secondImagePrompt,
   });
 }
 
+/// Service to interact with the Stable Diffusion API for image generation
 class StableDiffusionService {
+  // API Configuration
   final String _baseUrl =
       'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0';
-
-  // Replace dynamic API key with hardcoded value
   String get _apiKey => '#';
 
+  /// Tests if the API is reachable and credentials are valid
+  Future<bool> testApiConnection() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('https://api-inference.huggingface.co/status'),
+            headers: {'Authorization': 'Bearer $_apiKey'},
+          )
+          .timeout(const Duration(seconds: 10));
+
+      debugPrint('API connection test status: ${response.statusCode}');
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (e) {
+      debugPrint('API connection test failed: $e');
+      return false;
+    }
+  }
+
+  /// Generates a single image from the provided prompt
   Future<String> generateImage(String prompt) async {
     try {
-      // Add detailed logging to track the request process
       debugPrint('Sending request to Hugging Face for prompt: $prompt');
 
       final response = await http
@@ -47,7 +66,6 @@ class StableDiffusionService {
             body: jsonEncode({'inputs': prompt}),
           )
           .timeout(
-            // Add timeout to prevent hanging on slow responses
             const Duration(seconds: 60),
             onTimeout: () {
               debugPrint('API request timed out after 60 seconds');
@@ -55,7 +73,6 @@ class StableDiffusionService {
             },
           );
 
-      // Log the response status and headers for debugging
       debugPrint('Response status: ${response.statusCode}');
       debugPrint('Response headers: ${response.headers}');
 
@@ -97,28 +114,14 @@ class StableDiffusionService {
     }
   }
 
-  // Add a test method to check API connectivity
-  Future<bool> testApiConnection() async {
-    try {
-      final response = await http
-          .get(
-            Uri.parse('https://api-inference.huggingface.co/status'),
-            headers: {'Authorization': 'Bearer $_apiKey'},
-          )
-          .timeout(const Duration(seconds: 10));
-
-      debugPrint('API connection test status: ${response.statusCode}');
-      return response.statusCode >= 200 && response.statusCode < 300;
-    } catch (e) {
-      debugPrint('API connection test failed: $e');
-      return false;
-    }
-  }
-
+  /// Internal wrapper around generateImage for consistency
   Future<String> _generateImage(String prompt) async {
     return await generateImage(prompt);
   }
 
+  // Image Pair Generation
+
+  /// Generates a pair of related images based on a concept for the memory game
   Future<ImagePair> generateImagePair(
     String concept, {
     int difficulty = 1,
@@ -179,6 +182,9 @@ class StableDiffusionService {
     }
   }
 
+  // Helper Methods for Image Generation
+
+  /// Generates similar but different images based on a target
   Future<List<String>> _generateSimilarImages({
     required String concept,
     required String targetImage,
@@ -231,6 +237,7 @@ class StableDiffusionService {
     return results;
   }
 
+  /// Alternative method for generating distractor images (unused but kept for reference)
   // ignore: unused_element
   Future<List<String>> _generateDistractors(
     String concept, {
@@ -297,6 +304,9 @@ class StableDiffusionService {
     return futures;
   }
 
+  // Utility Methods
+
+  /// Returns a list of concepts unrelated to the given concept
   List<String> _getUnrelatedConcepts(
     String concept, {
     required int count,
