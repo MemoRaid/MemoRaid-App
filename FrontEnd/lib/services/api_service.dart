@@ -4,8 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // Replace with your backend URL
-  static const String baseUrl =
-      'http://localhost:5000/api'; // Your local network IP // Your local network IP
+  static const String baseUrl ='http://localhost:5000/api'; // Your local network IP // Your local network IP
   // For Android emulator
   // static const String baseUrl = 'http://localhost:3000/api'; // For iOS simulator
 
