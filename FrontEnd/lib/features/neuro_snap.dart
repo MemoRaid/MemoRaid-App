@@ -1333,3 +1333,210 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+// Use 50/50 power-up to eliminate half of incorrect options
+  void _useFiftyFifty() {
+    if (!_powerUpAvailable || _isFiftyfiftyUsed || _selectedOption != null)
+      return;
+
+    // Get the correct answer
+    final String hiddenImageUrl = _imagePair!.hiddenImageIndex == 0
+        ? _imagePair!.firstImage
+        : _imagePair!.secondImage;
+
+    // Find index of correct answer
+    int correctIndex = _imagePair!.optionImages.indexOf(hiddenImageUrl);
+
+    // Choose which wrong answers to eliminate
+    List<int> wrongIndices =
+        List.generate(_imagePair!.optionImages.length, (i) => i)
+            .where((i) => i != correctIndex)
+            .toList();
+    wrongIndices.shuffle();
+
+    // Keep only half (rounded up) of wrong answers
+    int toRemove = wrongIndices.length ~/ 2;
+    List<int> indicesToEliminate = wrongIndices.sublist(0, toRemove);
+
+    setState(() {
+      _isFiftyfiftyUsed = true;
+      _powerUpAvailable = false;
+    });
+
+    // Show elimination animation
+    for (int index in indicesToEliminate) {
+      _flashOption(index);
+    }
+  }
+
+  void _flashOption(int index) {
+    // Flash the option that's being eliminated
+    // This creates a visual effect for the power-up
+  }
+
+  void _showHintToUser() {
+    if (_hintUsed || _selectedOption != null) return;
+
+    // Get the correct image prompt from the ImagePair object
+    String promptHint;
+    if (_imagePair != null &&
+        _imagePair!.firstImagePrompt != null &&
+        _imagePair!.secondImagePrompt != null) {
+      // Use the prompt from the hidden image
+      promptHint = _imagePair!.hiddenImageIndex == 0
+          ? _imagePair!.firstImagePrompt!
+          : _imagePair!.secondImagePrompt!;
+    } else {
+      // Fall back to regular hints if prompts aren't available
+      promptHint =
+          _hints.isNotEmpty ? _hints.first : "Look closely at the details";
+    }
+
+    setState(() {
+      _showHint = true;
+      _hintUsed = true;
+      // Store the prompt to show
+      _currentHintText = promptHint;
+    });
+
+    // Hide hint after 5 seconds
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          _showHint = false;
+        });
+      }
+    });
+  }
+
+  void _showFeedback(String message, bool isCorrect) {
+    // Update tracking variables
+    _lastFeedbackMessage = message;
+    _lastFeedbackTime = DateTime.now();
+
+    // First, clear any existing SnackBars to prevent stacking
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    // Then show the new message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isCorrect ? Colors.green : Colors.red,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timeRemainingNotifier.dispose();
+    _pulseAnimationController.dispose();
+    _confettiController.dispose();
+    _imageAnimationController.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Text(
+              widget.isDaily ? 'Daily Challenge' : '${widget.gameMode} Mode',
+            ),
+            if (widget.isDaily) ...[
+              const SizedBox(width: 8),
+              const Icon(Icons.star, color: AppColors.accentColor, size: 20),
+            ],
+          ],
+        ),
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.textLight,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryDark.withOpacity(0.9),
+              AppColors.primaryMedium,
+              AppColors.primaryLight,
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: _isLoading
+                    ? _buildLoadingState()
+                    : _imagePair == null
+                        ? _buildErrorState()
+                        : _buildGameContent(),
+              ),
+            ),
+            // Confetti overlay for celebrations
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: pi / 2, // straight down
+                emissionFrequency: 0.05,
+                numberOfParticles: 20,
+                maxBlastForce: 20,
+                minBlastForce: 5,
+                gravity: 0.2,
+              ),
+            ),
+            // Hint overlay
+            if (_showHint) _buildHintOverlay(),
+
+            // Answer reveal overlay
+            if (_isAnswerRevealing) _buildAnswerRevealOverlay(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.primaryDark.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentColor),
+              strokeWidth: 3,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Generating images...\nThis may take a moment',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
