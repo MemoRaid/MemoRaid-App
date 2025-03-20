@@ -128,8 +128,8 @@ class GameScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildGameCard(
                         context,
-                        title: "Reaction Test",
-                        subtitle: "Test your reaction speed",
+                        title: "Memory Master",
+                        subtitle: "Remember the Flipped cards ",
                         image: "lib/assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
