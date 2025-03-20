@@ -162,8 +162,7 @@ class ExerciseScreen extends StatelessWidget {
   Widget _buildExerciseCard({
     required BuildContext context,
     required String title,
-    required double
-        rating, // Keep this parameter to avoid changing method signatures
+    required double rating,
     bool isHighlighted = false,
     required VoidCallback onTap,
   }) {
@@ -227,39 +226,23 @@ class ExerciseScreen extends StatelessWidget {
               ),
             ),
 
-            // Title and category instead of rating
+            // Title only - no category text
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
                 padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: Color(0xFF0D3445),
-                        fontSize: 16,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
-                        height: 0.81,
-                        letterSpacing: 0.07,
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    // Replace stars with category text
-                    Text(
-                      "Brain Training",
-                      style: TextStyle(
-                        color: Color(0xFF0D3445),
-                        fontSize: 12,
-                        fontFamily: 'M PLUS 1',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: Color(0xFF0D3445),
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w700,
+                    height: 0.81,
+                    letterSpacing: 0.07,
+                  ),
                 ),
               ),
             ),
@@ -322,7 +305,7 @@ class ExerciseScreen extends StatelessWidget {
             ),
           ),
 
-          // Title and locked status
+          // Title and lock icon
           Positioned(
             left: 0,
             right: 0,
@@ -344,7 +327,7 @@ class ExerciseScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 12),
-                  // Keep the lock icon but remove stars
+                  // Keep just the lock icon and text
                   Row(
                     children: [
                       Icon(
