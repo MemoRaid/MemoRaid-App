@@ -2,7 +2,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
 
 class AudioService {
   final AudioPlayer _player = AudioPlayer();

@@ -29,6 +29,7 @@ dependencies:
   cached_network_image: ^3.2.3
   lottie: ^2.6.0
   flutter_animate: ^4.2.0
+  audio_session: ^0.1.16
 
 dev_dependencies:
   flutter_test:
