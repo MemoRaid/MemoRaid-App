@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Make sure this is the correct URL
+  baseURL: 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -61,9 +61,15 @@ export const uploadPhoto = async (file) => {
   }
 };
 
-export const submitMemory = async (memoryData) => {
+export const submitMemory = async (memory) => {
   try {
-    const response = await api.post('/memories', memoryData);
+    const response = await api.post('/memories', {
+      contributorId: memory.contributorId,
+      photoUrl: memory.photoUrl,
+      description: memory.description,
+      briefDescription: memory.briefDescription,
+      eventDate: memory.eventDate
+    });
     return response.data;
   } catch (error) {
     console.error('Error submitting memory:', error);
@@ -71,7 +77,7 @@ export const submitMemory = async (memoryData) => {
   }
 };
 
-// Function to get user info from token (if needed)
+// Function to get user info from token
 export const getUserFromToken = async (token) => {
   try {
     const response = await api.get(`/auth/verify-token/${token}`);

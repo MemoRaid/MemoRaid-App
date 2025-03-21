@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_flutter_app/features/gamescreen.dart';
-//import 'signup.dart';
-import 'login.dart';
 import 'signup.dart';
-import 'exercise.dart';
-// Import your LoginScreen file
+import 'login.dart';
 
 class LoginSignupScreen extends StatelessWidget {
   const LoginSignupScreen({super.key});
@@ -35,26 +31,10 @@ class LoginSignupScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Image
-            Positioned(
-              left: width * 0.11,
-              top: height * 0.20,
-              child: Container(
-                width: width * 0.8,
-                height: height * 0.3,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/loginsignup.png"),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-
             // Heading Text
             Positioned(
               left: width * 0.1,
-              top: height * 0.5,
+              top: height * 0.3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -95,13 +75,10 @@ class LoginSignupScreen extends StatelessWidget {
             // Sign Up Button
             Positioned(
               left: width * 0.05,
-              top: height * 0.7,
+              top: height * 0.5,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ExerciseScreen()),
-                  );
+                  Navigator.pushNamed(context, '/signup');
                 },
                 child: Container(
                   width: width * 0.9,
@@ -129,15 +106,10 @@ class LoginSignupScreen extends StatelessWidget {
             // Log In Button
             Positioned(
               left: width * 0.05,
-              top: height * 0.78,
+              top: height * 0.58,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            LoginScreen()), // Navigate to LoginScreen
-                  );
+                  Navigator.pushNamed(context, '/login');
                 },
                 child: Container(
                   width: width * 0.9,
@@ -166,7 +138,7 @@ class LoginSignupScreen extends StatelessWidget {
             // Terms and Conditions
             Positioned(
               left: width * 0.15,
-              top: height * 0.88,
+              top: height * 0.68,
               child: SizedBox(
                 width: width * 0.7,
                 child: Text.rich(

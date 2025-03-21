@@ -1,363 +1,228 @@
 const supabase = require('../config/supabase');
 const gemini = require('../config/gemini');
 
-// Generate questions for a memory
-exports.generateQuestions = async (req, res) => {
+// Internal generator function
+const generateQuestions = async (memory, contributorDetails) => {
     try {
-      const { memoryId } = req.params;
-      
-      // Get the memory details
-      const { data: memory, error: memoryError } = await supabase
-        .from('memories')
-        .select(`
-          id,
-          photo_url,
-          description,
-          event_date,
-          contributor_id,
-          memory_contributors (
-            name,
-            relationship_type,
-            user_id
-          )
-        `)
-        .eq('id', memoryId)
-        .single();
-      
-      if (memoryError) {
-        return res.status(404).json({ message: 'Memory not found' });
-      }
-      
-      // Using Gemini AI to generate questions
-      const prompt = `
-        Generate 5 questions about this memory that would help someone with amnesia recall details:
+        console.log('Starting question generation for memory:', memory.id);
         
-        Description: ${memory.description}
-        Relationship: This memory is from a ${memory.memory_contributors.relationship_type} named ${memory.memory_contributors.name}
-        ${memory.event_date ? `Date: This happened on ${memory.event_date}` : ''}
-        
-        For each question:
-        1. Make it specific to the description provided
-        2. Include a correct answer based on the description
-        3. Assign a difficulty level (1-5)
-        4. Assign points (5-20 based on difficulty)
-        
-        Format the response as JSON with this structure for each question:
-        {
-          "question": "Question text here?",
-          "correct_answer": "Correct answer here",
-          "difficulty": 3,
-          "points": 15
+        // Validate memory ID
+        if (!memory.id) {
+            throw new Error('Invalid memory ID');
         }
-      `;
-      
-      // Call Gemini API
-      const result = await gemini.generateContent(prompt);
-      let questionsData;
-      
-      try {
-        // Parse the response to get structured data
-        const responseText = result.response.text();
-        const jsonStr = responseText.substring(
-          responseText.indexOf('['),
-          responseText.lastIndexOf(']') + 1
-        );
-        questionsData = JSON.parse(jsonStr);
-      } catch (parseError) {
-        console.error('Error parsing Gemini response:', parseError);
-        return res.status(500).json({ 
-          message: 'Failed to parse AI-generated questions', 
-          error: parseError.message 
-        });
-      }
-      
-      // Save generated questions to database
-      const questionsToInsert = questionsData.map(q => ({
-        memory_id: memoryId,
-        question: q.question,
-        correct_answer: q.correct_answer,
-        points: q.points
-      }));
-      
-      const { data: questions, error: insertError } = await supabase
-        .from('questions')
-        .insert(questionsToInsert)
-        .select();
-      
-      if (insertError) {
-        return res.status(500).json({ 
-          message: 'Error saving generated questions', 
-          error: insertError.message 
-        });
-      }
-      
-      res.status(201).json({
-        message: 'Questions generated successfully',
-        questions
-      });
-    } catch (error) {
-      console.error('Generate questions error:', error);
-      res.status(500).json({ 
-        message: 'Server error generating questions', 
-        error: error.message 
-      });
-    }
-};
 
-// Get questions for a memory
-exports.getMemoryQuestions = async (req, res) => {
-    try {
-      const { memoryId } = req.params;
-      
-      const { data: questions, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('memory_id', memoryId);
-      
-      if (error) {
-        return res.status(500).json({ 
-          message: 'Error fetching questions', 
-          error: error.message 
-        });
-      }
-      
-      res.status(200).json({
-        questions
-      });
-    } catch (error) {
-      console.error('Get questions error:', error);
-      res.status(500).json({ 
-        message: 'Server error fetching questions', 
-        error: error.message 
-      });
-    }
-};
+        const model = await gemini.getModel();
 
-// Get daily questions for a user
-exports.getDailyQuestions = async (req, res) => {
-    try {
-      const userId = req.user.id;
-      
-      // Get a random memory for this user that has questions
-      const { data: memories, error: memoriesError } = await supabase
-        .from('memories')
-        .select(`
-          id,
-          photo_url,
-          description,
-          memory_contributors!inner (
-            id,
-            user_id
-          )
-        `)
-        .eq('memory_contributors.user_id', userId)
-        .order('created_at', { ascending: false });
-      
-      if (memoriesError) {
-        return res.status(500).json({ 
-          message: 'Error fetching memories', 
-          error: memoriesError.message 
-        });
-      }
-      
-      if (!memories.length) {
-        return res.status(404).json({ message: 'No memories found for this user' });
-      }
-      
-      // Get a random memory from the list
-      const randomMemory = memories[Math.floor(Math.random() * memories.length)];
-      
-      // Get questions for this memory
-      const { data: questions, error: questionsError } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('memory_id', randomMemory.id)
-        .limit(5);
-      
-      if (questionsError) {
-        return res.status(500).json({ 
-          message: 'Error fetching questions', 
-          error: questionsError.message 
-        });
-      }
-      
-      // If no questions, generate them
-      if (!questions.length) {
-        // Call the generate questions function
-        // This would typically be a direct function call, but for API purposes we'll return a message
-        return res.status(200).json({
-          message: 'No questions available yet. Need to generate questions for this memory.',
-          memory: randomMemory,
-          needsQuestions: true
-        });
-      }
-      
-      res.status(200).json({
-        memory: randomMemory,
-        questions
-      });
-    } catch (error) {
-      console.error('Get daily questions error:', error);
-      res.status(500).json({ 
-        message: 'Server error fetching daily questions', 
-        error: error.message 
-      });
-    }
-};
+        const promptText = `Generate 5 multiple-choice questions to help an amnesia patient recall this memory. Return ONLY a JSON array.
 
-// Submit user's answer to a question
-exports.submitAnswer = async (req, res) => {
-    try {
-      const { questionId } = req.params;
-      const { answer } = req.body;
-      const userId = req.user.id;
-      
-      if (!answer) {
-        return res.status(400).json({ message: 'Answer is required' });
-      }
-      
-      // Get the question to check against correct answer
-      const { data: question, error: questionError } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('id', questionId)
-        .single();
-      
-      if (questionError) {
-        return res.status(404).json({ message: 'Question not found' });
-      }
-      
-      // Simple check if answer is correct
-      // In a real app, you'd use AI for more sophisticated answer checking
-      const correctKeywords = question.correct_answer.toLowerCase().split(' ');
-      const userKeywords = answer.toLowerCase().split(' ');
-      
-      // Check if answer contains key words from correct answer
-      // This is a very simple algorithm - in production you'd use better comparison
-      const matchCount = correctKeywords.filter(word => 
-        userKeywords.some(userWord => userWord.includes(word) || word.includes(userWord))
-      ).length;
-      
-      const accuracy = matchCount / correctKeywords.length;
-      const isCorrect = accuracy >= 0.5; // Consider it correct if 50% of keywords match
-      
-      // Save the user's answer
-      const { data: savedAnswer, error: saveError } = await supabase
-        .from('user_answers')
-        .insert([
-          {
-            user_id: userId,
-            question_id: questionId,
-            answer,
-            is_correct: isCorrect
-          }
-        ])
-        .select();
-      
-      if (saveError) {
-        return res.status(500).json({ 
-          message: 'Error saving answer', 
-          error: saveError.message 
-        });
-      }
-      
-      // If correct, award points
-      if (isCorrect) {
-        await supabase
-          .from('user_rewards')
-          .insert([
-            {
-              user_id: userId,
-              points: question.points,
-              reward_type: 'question_correct'
+Context:
+- Description: ${memory.description}
+- Person: ${contributorDetails.name} (${contributorDetails.relationship_type})
+${memory.event_date ? `- Date: ${memory.event_date}` : ''}
+
+Requirements:
+- Questions should help patient gradually recall details
+- Start with simpler questions about visible elements
+- Progress to more specific memory details
+- Each question must have exactly 4 options
+- Last option must always be "I don't remember"
+- Wrong options should be plausible but clearly incorrect
+- Difficulty increases progressively (1-5)
+
+Format response exactly like this:
+[{
+    "question": "Who can you see in this photo?",
+    "options": [
+        "Mom and Dad",
+        "Only Dad",
+        "The whole family",
+        "I don't remember"
+    ],
+    "correct_option_index": 0,
+    "difficulty": 1,
+    "points": 5
+}]`;
+
+        const result = await model.generateContent([promptText]);
+        const response = await result.response;
+        let text = response.text();
+        
+        // Clean up and parse JSON
+        text = text.replace(/```json\n|\n```/g, '').trim();
+        
+        try {
+            const questions = JSON.parse(text);
+            
+            // Enhanced validation
+            if (!Array.isArray(questions) || questions.length === 0) {
+                throw new Error('Invalid question format received');
             }
-          ]);
-      }
-      
-      res.status(200).json({
-        message: isCorrect ? 'Correct answer!' : 'Incorrect answer',
-        result: {
-          isCorrect,
-          points: isCorrect ? question.points : 0,
-          correctAnswer: question.correct_answer
+
+            // More detailed validation with specific error messages
+            questions.forEach((q, index) => {
+                const errors = [];
+                if (!q.question) errors.push('Question text missing');
+                if (!Array.isArray(q.options)) errors.push('Options must be an array');
+                if (q.options.length !== 4) errors.push('Must have exactly 4 options');
+                if (q.options[3] !== "I don't remember") errors.push('Last option must be "I don\'t remember"');
+                if (q.correct_option_index === undefined) errors.push('Correct option index missing');
+                
+                if (errors.length > 0) {
+                    throw new Error(`Question ${index + 1} validation failed: ${errors.join(', ')}`);
+                }
+            });
+
+            // Format questions for database insertion
+            const formattedQuestions = questions.map(q => ({
+                memory_id: memory.id,
+                patient_id: memory.patient_id,
+                question_text: q.question,
+                options: JSON.stringify(q.options), // Convert to JSON string
+                correct_option_index: parseInt(q.correct_option_index),
+                correct_answer: q.options[q.correct_option_index], // Add this line
+                difficulty_level: Math.min(Math.max(parseInt(q.difficulty), 1), 5),
+                points: Math.min(Math.max(parseInt(q.points), 5), 20)
+            }));
+
+            // Save to database with better error handling
+            const { data: savedQuestions, error } = await supabase
+                .from('questions')
+                .insert(formattedQuestions)
+                .select();
+
+            if (error) {
+                console.error('Database insertion error:', error);
+                throw new Error(`Failed to save questions: ${error.message}`);
+            }
+
+            return savedQuestions;
+
+        } catch (parseError) {
+            console.error('Question generation error:', parseError);
+            throw new Error('Failed to generate valid questions: ' + parseError.message);
         }
-      });
+
     } catch (error) {
-      console.error('Submit answer error:', error);
-      res.status(500).json({ 
-        message: 'Server error submitting answer', 
-        error: error.message 
-      });
+        console.error('Question generation error:', error);
+        throw error;
     }
 };
 
-// Get user's progress and statistics
-exports.getUserProgress = async (req, res) => {
+// Get questions for a specific memory
+const getMemoryQuestions = async (req, res) => {
     try {
-      const userId = req.user.id;
-      
-      // Get total correct answers
-      const { count: correctCount, error: correctError } = await supabase
-        .from('user_answers')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('is_correct', true);
-      
-      if (correctError) {
-        return res.status(500).json({ 
-          message: 'Error fetching correct answers', 
-          error: correctError.message 
-        });
-      }
-      
-      // Get total answers
-      const { count: totalCount, error: totalError } = await supabase
-        .from('user_answers')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
-      
-      if (totalError) {
-        return res.status(500).json({ 
-          message: 'Error fetching total answers', 
-          error: totalError.message 
-        });
-      }
-      
-      // Get total points
-      const { data: rewards, error: rewardsError } = await supabase
-        .from('user_rewards')
-        .select('points')
-        .eq('user_id', userId);
-      
-      if (rewardsError) {
-        return res.status(500).json({ 
-          message: 'Error fetching rewards', 
-          error: rewardsError.message 
-        });
-      }
-      
-      const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
-      
-      const accuracyRate = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
-      
-      res.status(200).json({
-        progress: {
-          correctAnswers: correctCount,
-          totalAnswers: totalCount,
-          accuracyRate: `${accuracyRate}%`,
-          totalPoints: totalPoints
+        const { memory_id } = req.params;
+        // TESTING ONLY: Use query parameter instead of auth
+        const patient_id = req.query.patient_id || (req.user && req.user.id);
+         
+        if (!patient_id) {
+            return res.status(400).json({ error: 'Patient ID is required' });
         }
-      });
+        // First verify memory belongs to patient
+        const { data: memory, error: memoryError } = await supabase
+            .from('memories')
+            .select('id')
+            .eq('id', memory_id)
+            .eq('patient_id', patient_id)
+            .single();
+
+        if (memoryError || !memory) {
+            return res.status(403).json({ 
+                error: 'Memory not found or access denied' 
+            });
+        }
+
+        // Update the questions query section
+        const { data: questions, error } = await supabase
+            .from('questions')
+            .select(`
+                id,
+                question_text,
+                options,
+                difficulty_level,
+                points,
+                memory_id,
+                correct_option_index,  
+                memories (
+                    photo_url,
+                    brief_description,
+                    description    
+                )
+            `)
+            .eq('memory_id', memory_id)
+            .eq('patient_id', patient_id)  // Add this line
+            .order('difficulty_level', { ascending: true });
+        
+        if (error) throw error;
+
+        // Update the formatting section
+        const formattedQuestions = questions.map(q => ({
+            id: q.id,
+            question: q.question_text,
+            options: JSON.parse(q.options),
+            difficulty: q.difficulty_level,
+            points: q.points,
+            memory: {
+                id: q.memory_id,
+                photo_url: q.memories.photo_url,
+                brief_description: q.memories.brief_description
+            },
+            correct_option_index: q.correct_option_index
+        }));
+
+        res.json({ 
+            success: true,
+            questions: formattedQuestions,
+            total: formattedQuestions.length
+        });
     } catch (error) {
-      console.error('Get user progress error:', error);
-      res.status(500).json({ 
-        message: 'Server error fetching user progress', 
-        error: error.message 
-      });
+        console.error('Error fetching memory questions:', error);
+        res.status(500).json({ error: error.message });
     }
 };
-  
 
-  
+// Get daily practice questions
+const getDailyQuestions = async (req, res) => {
+    try {
+        const patient_id = req.user.id;
 
-  
+        // Get random selection of questions from patient's memories
+        const { data: questions, error } = await supabase
+            .from('questions')
+            .select(`
+                id,
+                question_text,
+                options,
+                difficulty_level,
+                points,
+                memory_id,
+                memories (
+                    photo_url,
+                    brief_description
+                )
+            `)
+            .eq('patient_id', patient_id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        if (error) throw error;
+
+        const formattedQuestions = questions.map(q => ({
+            ...q,
+            options: JSON.parse(q.options),
+            correct_answer: q.correct_answer || q.options[q.correct_option_index]
+        }));
+
+        res.json({ questions: formattedQuestions });
+    } catch (error) {
+        console.error('Error fetching daily questions:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = {
+    getMemoryQuestions,
+    getDailyQuestions,
+    generateQuestions  // Your existing function
+};
+

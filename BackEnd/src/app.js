@@ -7,11 +7,20 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration - Important to allow requests from your frontend
+// Update existing CORS configuration for development
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.251.135:3000'],
-  credentials: true
+  origin: '*',  // Allow all origins during development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Add preflight handler for OPTIONS requests
+app.options('*', (req, res) => {
+  res.status(204).end();
+});
 
 // Middleware
 app.use(express.json());
@@ -20,10 +29,12 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 const memoriesRoutes = require('./routes/memories');
 const questionsRoutes = require('./routes/questions');
+const quizRoutes = require('./routes/quiz');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/memories', memoriesRoutes);
 app.use('/api/questions', questionsRoutes);
+app.use('/api/quiz-results', quizRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

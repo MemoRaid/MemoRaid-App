@@ -24,3 +24,6 @@ coverage/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# Service account fileE
+service-account.json

@@ -1,7 +1,11 @@
+// In login.dart
 import 'package:flutter/material.dart';
-import 'package:my_flutter_app/features/loginorsignup.dart';
-import 'signup.dart';
-import 'homescreen01.dart';
+import 'package:provider/provider.dart';
+import '../../memoraid_features/services/auth_service.dart';
+import 'share_link.dart'; // They're in the same folder now
+import 'signup.dart'; // This should work as they're in the same directory
+// Import home screen
+// import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,12 +18,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+    final authService = Provider.of<AuthService>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,14 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LoginSignupScreen(),
-              ),
-            );
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Container(
@@ -44,10 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              const Color(0xFF0D3445),
-            ],
+            colors: [Colors.white, const Color(0xFF0D3445)],
           ),
         ),
         child: SingleChildScrollView(
@@ -56,9 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               SizedBox(height: height * 0.01),
 
-              // Logo
-              Image.asset("assets/images/login.png",
-                  width: width * 0.6, height: height * 0.25),
+              // Logo - Make sure to copy this image to your assets folder
+              Image.asset(
+                "assets/images/login.png",
+                width: width * 0.6,
+                height: height * 0.25,
+              ),
 
               SizedBox(height: height * 0.002),
 
@@ -138,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Implement Forgot Password Logic
+                      // Forgot Password Logic
                     },
                     child: Text(
                       "Forgot Password?",
@@ -154,32 +153,59 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: height * 0.02),
 
               // Log In Button
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
-                },
-                child: Container(
-                  width: width * 0.8,
-                  height: height * 0.06,
-                  decoration: BoxDecoration(
-                    color: Color(0xFF0D3445),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Log In",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+              _isLoading
+                  ? CircularProgressIndicator(color: Color(0xFF0D3445))
+                  : GestureDetector(
+                      onTap: () async {
+                        if (_emailController.text.isEmpty ||
+                            _passwordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Please fill all fields")),
+                          );
+                          return;
+                        }
+
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        bool success = await authService.login(
+                          _emailController.text,
+                          _passwordController.text,
+                        );
+
+                        setState(() {
+                          _isLoading = false;
+                        });
+
+                        if (success) {
+                          Navigator.pushReplacementNamed(context, '/home');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Invalid email or password")),
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: width * 0.8,
+                        height: height * 0.06,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF0D3445),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Log In",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
 
               SizedBox(height: height * 0.02),
 
@@ -200,39 +226,51 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         // Google Button
                         GestureDetector(
-                          onTap: () {
-                            // TODO: Implement Google Login Logic
+                          onTap: () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+
+                            bool success = await authService.signInWithGoogle();
+
+                            setState(() {
+                              _isLoading = false;
+                            });
+
+                            if (success) {
+                              Navigator.pushReplacementNamed(context, '/home');
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Google sign-in failed"),
+                                ),
+                              );
+                            }
                           },
                           child: CircleAvatar(
                             backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            child: Image.asset("assets/images/google.png",
-                                width: 25),
+                            child: Image.asset(
+                              "assets/images/google.png",
+                              width: 25,
+                            ),
                           ),
                         ),
                         SizedBox(width: 15),
 
-                        // Facebook Button
-                        GestureDetector(
-                          onTap: () {
-                            // TODO: Implement Facebook Login Logic
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            child: Image.asset("assets/images/facebook.png",
-                                width: 25),
+                        // Other social login buttons (disabled for now)
+                        CircleAvatar(
+                          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          child: Image.asset(
+                            "assets/images/facebook.png",
+                            width: 25,
                           ),
                         ),
                         SizedBox(width: 15),
-
-                        // Apple Button
-                        GestureDetector(
-                          onTap: () {
-                            // TODO: Implement Apple Login Logic
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            child: Image.asset("assets/images/apple.png",
-                                width: 25),
+                        CircleAvatar(
+                          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          child: Image.asset(
+                            "assets/images/apple.png",
+                            width: 25,
                           ),
                         ),
                       ],
@@ -252,9 +290,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => SignUpScreen(),
-                        ),
+                        MaterialPageRoute(builder: (context) => SignUpScreen()),
                       );
                     },
                     child: Text(

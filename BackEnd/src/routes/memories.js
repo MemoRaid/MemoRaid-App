@@ -14,7 +14,11 @@ router.post('/upload', upload.single('photo'), memoryController.uploadPhoto);
 router.post('/', memoryController.createMemory);
 
 // Get memories for a user
-router.get('/user/:userId', auth, memoryController.getUserMemories);
+//router.get('/user/:userId', auth, memoryController.getUserMemories);
+
+// Get memories for a user
+// In memories.js - Removed auth middleware temporarily
+router.get('/user/:userId', memoryController.getUserMemories);
 
 // Get a single memory
 router.get('/:memoryId', auth, memoryController.getMemory);

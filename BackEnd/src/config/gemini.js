@@ -1,18 +1,40 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const dotenv = require('dotenv');
+require('dotenv').config();
 
-dotenv.config();
+let model = null;
 
-// Check for API key
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error('GEMINI_API_KEY is required in .env file');
-}
+const initializeGemini = async () => {
+    try {
+        // Use API key from environment variables
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error('GEMINI_API_KEY not found in environment variables');
+        }
 
-// Initialize the Gemini API
-const genAI = new GoogleGenerativeAI(apiKey);
+        // Initialize Gemini with API key
+        const genAI = new GoogleGenerativeAI(apiKey);
 
-// Get the model
-const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+        // Get model
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-pro",
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8192,
+            }
+        });
 
-module.exports = model;
+        return model;
+    } catch (error) {
+        console.error('Gemini initialization error:', error);
+        throw error;
+    }
+};
+
+module.exports = {
+    getModel: async () => {
+        if (!model) {
+            model = await initializeGemini();
+        }
+        return model;
+    }
+};

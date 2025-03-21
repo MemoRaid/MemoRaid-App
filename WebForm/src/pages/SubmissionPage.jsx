@@ -41,11 +41,11 @@ const SubmissionPage = () => {
           } catch (err) {
             console.log("Error fetching user from token, using demo mode");
             // For testing, set a demo userId
-            setUserId("00000000-0000-0000-0000-000000000000");
+            setUserId("11111111-1111-1111-1111-111111111111");
           }
         } else {
           // For testing without token
-          setUserId("00000000-0000-0000-0000-000000000000");
+          setUserId("11111111-1111-1111-1111-111111111111");
         }
         setLoading(false);
       } catch (err) {
