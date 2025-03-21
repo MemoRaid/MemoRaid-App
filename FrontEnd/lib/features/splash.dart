@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'loginorsignup.dart';
+import '../memoraid_features/auth/loginorsignup.dart';
+// Import the login or signup screen
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
