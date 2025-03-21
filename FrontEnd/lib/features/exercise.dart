@@ -103,7 +103,7 @@ class ExerciseScreen extends StatelessWidget {
                                 rating: 4.6,
                                 isHighlighted: true,
                                 imagePath:
-                                    'lib/assets/images/hand.webp', // Add hand image
+                                    'assets/images/hand.webp', // Add hand image
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -119,7 +119,7 @@ class ExerciseScreen extends StatelessWidget {
                                 title: 'Cross Body Movement',
                                 rating: 4.4,
                                 imagePath:
-                                    'lib/assets/images/CrossBody.webp', // Add specific image
+                                    'assets/images/CrossBody.webp', // Add specific image
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -135,7 +135,7 @@ class ExerciseScreen extends StatelessWidget {
                                 title: 'Brain Boosting Yoga',
                                 rating: 4.2,
                                 imagePath:
-                                    'lib/assets/images/yoga.jpeg', // Add yoga image
+                                    'assets/images/yoga.jpeg', // Add yoga image
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -296,7 +296,7 @@ class ExerciseScreen extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                    'lib/assets/images/relax.png'), // Update with your image path
+                    'assets/images/relax.png'), // Update with your image path
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5),

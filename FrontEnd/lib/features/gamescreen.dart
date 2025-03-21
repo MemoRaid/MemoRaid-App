@@ -86,7 +86,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Path Quest",
                         subtitle: "Remember the path to win",
-                        image: "lib/assets/images/memoraid.png",
+                        image: "assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -100,7 +100,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Daily Task Sequencer",
                         subtitle: "Reorder the jumbled tasks",
-                        image: "lib/assets/images/memoraid.png",
+                        image: "assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -115,7 +115,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Spot the Difference",
                         subtitle: "Find whats different on the image",
-                        image: "lib/assets/images/memoraid.png",
+                        image: "assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -130,7 +130,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Memory Master",
                         subtitle: "Remember the Flipped cards ",
-                        image: "lib/assets/images/memoraid.png",
+                        image: "assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -145,7 +145,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Neuro Snap",
                         subtitle: "Test your memory skills",
-                        image: "lib/assets/images/memoraid.png",
+                        image: "assets/images/memoraid.png",
                         onTap: () {
                           Navigator.push(
                             context,

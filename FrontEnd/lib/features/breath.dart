@@ -156,7 +156,7 @@ class _BreathExerciseScreenState extends State<BreathExerciseScreen>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: const DecorationImage(
-                            image: AssetImage("lib/assets/images/memoraid.png"),
+                            image: AssetImage("assets/images/memoraid.png"),
                             fit: BoxFit.cover,
                           ),
                           boxShadow: [

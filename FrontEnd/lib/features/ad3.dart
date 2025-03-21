@@ -42,7 +42,7 @@ class AdScreen3 extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(height: height * 0.03), // Add some space at the top
-                  Image.asset("lib/assets/images/receivemoney.png",
+                  Image.asset("assets/images/receivemoney.png",
                       width: width * 0.6),
                   SizedBox(height: height * 0.03),
                   Text(

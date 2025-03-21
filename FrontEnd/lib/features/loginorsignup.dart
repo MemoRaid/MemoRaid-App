@@ -44,7 +44,7 @@ class LoginSignupScreen extends StatelessWidget {
                 height: height * 0.3,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage("lib/assets/images/loginsignup.png"),
+                    image: AssetImage("assets/images/loginsignup.png"),
                     fit: BoxFit.contain,
                   ),
                 ),

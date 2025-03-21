@@ -47,7 +47,7 @@ class AdScreen2 extends StatelessWidget {
 
                   // Main Image
                   Image.asset(
-                    "lib/assets/images/sendmoney.png", // Update path to match the previous one
+                    "assets/images/sendmoney.png", // Update path to match the previous one
                     width: width * 0.6,
                   ),
 

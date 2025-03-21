@@ -2,7 +2,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
 
 class AudioService {
   final AudioPlayer _player = AudioPlayer();
@@ -52,25 +51,25 @@ class AudioService {
       // Using direct path mapping for each story with audio
       if (storyTitle == 'The Family Reunion') {
         developer.log('Loading Story1.mp3');
-        await _player.setAsset('lib/assets/audio/Story1.mp3');
+        await _player.setAsset('assets/audio/Story1.mp3');
       } else if (storyTitle == 'The World Traveler') {
         developer.log('Loading Story2.mp3');
-        await _player.setAsset('lib/assets/audio/Story2.mp3');
+        await _player.setAsset('assets/audio/Story2.mp3');
       } else if (storyTitle == 'The Mansion Mystery') {
         developer.log('Loading Story3.mp3');
-        await _player.setAsset('lib/assets/audio/Story3.mp3');
+        await _player.setAsset('assets/audio/Story3.mp3');
       } else if (storyTitle == 'The Battle of Rivers Crossing') {
         developer.log('Loading Story5.mp3');
-        await _player.setAsset('lib/assets/audio/Story5.mp3');
+        await _player.setAsset('assets/audio/Story5.mp3');
       } else if (storyTitle == 'Arctic Expedition Crisis') {
         developer.log('Loading Story7.mp3');
-        await _player.setAsset('lib/assets/audio/Story7.mp3');
+        await _player.setAsset('assets/audio/Story7.mp3');
       } else if (storyTitle == 'The Mars Mission Anomaly') {
         developer.log('Loading Story8.mp3');
-        await _player.setAsset('lib/assets/audio/Story8.mp3');
+        await _player.setAsset('assets/audio/Story8.mp3');
       } else if (storyTitle == 'The Rainforest Expedition') {
         developer.log('Loading Story9.mp3');
-        await _player.setAsset('lib/assets/audio/Story9.mp3');
+        await _player.setAsset('assets/audio/Story9.mp3');
       } else {
         // Use online sample for other stories
         developer.log('No audio mapping for $storyTitle, using online sample');
@@ -97,19 +96,19 @@ class AudioService {
     try {
       // Use the same audio path mapping logic as in loadStoryAudio
       if (storyTitle == 'The Family Reunion') {
-        await tempPlayer.setAsset('lib/assets/audio/Story1.mp3');
+        await tempPlayer.setAsset('assets/audio/Story1.mp3');
       } else if (storyTitle == 'The World Traveler') {
-        await tempPlayer.setAsset('lib/assets/audio/Story2.mp3');
+        await tempPlayer.setAsset('assets/audio/Story2.mp3');
       } else if (storyTitle == 'The Mansion Mystery') {
-        await tempPlayer.setAsset('lib/assets/audio/Story3.mp3');
+        await tempPlayer.setAsset('assets/audio/Story3.mp3');
       } else if (storyTitle == 'The Battle of Rivers Crossing') {
-        await tempPlayer.setAsset('lib/assets/audio/Story5.mp3');
+        await tempPlayer.setAsset('assets/audio/Story5.mp3');
       } else if (storyTitle == 'Arctic Expedition Crisis') {
-        await tempPlayer.setAsset('lib/assets/audio/Story7.mp3');
+        await tempPlayer.setAsset('assets/audio/Story7.mp3');
       } else if (storyTitle == 'The Mars Mission Anomaly') {
-        await tempPlayer.setAsset('lib/assets/audio/Story8.mp3');
+        await tempPlayer.setAsset('assets/audio/Story8.mp3');
       } else if (storyTitle == 'The Rainforest Expedition') {
-        await tempPlayer.setAsset('lib/assets/audio/Story9.mp3');
+        await tempPlayer.setAsset('assets/audio/Story9.mp3');
       }
 
       // Get the duration and store it

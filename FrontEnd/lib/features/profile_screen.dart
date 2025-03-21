@@ -163,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(60),
                 child: _profileImage == null
                     ? Image.asset(
-                        "lib/assets/images/kushen.png",
+                        "assets/images/kushen.png",
                         fit: BoxFit.cover,
                       )
                     : Image.file(

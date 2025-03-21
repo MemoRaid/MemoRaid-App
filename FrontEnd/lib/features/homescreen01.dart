@@ -106,7 +106,7 @@ class HomeScreen extends StatelessWidget {
               buildActivityCard(
                 title: "General Memory Assessment",
                 buttonText: "Test your memory now",
-                image: "lib/assets/images/brainperson.png",
+                image: "assets/images/brainperson.png",
                 onTap: () {
                   Navigator.push(
                     context,
