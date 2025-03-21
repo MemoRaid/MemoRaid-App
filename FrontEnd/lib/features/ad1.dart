@@ -47,7 +47,7 @@ class AdScreen extends StatelessWidget {
 
                   // Main Image
                   Image.asset(
-                    "lib/assets/images/Trust.png",
+                    "assets/images/Trust.png",
                     width: width * 0.6,
                   ),
 

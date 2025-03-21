@@ -183,7 +183,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundImage: AssetImage("lib/assets/images/no.png"),
+                backgroundImage: AssetImage("assets/images/no.png"),
               ),
               SizedBox(width: 15),
               Column(

@@ -66,7 +66,7 @@ class HomeScreen2 extends StatelessWidget {
                   title: "Memory Games",
                   subtitle:
                       "Enhance your cognitive abilities through interactive games",
-                  image: 'lib/assets/images/patient.png',
+                  image: 'assets/images/patient.png',
                   icon: Icons.sports_esports,
                   onTap: () => Navigator.push(
                     context,
@@ -90,7 +90,7 @@ class HomeScreen2 extends StatelessWidget {
                         context,
                         title: "Story\nRecall Activity",
                         icon: Icons.auto_stories,
-                        image: 'lib/assets/images/story.png',
+                        image: 'assets/images/story.png',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -104,7 +104,7 @@ class HomeScreen2 extends StatelessWidget {
                         context,
                         title: "Excercises",
                         icon: Icons.book,
-                        image: 'lib/assets/images/reminder.png',
+                        image: 'assets/images/reminder.png',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -128,7 +128,7 @@ class HomeScreen2 extends StatelessWidget {
                   context,
                   title: "Calm Mind Exercises",
                   subtitle: "Improve focus and mental clarity",
-                  image: 'lib/assets/images/mind.png',
+                  image: 'assets/images/mind.png',
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -210,7 +210,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundImage: AssetImage("lib/assets/images/memoraid.png"),
+              backgroundImage: AssetImage("assets/images/memoraid.png"),
             ),
             SizedBox(width: 10),
             Column(
@@ -387,7 +387,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (!isUser)
-                        _buildAvatar("lib/assets/images/memoraid.png"),
+                        _buildAvatar("assets/images/memoraid.png"),
                       SizedBox(width: 8),
                       Flexible(
                         child: Container(
@@ -434,7 +434,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       SizedBox(width: 8),
-                      if (isUser) _buildAvatar("lib/assets/images/no.png"),
+                      if (isUser) _buildAvatar("assets/images/no.png"),
                     ],
                   ),
                 ),
@@ -447,7 +447,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                _buildAvatar("lib/assets/images/memoraid.png"),
+                _buildAvatar("assets/images/memoraid.png"),
                 SizedBox(width: 8),
                 SpinKitThreeBounce(
                   color: Colors.white,

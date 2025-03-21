@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: height * 0.01),
 
               // Logo
-              Image.asset("lib/assets/images/login.png",
+              Image.asset("assets/images/login.png",
                   width: width * 0.6, height: height * 0.25),
 
               SizedBox(height: height * 0.002),
@@ -205,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: CircleAvatar(
                             backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            child: Image.asset("lib/assets/images/google.png",
+                            child: Image.asset("assets/images/google.png",
                                 width: 25),
                           ),
                         ),
@@ -218,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: CircleAvatar(
                             backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            child: Image.asset("lib/assets/images/facebook.png",
+                            child: Image.asset("assets/images/facebook.png",
                                 width: 25),
                           ),
                         ),
@@ -231,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: CircleAvatar(
                             backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            child: Image.asset("lib/assets/images/apple.png",
+                            child: Image.asset("assets/images/apple.png",
                                 width: 25),
                           ),
                         ),

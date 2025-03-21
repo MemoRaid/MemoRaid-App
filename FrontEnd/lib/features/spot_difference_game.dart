@@ -79,24 +79,24 @@ class _SpotDifferenceGameState extends State<SpotDifferenceGame>
   // Image pairs - you would replace these with your actual images
   final List<List<String>> _imagePairs = [
     [
-      'lib/assets/images/crow2.jpeg',
-      'lib/assets/images/crow1.jpeg',
+      'assets/images/crow2.jpeg',
+      'assets/images/crow1.jpeg',
     ],
     [
-      'lib/assets/images/plane2.jpeg',
-      'lib/assets/images/plane1.jpeg',
+      'assets/images/plane2.jpeg',
+      'assets/images/plane1.jpeg',
     ],
     [
-      'lib/assets/images/dog2.jpeg',
-      'lib/assets/images/dog1.jpeg',
+      'assets/images/dog2.jpeg',
+      'assets/images/dog1.jpeg',
     ],
     [
-      'lib/assets/images/cow2.jpeg',
-      'lib/assets/images/cow1.jpeg',
+      'assets/images/cow2.jpeg',
+      'assets/images/cow1.jpeg',
     ],
     [
-      'lib/assets/images/boy2.jpeg',
-      'lib/assets/images/boy1.jpeg',
+      'assets/images/boy2.jpeg',
+      'assets/images/boy1.jpeg',
     ],
   ];
 
