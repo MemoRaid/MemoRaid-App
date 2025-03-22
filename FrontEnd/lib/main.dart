@@ -40,7 +40,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(
-            create: (_) => authService), // Use initialized instance
+            create: (_) => AuthService()), // Use initialized instance
       ],
       child: const MyApp(),
     ),
