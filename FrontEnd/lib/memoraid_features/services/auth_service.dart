@@ -173,4 +173,11 @@ class AuthService extends ChangeNotifier {
       return false;
     }
   }
+
+  // Add this method to your existing AuthService class
+  void checkSession(BuildContext context) {
+    if (!_isAuthenticated) {
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
 }

@@ -105,12 +105,7 @@ class AdScreen3 extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  );
-
-                  // You can modify this to navigate to the next screen
+                  Navigator.pushReplacementNamed(context, '/share_link');
                 },
                 child: Container(
                   width: width * 0.9,

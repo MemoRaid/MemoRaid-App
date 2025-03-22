@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'bottomnavbar.dart';
 import 'homescreen02.dart';
-import 'package:my_flutter_app/features/memories/memory_list_screen.dart';
+import 'memories/memory_list_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

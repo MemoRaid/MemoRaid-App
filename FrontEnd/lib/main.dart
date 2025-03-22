@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/note.dart';
 import 'package:provider/provider.dart';
 import 'features/splash.dart';
 import 'features/homescreen01.dart';
@@ -29,15 +30,17 @@ import 'features/ad2.dart';
 import 'features/ad3.dart';
 
 void main() async {
+  // Initialize Flutter bindings first
   WidgetsFlutterBinding.ensureInitialized();
   await APIConfig.listModels();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(
-            create: (_) => AuthService()), // Add AuthService provider
+            create: (_) => AuthService()), // Use initialized instance
       ],
       child: const MyApp(),
     ),
@@ -78,8 +81,9 @@ class MyApp extends StatelessWidget {
             // Code2 existing routes
             '/home': (context) => const HomeScreen(),
             '/chatbot': (context) => const ChatScreen(),
-            '/achievements': (context) => const LeaderboardScreen(),
+            '/progress': (context) => const LeaderboardScreen(),
             '/settings': (context) => const SettingsScreen(),
+            '/notebook': (context) => const TaskSchedulerScreen(),
 
             // Settings sub-screens
             '/help_center': (context) => const HelpCenterScreen(),

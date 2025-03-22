@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Container, 
   Typography, 
@@ -19,8 +19,14 @@ import { submitContributor, getUserFromToken } from '../services/api';
 const steps = ['Your Information', 'Add Memories'];
 
 const SubmissionPage = () => {
-  const { token } = useParams();
+  const { token: pathToken } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+  
+  // Extract token from either path parameter or query parameter
+  const queryParams = new URLSearchParams(location.search);
+  const queryToken = queryParams.get('token');
+  const token = pathToken || queryToken;
   
   const [activeStep, setActiveStep] = useState(0);
   const [userId, setUserId] = useState(null);
@@ -30,22 +36,44 @@ const SubmissionPage = () => {
   const [memories, setMemories] = useState([]);
   
   // Fetch user info from token when component mounts
-  // In useEffect
   useEffect(() => {
     const fetchUserFromToken = async () => {
       try {
         if (token) {
           try {
+            console.log("Attempting to verify token:", token);
             const userData = await getUserFromToken(token);
-            setUserId(userData.id);
+            if (userData && userData.id) {
+              console.log("Successfully extracted userId:", userData.id);
+              setUserId(userData.id);
+            } else {
+              console.error("Token verification returned invalid user data");
+              setError('Invalid user data from token. Please try again with a valid link.');
+              setLoading(false);
+              return;
+            }
           } catch (err) {
-            console.log("Error fetching user from token, using demo mode");
-            // For testing, set a demo userId
-            setUserId("11111111-1111-1111-1111-111111111111");
+            console.error("Error fetching user from token:", err);
+            // Only use demo mode in development environment
+            if (process.env.NODE_ENV === 'development') {
+              console.log("Using demo mode due to development environment");
+              setUserId("11111111-1111-1111-1111-111111111111");
+            } else {
+              setError('Invalid or expired link. Please contact the person who sent you this link.');
+              setLoading(false);
+              return;
+            }
           }
         } else {
-          // For testing without token
-          setUserId("11111111-1111-1111-1111-111111111111");
+          console.log("No token provided, using demo mode");
+          // For testing without token, only in development
+          if (process.env.NODE_ENV === 'development') {
+            setUserId("11111111-1111-1111-1111-111111111111");
+          } else {
+            setError('No access token provided. Please use the link you received.');
+            setLoading(false);
+            return;
+          }
         }
         setLoading(false);
       } catch (err) {

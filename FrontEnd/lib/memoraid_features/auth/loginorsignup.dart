@@ -109,7 +109,7 @@ class LoginSignupScreen extends StatelessWidget {
               top: height * 0.58,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/login');
+                  Navigator.pushReplacementNamed(context, '/home');
                 },
                 child: Container(
                   width: width * 0.9,

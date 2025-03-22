@@ -33,6 +33,7 @@ dependencies:
   google_sign_in: ^6.1.4
   flutter_secure_storage: ^8.0.0
   jwt_decoder: ^2.0.1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -91,3 +92,9 @@ flutter:
     - assets/audio/Story7.mp3
     - assets/audio/Story8.mp3
     - assets/audio/Story9.mp3
+    - assets/images/Emojie.jpeg
+    - assets/images/Neurosnap.jpeg
+    - assets/images/Pathquest.jpeg
+    - assets/images/Sequence.jpeg
+    - assets/images/Spot.jpeg
+    - .env

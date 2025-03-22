@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'theme_provider.dart';
+import 'homescreen01.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,7 +36,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: themeProvider.isDarkMode
                     ? Colors.white
                     : Color(0xFF0D3445)),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+            },
           ),
           title: Text(
             "Settings",
@@ -82,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               radius: 70,
                               backgroundColor: Colors.white,
                               backgroundImage:
-                                  AssetImage("assets/images/no.png"),
+                                  AssetImage("lib/assets/images/no.png"),
                             ),
                           ),
                           Positioned(
