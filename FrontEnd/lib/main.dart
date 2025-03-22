@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/note.dart';
 import 'package:provider/provider.dart';
 import 'features/splash.dart';
 import 'features/homescreen01.dart';
@@ -78,8 +79,9 @@ class MyApp extends StatelessWidget {
             // Code2 existing routes
             '/home': (context) => const HomeScreen(),
             '/chatbot': (context) => const ChatScreen(),
-            '/achievements': (context) => const LeaderboardScreen(),
+            '/progress': (context) => const LeaderboardScreen(),
             '/settings': (context) => const SettingsScreen(),
+            '/notebook': (context) => const TaskSchedulerScreen(),
 
             // Settings sub-screens
             '/help_center': (context) => const HelpCenterScreen(),

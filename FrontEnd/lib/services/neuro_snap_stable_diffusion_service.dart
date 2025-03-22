@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'dart:math';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Class to store a pair of related images with their metadata
 class ImagePair {
@@ -30,18 +31,58 @@ class ImagePair {
 class StableDiffusionService {
   // API Configuration
   final String _baseUrl =
-      'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0';
-  String get _apiKey => '#';
+      'https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0';
+
+  // API key field
+  String? _apiKey;
+
+  // Constructor that loads environment variables
+  StableDiffusionService() {
+    _loadApiKey();
+  }
+
+  // Load API key from environment file
+  Future<void> _loadApiKey() async {
+    try {
+      // Load .env file if not already loaded
+      if (!dotenv.isInitialized) {
+        await dotenv.load(fileName: ".env");
+      }
+      _apiKey = dotenv.env['HF_API_KEY'];
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        debugPrint('Warning: HF_API_KEY not found in .env file');
+      }
+    } catch (e) {
+      debugPrint('Error loading .env file: $e');
+    }
+  }
+
+  // Get API key with null safety
+  String get apiKey => _apiKey ?? '';
+
+  // Check if API key is available
+  bool get hasValidApiKey => apiKey.isNotEmpty;
 
   /// Tests if the API is reachable and credentials are valid
   Future<bool> testApiConnection() async {
+    // Ensure API key is loaded
+    if (_apiKey == null) {
+      await _loadApiKey();
+    }
+
+    if (!hasValidApiKey) {
+      debugPrint('Error: No API key found in environment variables');
+      return false;
+    }
+
     try {
-      final response = await http
-          .get(
-            Uri.parse('https://api-inference.huggingface.co/status'),
-            headers: {'Authorization': 'Bearer $_apiKey'},
-          )
-          .timeout(const Duration(seconds: 10));
+      final response = await http.get(
+        Uri.parse('https://api-inference.huggingface.co/status'),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+        },
+      ).timeout(const Duration(seconds: 10));
 
       debugPrint('API connection test status: ${response.statusCode}');
       return response.statusCode >= 200 && response.statusCode < 300;
@@ -53,25 +94,35 @@ class StableDiffusionService {
 
   /// Generates a single image from the provided prompt
   Future<String> generateImage(String prompt) async {
+    // Ensure API key is loaded
+    if (_apiKey == null) {
+      await _loadApiKey();
+    }
+
+    if (!hasValidApiKey) {
+      throw Exception(
+          'API key not found. Please check your .env file configuration.');
+    }
+
     try {
       debugPrint('Sending request to Hugging Face for prompt: $prompt');
 
       final response = await http
           .post(
-            Uri.parse(_baseUrl),
-            headers: {
-              'Authorization': 'Bearer $_apiKey',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode({'inputs': prompt}),
-          )
+        Uri.parse(_baseUrl),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'inputs': prompt}),
+      )
           .timeout(
-            const Duration(seconds: 60),
-            onTimeout: () {
-              debugPrint('API request timed out after 60 seconds');
-              throw Exception('API request timed out - check your connection');
-            },
-          );
+        const Duration(seconds: 60),
+        onTimeout: () {
+          debugPrint('API request timed out after 60 seconds');
+          throw Exception('API request timed out - check your connection');
+        },
+      );
 
       debugPrint('Response status: ${response.statusCode}');
       debugPrint('Response headers: ${response.headers}');
@@ -93,20 +144,16 @@ class StableDiffusionService {
       } else if (response.statusCode == 401 || response.statusCode == 403) {
         // Authentication error - this helps identify API key issues
         debugPrint(
-          'Authentication error: Check your API key: ${response.body}',
-        );
+            'Authentication error: Check your API key: ${response.body}');
         throw Exception(
-          'API key error: ${response.statusCode} - Check that your API key is valid',
-        );
+            'API key error: ${response.statusCode} - Check that your API key is valid');
       } else {
         // Other errors
         debugPrint(
-          'API Error: ${response.statusCode} - ${response.reasonPhrase}',
-        );
+            'API Error: ${response.statusCode} - ${response.reasonPhrase}');
         debugPrint('Error details: ${response.body}');
         throw Exception(
-          'Failed to generate image: ${response.statusCode} - ${response.reasonPhrase}',
-        );
+            'Failed to generate image: ${response.statusCode} - ${response.reasonPhrase}');
       }
     } catch (e) {
       debugPrint('Exception in generateImage: $e');
@@ -128,14 +175,12 @@ class StableDiffusionService {
   }) async {
     try {
       // Generate two distinctly different images of the same concept
-      final firstImage = await _generateImage(
-        '$concept from front view, detailed',
-      );
+      final firstImage =
+          await _generateImage('$concept from front view, detailed');
 
       // Make sure second image is distinctly different from first
       final secondImage = await _generateImage(
-        '$concept from different angle, with different lighting and background',
-      );
+          '$concept from different angle, with different lighting and background');
 
       // Randomly select which image to hide
       final random = Random();
@@ -272,25 +317,21 @@ class StableDiffusionService {
         } else {
           // Create standard distractor
           prompts.add(
-            'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality',
-          );
+              'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality');
         }
       } else if (difficulty >= 2) {
         // For medium difficulty, mix similar and standard distractors
         if (i % 2 == 0) {
           prompts.add(
-            'A photorealistic image of a ${currentConcept} with some similar features to a $concept, on a plain white background, studio lighting, high quality',
-          );
+              'A photorealistic image of a ${currentConcept} with some similar features to a $concept, on a plain white background, studio lighting, high quality');
         } else {
           prompts.add(
-            'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality',
-          );
+              'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality');
         }
       } else {
         // Standard distractor for beginners
         prompts.add(
-          'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality',
-        );
+            'A photorealistic image of a ${currentConcept} on a plain white background, studio lighting, high quality');
       }
     }
 
@@ -361,8 +402,7 @@ class StableDiffusionService {
         allConcepts.addAll(['pear', 'peach', 'red ball']);
       else if (concept == 'banana')
         allConcepts.addAll(['plantain', 'yellow pepper']);
-      else if (concept == 'car')
-        allConcepts.addAll(['truck', 'van', 'bus']);
+      else if (concept == 'car') allConcepts.addAll(['truck', 'van', 'bus']);
       // Add more similar items for other concepts
     }
 
