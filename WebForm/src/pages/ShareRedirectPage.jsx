@@ -26,7 +26,7 @@ const ShareRedirectPage = () => {
       // Still allow navigation to demo mode after a delay
       setTimeout(() => {
         navigate('/submission');
-      }, 5000);
+      }, 5001);
     }
   }, [location, navigate]);
   

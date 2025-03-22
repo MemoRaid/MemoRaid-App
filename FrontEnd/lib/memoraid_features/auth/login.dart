@@ -250,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: CircleAvatar(
                             backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                             child: Image.asset(
-                              "assets/images/google.png",
+                              "lib/assets/images/google.png",
                               width: 25,
                             ),
                           ),
@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CircleAvatar(
                           backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                           child: Image.asset(
-                            "assets/images/facebook.png",
+                            "lib/assets/images/facebook.png",
                             width: 25,
                           ),
                         ),
@@ -269,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CircleAvatar(
                           backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                           child: Image.asset(
-                            "assets/images/apple.png",
+                            "lib/assets/images/apple.png",
                             width: 25,
                           ),
                         ),
