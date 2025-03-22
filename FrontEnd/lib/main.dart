@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// Remove Supabase import
 import 'features/splash.dart';
 import 'features/homescreen01.dart';
 import 'features/chatbot.dart';
@@ -30,14 +31,23 @@ import 'features/ad3.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Remove Supabase initialization
+  // await Supabase.initialize(...);
+
+  // Initialize AuthService
+  final authService = AuthService();
+  await authService.init();
+
   await APIConfig.listModels();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(
-            create: (_) => AuthService()), // Add AuthService provider
+            create: (_) => authService), // Use initialized instance
       ],
       child: const MyApp(),
     ),

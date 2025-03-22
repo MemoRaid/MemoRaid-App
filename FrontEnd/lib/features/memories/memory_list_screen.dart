@@ -1,8 +1,11 @@
 // lib/features/memories/memory_list_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/memory.dart';
 import '../../services/memory_service.dart';
 import '../questions/memory_questions_screen.dart';
+import '../../memoraid_features/services/auth_service.dart';
+
 class MemoryListScreen extends StatefulWidget {
   const MemoryListScreen({Key? key}) : super(key: key);
 
@@ -16,6 +19,17 @@ class _MemoryListScreenState extends State<MemoryListScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Authentication check
+    final authService = Provider.of<AuthService>(context, listen: false);
+    if (!authService.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/login');
+      });
+      return;
+    }
+
+    // Only fetch memories if authenticated
     _memoriesFuture = MemoryService().getPatientMemories();
   }
 
@@ -23,7 +37,8 @@ class _MemoryListScreenState extends State<MemoryListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Memories', 
+        title: const Text(
+          'My Memories',
           style: TextStyle(
             color: Color(0xFF0D3445),
             fontWeight: FontWeight.bold,
@@ -47,21 +62,21 @@ class _MemoryListScreenState extends State<MemoryListScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (snapshot.hasError) {
               return Center(
                 child: Text('Error: ${snapshot.error}'),
               );
             }
-            
+
             final memories = snapshot.data!;
-            
+
             if (memories.isEmpty) {
               return const Center(
                 child: Text('No memories found'),
               );
             }
-            
+
             return ListView.builder(
               itemCount: memories.length,
               itemBuilder: (context, index) {
@@ -78,9 +93,9 @@ class _MemoryListScreenState extends State<MemoryListScreen> {
 
 class MemoryCard extends StatelessWidget {
   final Memory memory;
-  
+
   const MemoryCard({Key? key, required this.memory}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -129,12 +144,16 @@ class MemoryCard extends StatelessWidget {
                       left: 0,
                       right: 0,
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.7)
+                            ],
                           ),
                         ),
                         child: Text(
@@ -161,14 +180,16 @@ class MemoryCard extends StatelessWidget {
                       ),
                       Spacer(),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Color(0xFF0D3445),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.question_answer, color: Colors.white, size: 16),
+                            Icon(Icons.question_answer,
+                                color: Colors.white, size: 16),
                             SizedBox(width: 4),
                             Text('Quiz', style: TextStyle(color: Colors.white)),
                           ],

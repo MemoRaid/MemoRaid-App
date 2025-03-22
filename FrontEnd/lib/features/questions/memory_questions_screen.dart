@@ -1,7 +1,9 @@
 // lib/features/questions/memory_questions_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/question.dart';
 import '../../services/question_service.dart';
+import '../../memoraid_features/services/auth_service.dart';
 
 class MemoryQuestionsScreen extends StatefulWidget {
   final String memoryId;
@@ -9,7 +11,7 @@ class MemoryQuestionsScreen extends StatefulWidget {
   final String briefDescription;
 
   const MemoryQuestionsScreen({
-    Key? key, 
+    Key? key,
     required this.memoryId,
     required this.photoUrl,
     required this.briefDescription,
@@ -24,7 +26,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   List<String> _shuffledOptions = [];
   int _shuffledCorrectIndex = 0;
   int previousQuestionIndex = -1;
-  
+
   // Existing variables...
   late Future<List<Question>> _questionsFuture;
   int _currentQuestionIndex = 0;
@@ -33,12 +35,27 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
   List<bool> _userAnswers = [];
   int? _selectedAnswerIndex;
   bool _showingFeedback = false;
-  
+
   @override
   void initState() {
     super.initState();
+
+    // Use custom AuthService for auth check
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    if (!authService.isAuthenticated) {
+      // Redirect to login if not authenticated
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please log in to view questions')));
+        Navigator.pushReplacementNamed(context, '/login');
+      });
+      return;
+    }
+
+    // Continue with loading questions if authenticated
     _questionsFuture = QuestionService().getMemoryQuestions(widget.memoryId);
-    
+
     _questionsFuture.then((questions) {
       if (questions.isNotEmpty) {
         // Use post-frame callback to safely update state
@@ -48,35 +65,47 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
           setState(() {}); // Update UI after shuffling
         });
       }
+    }).catchError((error) {
+      // Better error handling
+      if (error.toString().contains('authenticated')) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Session expired. Please login again.')),
+          );
+          Navigator.pushReplacementNamed(context, '/login');
+        });
+      }
     });
   }
-  
+
   // Update this method - REMOVE setState() call
   void _shuffleOptions(Question question) {
     // Create a list of option indices
     final indices = List<int>.generate(question.options.length, (i) => i);
-    
+
     // Shuffle the indices
     indices.shuffle();
-    
+
     // Create newly ordered options list
     _shuffledOptions = indices.map((i) => question.options[i]).toList();
-    
+
     // Find where the correct answer ended up
     _shuffledCorrectIndex = indices.indexOf(question.correctOptionIndex);
   }
-  
+
   void _handleAnswer(int selectedIndex, Question question) {
     // Print added to debug
-    print("Handling answer: selected=$selectedIndex, correct=${_shuffledCorrectIndex}, showing=$_showingFeedback");
-    
+    print(
+        "Handling answer: selected=$selectedIndex, correct=${_shuffledCorrectIndex}, showing=$_showingFeedback");
+
     // Don't allow selecting another answer while showing feedback
     if (_showingFeedback) return;
-    
+
     setState(() {
       _selectedAnswerIndex = selectedIndex;
       _showingFeedback = true;
-      
+
       // Check against shuffled index instead of original
       if (selectedIndex == _shuffledCorrectIndex) {
         _score += question.points;
@@ -85,7 +114,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
         _userAnswers.add(false);
       }
     });
-    
+
     // Delay before moving to next question
     Future.delayed(Duration(milliseconds: 1500), () {
       if (mounted) {
@@ -93,7 +122,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
           setState(() {
             _showingFeedback = false;
             _selectedAnswerIndex = null;
-            
+
             if (_currentQuestionIndex < questions.length - 1) {
               _currentQuestionIndex++;
             } else {
@@ -104,7 +133,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
       }
     });
   }
-  
+
   void _moveToNextQuestion() {
     _questionsFuture.then((questions) {
       if (_currentQuestionIndex < questions.length - 1) {
@@ -119,13 +148,14 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
       }
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Memory Questions',
+        title: const Text(
+          'Memory Questions',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -148,29 +178,30 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             }
-            
+
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No questions found for this memory'));
+              return const Center(
+                  child: Text('No questions found for this memory'));
             }
-            
+
             final questions = snapshot.data!;
-            
+
             if (_quizComplete) {
               return _buildResultsView(questions.length);
             }
-            
+
             final currentQuestion = questions[_currentQuestionIndex];
-            
-            if (_shuffledOptions.isEmpty || 
+
+            if (_shuffledOptions.isEmpty ||
                 _currentQuestionIndex != previousQuestionIndex) {
               _shuffleOptions(currentQuestion);
               previousQuestionIndex = _currentQuestionIndex;
             }
-            
+
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -216,9 +247,9 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: 16),
-                  
+
                   // Progress indicator with custom styling
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -236,7 +267,8 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                             ),
                             Spacer(),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Color(0xFF4E6077),
                                 borderRadius: BorderRadius.circular(12),
@@ -255,18 +287,20 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: LinearProgressIndicator(
-                            value: (_currentQuestionIndex + 1) / questions.length,
+                            value:
+                                (_currentQuestionIndex + 1) / questions.length,
                             backgroundColor: Colors.white.withOpacity(0.3),
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                             minHeight: 6,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: 24),
-                  
+
                   // Question card with styled design
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 20),
@@ -285,39 +319,43 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                     child: Text(
                       currentQuestion.question,
                       style: TextStyle(
-                        fontSize: 22, 
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF0D3445),
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  
+
                   SizedBox(height: 20),
-                  
+
                   // Restyled answer options
                   ...List.generate(_shuffledOptions.length, (index) {
                     bool isSelected = _selectedAnswerIndex == index;
                     bool isCorrect = index == _shuffledCorrectIndex;
-                    
+
                     return Container(
                       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: MaterialButton(
-                        onPressed: _showingFeedback ? () {} : () => _handleAnswer(index, currentQuestion),
+                        onPressed: _showingFeedback
+                            ? () {}
+                            : () => _handleAnswer(index, currentQuestion),
                         elevation: isSelected ? 5 : 2,
                         color: _showingFeedback
-                          ? (isCorrect 
-                              ? Colors.green[400] 
-                              : (isSelected ? Colors.red[400] : Colors.white))
-                          : Colors.white,
+                            ? (isCorrect
+                                ? Colors.green[400]
+                                : (isSelected ? Colors.red[400] : Colors.white))
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                           side: _showingFeedback && (isCorrect || isSelected)
-                            ? BorderSide(
-                                color: isCorrect ? Colors.green[800]! : Colors.red[800]!,
-                                width: 2.0,
-                              )
-                            : BorderSide.none,
+                              ? BorderSide(
+                                  color: isCorrect
+                                      ? Colors.green[800]!
+                                      : Colors.red[800]!,
+                                  width: 2.0,
+                                )
+                              : BorderSide.none,
                         ),
                         padding: EdgeInsets.zero,
                         child: Container(
@@ -330,16 +368,20 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: _showingFeedback
-                                    ? (isCorrect || isSelected ? Colors.white : Color(0xFF4E6077))
-                                    : Color(0xFF4E6077),
+                                      ? (isCorrect || isSelected
+                                          ? Colors.white
+                                          : Color(0xFF4E6077))
+                                      : Color(0xFF4E6077),
                                 ),
                                 child: Center(
                                   child: Text(
-                                    String.fromCharCode(65 + index), // A, B, C, D
+                                    String.fromCharCode(
+                                        65 + index), // A, B, C, D
                                     style: TextStyle(
-                                      color: _showingFeedback && (isCorrect || isSelected)
-                                        ? Color(0xFF0D3445)
-                                        : Colors.white,
+                                      color: _showingFeedback &&
+                                              (isCorrect || isSelected)
+                                          ? Color(0xFF0D3445)
+                                          : Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -350,10 +392,11 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
                                 child: Text(
                                   _shuffledOptions[index],
                                   style: TextStyle(
-                                    fontSize: 16, 
-                                    color: _showingFeedback && (isCorrect || isSelected) 
-                                      ? Colors.white 
-                                      : Color(0xFF0D3445),
+                                    fontSize: 16,
+                                    color: _showingFeedback &&
+                                            (isCorrect || isSelected)
+                                        ? Colors.white
+                                        : Color(0xFF0D3445),
                                   ),
                                 ),
                               ),
@@ -375,7 +418,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
       ),
     );
   }
-  
+
   Widget _buildResultsView(int totalQuestions) {
     // Call this first to save results
     QuestionService().saveQuizResults(
@@ -384,7 +427,7 @@ class _MemoryQuestionsScreenState extends State<MemoryQuestionsScreen> {
       correctAnswers: _userAnswers.where((answer) => answer).length,
       totalQuestions: totalQuestions,
     );
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
