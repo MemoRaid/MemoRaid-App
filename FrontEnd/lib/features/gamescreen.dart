@@ -5,7 +5,7 @@ import 'game.dart';
 import 'g_01_home_screen.dart';
 import 'spot_difference_game.dart';
 import 'g_02_memory_recovery_app.dart';
-import'neuro_snap.dart';
+import 'neuro_snap.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -49,7 +49,7 @@ class GameScreen extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   Color(0xFF0D3445),
-                  Color(0xFF165066),
+                  Color(0xFFFFFFFF),
                   Color(0xFF0A2632),
                 ],
                 stops: [0.0, 0.5, 1.0],
@@ -86,7 +86,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Path Quest",
                         subtitle: "Remember the path to win",
-                        image: "assets/images/memoraid.png",
+                        image: "assets/images/Pathquest.jpeg",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -100,7 +100,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Daily Task Sequencer",
                         subtitle: "Reorder the jumbled tasks",
-                        image: "assets/images/memoraid.png",
+                        image: "assets/images/Sequence.jpeg",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -115,7 +115,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Spot the Difference",
                         subtitle: "Find whats different on the image",
-                        image: "assets/images/memoraid.png",
+                        image: "assets/images/Spot.jpeg",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -130,7 +130,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Memory Master",
                         subtitle: "Remember the Flipped cards ",
-                        image: "assets/images/memoraid.png",
+                        image: "assets/images/Emojie.jpeg",
                         onTap: () {
                           Navigator.push(
                             context,
@@ -150,13 +150,10 @@ class GameScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    const WelcomeScreen()),
+                                builder: (context) => const WelcomeScreen()),
                           );
                         },
                       ),
-
-
                     ],
                   ),
                 ),
