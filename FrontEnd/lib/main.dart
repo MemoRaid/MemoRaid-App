@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/features/note.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'features/splash.dart';
 import 'features/homescreen01.dart';
 import 'features/chatbot.dart';
@@ -30,7 +31,12 @@ import 'features/ad2.dart';
 import 'features/ad3.dart';
 
 void main() async {
+  // Initialize Flutter bindings first
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
   await APIConfig.listModels();
   runApp(
     MultiProvider(
