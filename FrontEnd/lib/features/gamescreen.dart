@@ -145,7 +145,7 @@ class GameScreen extends StatelessWidget {
                         context,
                         title: "Neuro Snap",
                         subtitle: "Test your memory skills",
-                        image: "assets/images/memoraid.png",
+                        image: "assets/images/Neurosnap.jpeg",
                         onTap: () {
                           Navigator.push(
                             context,
