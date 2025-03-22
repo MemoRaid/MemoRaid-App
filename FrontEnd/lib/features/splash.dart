@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../memoraid_features/auth/loginorsignup.dart';
-import 'homescreen01.dart';
+
 // Import the login or signup screen
 
 class SplashScreen extends StatefulWidget {
@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => LoginSignupScreen()),
       );
     });
   }
