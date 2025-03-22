@@ -80,10 +80,12 @@ export const submitMemory = async (memory) => {
 // Function to get user info from token
 export const getUserFromToken = async (token) => {
   try {
+    console.log("Verifying token with backend:", token.substring(0, 15) + "...");
     const response = await api.get(`/auth/verify-token/${token}`);
+    console.log("Token verification successful, user ID:", response.data.user?.id);
     return response.data.user;
   } catch (error) {
-    console.error('Error getting user from token:', error);
+    console.error('Error getting user from token:', error.response?.data || error.message);
     throw error;
   }
 };
