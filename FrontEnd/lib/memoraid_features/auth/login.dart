@@ -1,9 +1,12 @@
 // In login.dart
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/features/splash.dart';
 import 'package:provider/provider.dart';
 import '../../memoraid_features/services/auth_service.dart';
 import 'share_link.dart'; // They're in the same folder now
-import 'signup.dart'; // This should work as they're in the same directory
+import 'signup.dart';
+import 'loginorsignup.dart'; // This should work as they're in the same directory
+// This should work as they're in the same directory
 // Import home screen
 // import '../home/home_screen.dart';
 
@@ -33,7 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF0D3445)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => LoginSignupScreen()));
+          },
         ),
       ),
       body: Container(
@@ -250,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: CircleAvatar(
                             backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                             child: Image.asset(
-                              "lib/assets/images/google.png",
+                              "assets/images/google.png",
                               width: 25,
                             ),
                           ),
@@ -261,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CircleAvatar(
                           backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                           child: Image.asset(
-                            "lib/assets/images/facebook.png",
+                            "assets/images/facebook.png",
                             width: 25,
                           ),
                         ),
@@ -269,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CircleAvatar(
                           backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                           child: Image.asset(
-                            "lib/assets/images/apple.png",
+                            "assets/images/apple.png",
                             width: 25,
                           ),
                         ),
