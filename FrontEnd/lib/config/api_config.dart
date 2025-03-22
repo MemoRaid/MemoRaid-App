@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class APIConfig {
-  static const String geminiApiKey = 'AIzaSyDYbi91NcZrDPD-jbYXwkwP9hb6BR0smzQ';
+  static String get geminiApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
   static const String geminiApiUrlBase =
       'https://generativelanguage.googleapis.com/v1';
   static const String modelsEndpoint = '$geminiApiUrlBase/models';

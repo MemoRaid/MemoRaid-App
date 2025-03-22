@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'bottomnavbar.dart';
+import 'homescreen01.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -48,6 +49,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Color(0xFF0D3445),
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomeScreen()),
+                  );
+                },
+              ),
               title: const Text(
                 "Progress & Leaderboard",
                 style: TextStyle(
@@ -183,7 +196,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundImage: AssetImage("assets/images/no.png"),
+                backgroundImage: AssetImage("lib/assets/images/no.png"),
               ),
               SizedBox(width: 15),
               Column(
