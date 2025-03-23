@@ -2,11 +2,15 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL  || 'https://memoraid-app.onrender.com/api',
+  // Remove any trailing slash from the base URL
+  baseURL: (process.env.REACT_APP_API_URL || 'https://memoraid-app.onrender.com').replace(/\/$/, '') + '/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Debug API configuration
+console.log("API base URL:", api.defaults.baseURL);
 
 // Add request interceptor for debugging
 api.interceptors.request.use(request => {
@@ -30,11 +34,24 @@ api.interceptors.response.use(
 export const submitContributor = async (contributorData) => {
   try {
     console.log('Submitting contributor data:', contributorData);
-    const response = await api.post('/memories/contributor', contributorData);
+    
+    // CHANGE HERE - Explicitly map the properties to match backend expectations
+    const formattedData = {
+      userId: contributorData.userId,
+      name: contributorData.name,
+      email: contributorData.email,
+      relationshipType: contributorData.relationshipType || contributorData.relationship,
+      relationshipYears: contributorData.relationshipYears || contributorData.years
+    };
+    
+    console.log('Formatted data for backend:', formattedData);
+    
+    const response = await api.post('/memories/contributor', formattedData);
     console.log('Contributor submitted successfully:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error submitting contributor:', error);
+    console.error('Error details:', error.response?.data);
     throw error;
   }
 };
