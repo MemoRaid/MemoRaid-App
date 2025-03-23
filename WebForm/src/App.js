@@ -28,7 +28,7 @@ function App() {
           <Route path="/share" element={<ShareRedirectPage />} />
           
           {/* Add this contribute route */}
-        <Route path="/contribute" element={<SubmissionPage />} />
+          <Route path="/contribute" element={<SubmissionPage />} />
         
           {/* Submission routes */}
           <Route path="/submission/:token" element={<SubmissionPage />} />
