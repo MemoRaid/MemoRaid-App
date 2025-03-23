@@ -360,7 +360,7 @@ exports.generateShareLink = async (req, res) => {
     );
     
     // Get base URL from environment variable or use a default
-    const baseUrl = process.env.BASE_URL || 'https://da31-175-157-248-67.ngrok-free.app';
+    const baseUrl = process.env.BASE_URL || 'https://memoraidwf.netlify.app';
     
     res.status(200).json({
       message: 'Share link generated successfully',
