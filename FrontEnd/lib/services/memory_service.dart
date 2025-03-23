@@ -5,7 +5,8 @@ import '../models/memory.dart';
 import '../memoraid_features/services/api_service.dart';
 
 class MemoryService {
-  final String baseUrl = 'http://127.0.0.1:5001/api';
+  //final String baseUrl = 'http://127.0.0.1:5001/api';
+  final String baseUrl = 'https://memoraid-app.onrender.com/api';
   final ApiService _apiService = ApiService();
 
   Future<List<Memory>> getPatientMemories() async {
