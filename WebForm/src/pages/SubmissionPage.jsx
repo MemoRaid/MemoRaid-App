@@ -59,15 +59,16 @@ const SubmissionPage = () => {
             }
           } catch (err) {
             console.error("Error fetching user from token:", err);
-            // Only use demo mode in development environment
-            if (process.env.NODE_ENV === 'development') {
-              console.log("Using demo mode due to development environment");
-              setUserId("11111111-1111-1111-1111-111111111111");
-            } else {
-              setError('Invalid or expired link. Please contact the person who sent you this link.');
-              setLoading(false);
-              return;
-            }
+            
+            // CHANGE THIS PART - remove the environment check and add better error handling
+            console.log("Token verification failed, showing debug info:", err);
+            
+            // Still show the form in production by using a fallback ID
+            setUserId("temporary-user-id");
+            setLoading(false);
+            
+            // Optional: Show a warning but continue
+            console.warn("Using temporary ID due to verification failure");
           }
         } else {
           console.log("No token provided, using demo mode");

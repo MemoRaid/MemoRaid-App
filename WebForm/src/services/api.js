@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL  || 'http://localhost:5001/api',
+  baseURL: process.env.REACT_APP_API_URL  || 'https://memoraid-app.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -80,12 +80,13 @@ export const submitMemory = async (memory) => {
 // Function to get user info from token
 export const getUserFromToken = async (token) => {
   try {
-    console.log("Verifying token with backend:", token.substring(0, 15) + "...");
-    const response = await api.get(`/auth/verify-token/${token}`);
-    console.log("Token verification successful, user ID:", response.data.user?.id);
+    console.log("Sending token for verification:", token);
+    const response = await api.post('/auth/verify-share-token', { token });
+    console.log("Verification response:", response.data);
     return response.data.user;
   } catch (error) {
-    console.error('Error getting user from token:', error.response?.data || error.message);
+    console.error("Full API error:", error);
+    console.error("Error response:", error.response?.data);
     throw error;
   }
 };
