@@ -27,6 +27,9 @@ function App() {
           {/* Share link route - this is the entry point from the mobile app */}
           <Route path="/share" element={<ShareRedirectPage />} />
           
+          {/* Add this contribute route */}
+        <Route path="/contribute" element={<SubmissionPage />} />
+        
           {/* Submission routes */}
           <Route path="/submission/:token" element={<SubmissionPage />} />
           <Route path="/submission" element={<SubmissionPage />} />

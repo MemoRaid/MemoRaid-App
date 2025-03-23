@@ -23,6 +23,9 @@ const SubmissionPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Add debug logs
+ console.log('Token from URL:', token);
+ 
   // Extract token from either path parameter or query parameter
   const queryParams = new URLSearchParams(location.search);
   const queryToken = queryParams.get('token');
